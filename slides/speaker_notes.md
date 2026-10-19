@@ -92,7 +92,7 @@ Tous les chiffres sont dans `outputs/` : `access_summary.json`, `walk_calibratio
   - le modèle apprend des biais passés des opérateurs ;
   - il n'y a pas de free-floating à Strasbourg dans les flux publics ;
   - l'emprise est une boîte, pas la liste des communes.
-- Renvoyer vers DEMARCHE.md, section 8.
+- Renvoyer vers le document interne DEMARCHE.pdf, section 8.
 
 ### 14. Démo et suite (D pour la démo, A pour la suite ; 2-3 min de démo)
 - Lancer `.venv/bin/python -m streamlit run app.py` **avant** la soutenance : le premier chargement est plus lent.

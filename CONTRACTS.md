@@ -40,7 +40,7 @@ Géométrie commune : `src/geo.py` (projection, `walk_radius_m()`, `pairs_within
 `key` + colonnes de cells utiles (`crs_id,x,y,lon,lat,com,dep,ind`) +
 `n_<mode>` (nb de points d'offre de ce mode à ≤ 5 min de marche), `n_options` (somme pondérée par `C.MODE_WEIGHT`),
 `n_modes` (nb de modes distincts accessibles), `pop_catchment` (habitants à ≤ 5 min du carreau),
-`options_per_1000` (= 1000·n_options / pop_catchment), `score` (indice 0-100 froid→chaud, cf. DEMARCHE.md),
+`options_per_1000` (= 1000·n_options / pop_catchment), `score` (indice 0-100 froid→chaud, cf. docstring de `src/accessibility.py`),
 `served_<mode>` (bool).
 
 ## outputs/stations_served.parquet

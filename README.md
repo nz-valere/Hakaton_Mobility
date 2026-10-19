@@ -4,7 +4,7 @@
 Mobili'Score croise l'offre ouverte (GTFS, GBFS) avec la population au carreau de 200 m (INSEE) pour cartographier l'accès à la mobilité en France, DROM couverts par Filosofi inclus.
 Un modèle prédictif et un optimiseur sous budget proposent ensuite une liste priorisée de stations Citiz, de stations vélo et d'arrêts de bus, avec leur coût, les habitants gagnés et le CO2 évité.
 
-Hackathon Mobility, Epitech x Citiz x Microsoft. Documentation technique : [DEMARCHE.md](DEMARCHE.md). Sources : [SOURCES.md](SOURCES.md). Contrats entre modules : [CONTRACTS.md](CONTRACTS.md). Présentation : [slides/presentation.html](slides/presentation.html).
+Hackathon Mobility, Epitech x Citiz x Microsoft. Sources : [SOURCES.md](SOURCES.md). Contrats entre modules : [CONTRACTS.md](CONTRACTS.md). Présentation : [slides/presentation.html](slides/presentation.html).
 
 ## Résultats clés
 
@@ -29,7 +29,7 @@ Tous les chiffres viennent des fichiers de `outputs/`.
 
 - **28 sites** : 14 stations vélo, 12 stations Citiz et 2 arrêts de bus, pour 1,98 M€.
 - **68 465 habitants nouvellement desservis**, soit 71 574 à l'horizon 2040. Le coût revient à **29 € par nouvel habitant desservi**.
-- Environ **106 t de CO2 évitées par an** (hypothèses ADEME, voir DEMARCHE.md).
+- Environ **106 t de CO2 évitées par an** (hypothèses ADEME, détaillées dans `Config.py` et `outputs/recommendations_summary.json`).
 - **50,4 %** des nouveaux desservis vivent dans les 3 premiers déciles de revenu de la zone.
 - À budget égal, la stratégie naïve « population seule » (sans modèle et sans tenir compte de l'offre existante) ne dessert réellement que 39 067 nouveaux habitants, pour 22 t de CO2 évitées par an.
 
@@ -105,7 +105,6 @@ Les durées de `download`, `population` et `offer` n'ont pas été mesurées dan
 ├── Config.py              # tous les paramètres et hypothèses chiffrées (coûts, CO2, budget, rayons…)
 ├── CONTRACTS.md           # schémas des fichiers échangés entre modules
 ├── SOURCES.md             # sources de données, licences, hypothèses
-├── DEMARCHE.md            # documentation technique (méthode, évaluation, éthique, limites)
 ├── app.py                 # démo Streamlit
 ├── requirements.txt
 ├── src/

@@ -8,3 +8,6 @@ outputs/*.parquet
 outputs/*.joblib
 outputs/*.pkl
 outputs/cache/
+# documents internes au groupe
+DEMARCHE.md
+DEMARCHE.pdf

@@ -73,7 +73,7 @@ MODE_WEIGHT = {m: 1.0 for m in MODES}
 # --------------------------------------------------------------------------- coûts (EUR)
 # Coût total sur HORIZON_YEARS = investissement + exploitation annuelle * années.
 # Ordres de grandeur issus de retours d'expérience publics ; ce sont des HYPOTHÈSES
-# paramétrables, discutées dans DEMARCHE.md (section Coûts).
+# paramétrables, à faire valider par l'opérateur.
 HORIZON_YEARS = 5
 COSTS = {
     # Station Citiz 1 véhicule : véhicule citadine (~20 k€ amorti), télématique, marquage,
