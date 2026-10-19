@@ -17,6 +17,7 @@ Toutes les données sont ouvertes et téléchargées automatiquement par `python
 | GTFS CTS (tram et bus de Strasbourg) | Compagnie des Transports Strasbourgeois | GTFS | Licence Ouverte / ODbL | Contrôle de l'offre, types de lignes (tram/bus) | `gtfs_cts.zip` |
 | GTFS Fluo Grand Est 67 (cars interurbains Bas-Rhin) | Région Grand Est | GTFS | Licence Ouverte | Offre interurbaine autour de Strasbourg | `gtfs_fluo67.zip` |
 | Communes (nom, code, centre, population, surface) | geo.api.gouv.fr (IGN Admin Express / INSEE) | JSON | Licence Ouverte 2.0 | Noms de communes, agrégations | `communes.json` |
+| Intercommunalités (EPCI) et rattachement des communes | geo.api.gouv.fr (IGN Admin Express / BANATIC) | JSON | Licence Ouverte 2.0 | Classement national des territoires pour Citiz (`src/territories.py`) | `epcis.json`, `communes_epci.json` |
 | Réseau piéton OpenStreetMap (Eurométropole de Strasbourg) | contributeurs OpenStreetMap via Overpass API | JSON | ODbL 1.0 | Calibration du coefficient de détour marche | `osm_walk_strasbourg.json` |
 
 ## Hypothèses chiffrées (non issues de jeux de données)
@@ -29,3 +30,12 @@ Toutes les données sont ouvertes et téléchargées automatiquement par `python
 | Taille du réseau Citiz | ~2 800 véhicules, ~280 villes, ~130 000 conducteurs | Énoncé du hackathon |
 | Coûts d'investissement / exploitation | voir `Config.COSTS` | Ordres de grandeur publics, **hypothèses paramétrables** |
 | Seuil de secret statistique | 11 ménages | INSEE (règles de diffusion Filosofi) |
+| Budgets par financeur | Citiz 1 M€, collectivité 1 M€ sur 5 ans | `Config.CITIZ_BUDGET`, `Config.PUBLIC_BUDGET`, **hypothèses paramétrables** |
+| Seuil de taille des territoires classés | 100 000 habitants par intercommunalité | `Config.TERRITORY_MIN_POP`, hypothèse de masse critique |
+
+## Contexte terrain (vérification qualitative du territoire prioritaire)
+
+| Information | Source |
+|---|---|
+| Fin du service Mobilize Share (Renault) dans la métropole niçoise fin juin 2026 ; les 86 bornes réservées reprises par la Métropole | [automobile-propre.com](https://www.automobile-propre.com/articles/nice-bornes-recharge-ex-mobilize-share-reseau-public/) |
+| Vélo Bleu (Nice) : stations publiées en 2014 sur data.gouv.fr, pas de flux GBFS | [data.gouv.fr – Cartographie des stations Vélobleu](https://www.data.gouv.fr/datasets/cartographie-des-stations-velobleu) |

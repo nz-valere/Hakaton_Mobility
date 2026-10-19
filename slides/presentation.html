@@ -72,7 +72,7 @@
   <div class="kicker">Hackathon Mobility · Epitech × Citiz × Microsoft</div>
   <h1>Mobili'Score</h1>
   <p class="sub">Qui a vraiment une option de transport à 5 minutes de chez soi,<br>et où en ajouter pour toucher le plus de monde au moindre coût ?</p>
-  <p style="color:#c9d4ea;font-size:18px;margin-top:40px">Diagnostic France entière (DROM couverts par l'INSEE inclus) · Recommandation chiffrée pour l'Eurométropole de Strasbourg</p>
+  <p style="color:#c9d4ea;font-size:18px;margin-top:40px">Diagnostic France entière (DROM couverts par l'INSEE inclus) · Territoire prioritaire pour Citiz : la Métropole Nice Côte d'Azur · Strasbourg comme témoin</p>
 </section>
 
 <!-- 2 -->
@@ -90,7 +90,7 @@
     <div class="col">
       <div class="card" style="margin-bottom:14px"><h3>1 · Cartographier</h3><p>Nombre d'options de transport à 5 min de marche, du plus froid au plus chaud.</p></div>
       <div class="card" style="margin-bottom:14px"><h3>2 · Qui est concerné</h3><p>Chaque arrêt et station, et le nombre d'habitants qu'il dessert.</p></div>
-      <div class="card"><h3>3 · Où investir</h3><p>Liste priorisée de stations Citiz, de stations vélo et d'arrêts de bus sous contrainte de budget.</p></div>
+      <div class="card"><h3>3 · Où investir</h3><p>D'abord <b>quel territoire</b> pour Citiz, puis quelles stations, sous budget. Vélo et bus : une liste à part pour la collectivité.</p></div>
     </div>
   </div>
 </section>
@@ -178,7 +178,7 @@
         <tr><td>Vélo</td><td>logistique</td><td class="n">0,64</td><td class="n">0,53</td></tr>
         <tr><td>Bus</td><td>boosting</td><td class="n">0,71</td><td class="n">0,67</td></tr>
       </table>
-      <p class="note">Limite : le modèle ne prédit pas le nombre de voitures par station. Pour la capacité Citiz, il ne fait pas mieux que la baseline (Spearman 0,44 contre 0,46).</p>
+      <p class="note">Appris sur 80 départements où l'autopartage existe. <b>Test sur Strasbourg</b>, Bas-Rhin tenu hors de l'apprentissage : PR-AUC 0,66 contre 0,59 pour la population seule. Limite : il ne prédit pas le nombre de voitures par station.</p>
     </div>
     <div class="col w2"><div class="figbox"><img class="fig" src="../outputs/figures/model_citiz_curves.png" alt="Courbes ROC, précision-rappel et calibration du modèle Citiz"></div></div>
   </div>
@@ -193,7 +193,7 @@
     <div class="col">
       <div class="formula">
         max Σ<sub>carreaux</sub> poids<sub>i</sub> × valeur<sub>site</sub> × [i nouvellement couvert]<br>
-        sous coût(sites) ≤ 2 M€ (sur 5 ans)<br><br>
+        sous coût(sites) ≤ budget du financeur (5 ans)<br><br>
         poids<sub>i</sub> = habitants 2040 × (1 + 4·λ·besoin<sub>i</sub>)<br>
         valeur = propension / propension d'un site existant typique
       </div>
@@ -204,65 +204,81 @@
     </div>
     <div class="col">
       <div class="card" style="margin-bottom:14px"><h3>Glouton paresseux + garde-fou</h3><p>Garantie théorique : au moins (1 − 1/e)/2 de l'optimum. <b>Testé contre la force brute</b> : 97,3 % de l'optimum en moyenne, 88,4 % au pire.</p></div>
-      <div class="card"><h3>Des choix normatifs, assumés et réglables</h3><p>Enveloppes par financeur (40 % Citiz, 30 % vélo, 30 % bus) et 15 % du budget réservés aux zones peu denses. Sans elles, l'optimiseur met presque tout sur le vélo en centre-ville.</p></div>
+      <div class="card"><h3>Un budget par financeur</h3><p>Citiz ne gère que l'autopartage : <b>1 M€ Citiz</b> pour ses stations, <b>1 M€ collectivité</b> pour le vélo et le bus, deux listes séparées. Choix normatif réglable : 15 % de chaque budget réservés aux zones peu denses.</p></div>
     </div>
   </div>
 </section>
 
 <!-- 9 -->
 <section class="slide">
-  <div class="kicker">La recommandation · Eurométropole de Strasbourg</div>
+  <div class="kicker">Objectif 3 · Quel territoire ?</div>
+  <h2>Avec le même budget, Nice rapporte 2,5 fois plus d'habitants que Strasbourg</h2>
   <div class="row">
+    <div class="col w2"><div class="figbox"><img class="fig" src="../outputs/figures/slides_territories.png" alt="Classement des territoires pour Citiz"></div></div>
     <div class="col">
-      <h2 style="margin-bottom:16px">28 sites pour 1,98 M€ sur 5 ans</h2>
-      <div class="kpis">
-        <div class="kpi"><div class="v">68 465</div><div class="l">habitants nouvellement à 5 min d'une option</div></div>
-        <div class="kpi"><div class="v">29 €</div><div class="l">par nouvel habitant desservi</div></div>
-        <div class="kpi"><div class="v">≈ 106 t</div><div class="l">de CO2 évitées par an (hypothèses ADEME)</div></div>
-        <div class="kpi"><div class="v">50,4 %</div><div class="l">des nouveaux desservis dans les 3 premiers déciles de revenu</div></div>
-      </div>
-      <p style="margin-top:16px;font-size:18px"><span class="tag">14 stations vélo</span><span class="tag">12 stations Citiz</span><span class="tag">2 arrêts de bus</span></p>
-      <p class="note">Premier site : une station vélo dans l'ouest de Strasbourg (3 795 nouveaux desservis, 60 000 €). La liste complète est dans outputs/recommendations.csv.</p>
+      <p style="font-size:17px"><b>1. Criblage</b> des 99 intercommunalités de plus de 100 000 habitants : habitants des quartiers denses sans autopartage à 5 min, pondérés par le modèle.</p>
+      <p style="font-size:17px"><b>2. Simulation</b> : sur les 10 premières, l'optimiseur place les stations que permet 1 M€. On classe par adhérents potentiels.</p>
+      <p style="font-size:17px"><b>Nice</b> : 549 000 habitants, aucune station d'autopartage depuis l'arrêt de Mobilize Share (juin 2026), 28 % de ménages sans voiture.</p>
+      <p class="note">Île-de-France exclue : son autopartage est presque absent des flux GBFS publics.</p>
     </div>
-    <div class="col"><div class="figbox"><img class="fig" src="../outputs/figures/slides_map_ems.png" alt="Carte des sites recommandés à Strasbourg"></div></div>
   </div>
-  <div class="src">Source : outputs/recommendations_summary.json (budget 2 M€, λ = 0,5, horizon 2040)</div>
+  <div class="src">Source : outputs/territories_citiz.csv, territories_summary.json</div>
 </section>
 
 <!-- 10 -->
 <section class="slide">
-  <div class="kicker">Impact · Avec ou sans l'outil</div>
-  <h2>À budget égal, 1,75 fois plus d'habitants desservis qu'une approche naïve</h2>
-  <div class="figbox" style="margin-top:6px"><img class="fig" src="../outputs/figures/slides_strategies.png" alt="Comparaison de la stratégie recommandée avec l'efficacité pure et la stratégie naïve"></div>
-  <p class="note" style="font-size:15px">Stratégie naïve : sites placés là où il y a le plus d'habitants, sans modèle et sans regarder l'offre existante. Elle place des stations où les gens sont déjà desservis. Sans enveloppes ni quota, on atteindrait 90 324 habitants, mais avec 31 stations vélo sur 33 sites, 35 t de CO2 par an et 37 % des nouveaux desservis dans les déciles modestes.</p>
+  <div class="kicker">La recommandation · Métropole Nice Côte d'Azur</div>
+  <div class="row">
+    <div class="col">
+      <h2 style="margin-bottom:16px">Pour Citiz : 16 stations, 0,96 M€ sur 5 ans</h2>
+      <div class="kpis">
+        <div class="kpi"><div class="v">85 573</div><div class="l">habitants nouvellement à 5 min d'une voiture partagée</div></div>
+        <div class="kpi"><div class="v">11 €</div><div class="l">par nouvel habitant desservi (28 € à Strasbourg)</div></div>
+        <div class="kpi"><div class="v">≈ 121 t</div><div class="l">de CO2 évitées par an (hypothèses ADEME)</div></div>
+        <div class="kpi"><div class="v">48 %</div><div class="l">des nouveaux desservis dans les 3 premiers déciles de revenu</div></div>
+      </div>
+      <p style="margin-top:14px;font-size:17px"><span class="tag">14 à Nice</span><span class="tag">Beaulieu-sur-Mer</span><span class="tag">Saint-Martin-du-Var</span></p>
+      <p class="note">Pour la collectivité, liste séparée : 9 stations vélo et 2 arrêts de bus, 48 494 nouveaux desservis pour 0,95 M€. À confronter à Vélo Bleu, qui ne publie pas de flux GBFS.</p>
+    </div>
+    <div class="col"><div class="figbox"><img class="fig" src="../outputs/figures/slides_map_top.png" alt="Carte des sites recommandés dans la Métropole Nice Côte d'Azur"></div></div>
+  </div>
+  <div class="src">Source : outputs/recommendations_summary.json, recommendations.csv (λ = 0,5, horizon 2040)</div>
 </section>
 
 <!-- 11 -->
 <section class="slide">
-  <div class="kicker">Ce que ça apporte à Citiz</div>
-  <h2>Un outil de décision, pas seulement une carte</h2>
-  <div class="grid4" style="margin-top:14px">
-    <div class="card"><h3>Où ouvrir</h3><p>12 stations Citiz à Strasbourg, Schiltigheim, Hœnheim et Mittelhausbergen. Elles amènent 28 320 nouveaux habitants à 5 min d'une voiture partagée, là où le réseau couvre déjà 46,5 % de la population.</p></div>
-    <div class="card"><h3>Pourquoi là</h3><p>Pour chaque site : habitants gagnés, propension du modèle, coût, CO2 et part de ménages sans voiture. La décision est traçable et discutable.</p></div>
-    <div class="card"><h3>Partout en France</h3><p>Les modèles sont entraînés sur toute la France. Il suffit de lancer <code>--dep 54</code> : la Meurthe-et-Moselle obtient elle aussi 12 stations Citiz, pour 41 497 nouveaux desservis au total.</p></div>
-    <div class="card"><h3>Le climat comme argument</h3><p>Les 12 stations Citiz représentent 90 t sur les 106 t de CO2 évitées par an : c'est l'équipement le plus efficace pour réduire les km en voiture.</p></div>
-  </div>
-  <div class="src">Sources : outputs/recommendations.csv, recommendations_summary.json, recommendations_summary_dep54.json</div>
+  <div class="kicker">Impact · Avec ou sans l'outil (Strasbourg, témoin)</div>
+  <h2>Là où l'offre existe déjà, l'ignorer divise l'efficacité par 2,4</h2>
+  <div class="figbox" style="margin-top:6px"><img class="fig" src="../outputs/figures/slides_strategies.png" alt="Comparaison des stratégies pour Citiz à Strasbourg"></div>
+  <p class="note" style="font-size:15px">Même budget Citiz à Strasbourg. La stratégie naïve place les stations là où il y a le plus d'habitants, sans regarder l'existant : 13 800 nouveaux desservis contre 33 740. Le modèle, lui, est un arbitrage : 19 % d'habitants en moins que sans modèle, mais +28 % de CO2 évité, car il vise les sites où l'usage attendu est plus fort.</p>
 </section>
 
 <!-- 12 -->
+<section class="slide">
+  <div class="kicker">Ce que ça apporte à Citiz</div>
+  <h2>Un territoire, une liste de stations, un plan de montée en charge</h2>
+  <div class="grid4" style="margin-top:14px">
+    <div class="card"><h3>Où s'implanter</h3><p>Un classement national des territoires, simulé à budget égal. Nice arrive en tête, devant Lyon et Montpellier. Strasbourg, déjà bien couvert, sert de témoin.</p></div>
+    <div class="card"><h3>Où ouvrir</h3><p>16 stations nommées et localisées, à 5 min de 85 573 habitants. Chaque site est justifié par les habitants gagnés, la valeur du modèle, le coût et le CO2.</p></div>
+    <div class="card"><h3>Combien de voitures</h3><p>La demande estimée justifierait jusqu'à ≈ 10 véhicules par station (borne haute, pénétration nationale Citiz). Elle est à confirmer par un pilote : commencer à 1-2 voitures et suivre les réservations.</p></div>
+    <div class="card"><h3>Partout en France</h3><p><code>--area epci:&lt;siren&gt;</code> ou <code>--dep 54</code> relance l'analyse en quelques secondes, sur n'importe quel territoire.</p></div>
+  </div>
+  <div class="src">Sources : outputs/territories_citiz.csv, recommendations.csv, recommendations_summary_ems.json</div>
+</section>
+
+<!-- 13 -->
 <section class="slide">
   <div class="kicker">Éthique</div>
   <h2>Quatre risques, quatre réponses</h2>
   <div class="grid4" style="margin-top:14px">
     <div class="card"><h3>Empreinte carbone</h3><p>CO2 calculé site par site avec des hypothèses prudentes (ADEME) : 50 % d'adhérents actifs, 1 500 km évités par an. Le détour des bus est retranché : un arrêt peut avoir un bilan négatif, et on l'affiche.</p></div>
     <div class="card"><h3>Équité dense / peu dense</h3><p>Les zones déjà desservies ne comptent pas, 15 % du budget est réservé au peu dense et le besoin social est pondéré par λ. On publie toujours la comparaison avec l'efficacité pure.</p></div>
-    <div class="card"><h3>Stigmatisation</h3><p>On parle d'« offre à développer », jamais de quartier « mal desservi ». Les rangs de besoin sont relatifs à la zone et il n'y a aucun palmarès de communes.</p></div>
+    <div class="card"><h3>Stigmatisation</h3><p>On parle d'« offre à développer », jamais de quartier « mal desservi ». Le classement des territoires mesure un <b>potentiel pour Citiz</b>, pas un retard, et il n'y a aucun palmarès de communes.</p></div>
     <div class="card"><h3>Vie privée</h3><p>Aucune statistique sociale sous 11 ménages (seuil INSEE). Seuls 22,7 % des carreaux l'atteignent seuls : les autres sont lissés au km² ou masqués.</p></div>
   </div>
 </section>
 
-<!-- 13 -->
+<!-- 14 -->
 <section class="slide">
   <div class="kicker">Limites reconnues</div>
   <h2>Ce que nos chiffres ne disent pas</h2>
@@ -272,14 +288,14 @@
         <li style="font-size:18px"><b>Cercle ≠ réseau</b> hors de Strasbourg : le détour est calibré sur un seul territoire.</li>
         <li style="font-size:18px"><b>Pas de fréquence</b> : un car scolaire compte autant qu'un tram.</li>
         <li style="font-size:18px"><b>Coûts hypothétiques</b>, à valider avec Citiz et l'Eurométropole.</li>
-        <li style="font-size:18px"><b>Plafond du modèle</b> : 11 des 14 stations vélo ont une valeur plafonnée, donc c'est la population qui les départage.</li>
+        <li style="font-size:18px"><b>Le modèle mesure une ressemblance</b>, pas une fréquentation : les réservations Citiz permettraient de le calibrer.</li>
       </ul>
     </div>
     <div class="col" style="justify-content:flex-start">
       <ul>
         <li style="font-size:18px"><b>Capacité Citiz</b> non prédite, et usage plafonné à ≈ 46 adhérents par voiture.</li>
         <li style="font-size:18px"><b>Le modèle apprend des choix passés</b> des opérateurs, avec leurs biais.</li>
-        <li style="font-size:18px"><b>Pas de free-floating</b> dans les flux publics de Strasbourg. L'emprise est une boîte, pas la liste des communes.</li>
+        <li style="font-size:18px"><b>Offre non publiée invisible</b> : autopartage entre particuliers (Getaround), Vélo Bleu à Nice. Classement à confirmer sur le terrain.</li>
         <li style="font-size:18px"><b>DROM</b> : Guadeloupe, Guyane et Mayotte sont absentes, faute de carreaux INSEE.</li>
       </ul>
     </div>
@@ -287,7 +303,7 @@
   <p class="note">Chaque limite est documentée dans les docstrings des modules de <code>src/</code>.</p>
 </section>
 
-<!-- 14 -->
+<!-- 15 -->
 <section class="slide">
   <div class="kicker">Démo live, puis la suite</div>
   <div class="row">
@@ -297,7 +313,8 @@
       <ol style="font-size:18px;line-height:1.5;padding-left:22px">
         <li>Carte nationale, puis zoom sur un territoire.</li>
         <li>Arrêts et stations, avec les habitants desservis.</li>
-        <li>Strasbourg : budget et λ réglables, liste priorisée recalculée en direct.</li>
+        <li>« Où s'implanter » : classement national, Nice en tête.</li>
+        <li>Nice : budgets Citiz et collectivité réglables, listes recalculées en direct.</li>
       </ol>
     </div>
     <div class="col">

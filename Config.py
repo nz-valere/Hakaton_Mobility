@@ -33,6 +33,9 @@ URLS = {
     "pan_api": "https://transport.data.gouv.fr/api/datasets",
     # geo.api.gouv.fr (IGN Admin Express) – communes (nom, centre, population)
     "communes": "https://geo.api.gouv.fr/communes?fields=nom,code,codeDepartement,codeRegion,population,centre,surface&format=json",
+    # geo.api.gouv.fr (IGN Admin Express / BANATIC) – intercommunalités (EPCI) et rattachement des communes
+    "epcis": "https://geo.api.gouv.fr/epcis?fields=nom,code,population&format=json",
+    "communes_epci": "https://geo.api.gouv.fr/communes?fields=code,codeEpci&format=json",
     # Étude de cas Strasbourg
     "gtfs_cts": "https://opendata.cts-strasbourg.eu/google_transit.zip",
     "gbfs_citiz_grandest": "https://backend.citiz.fr/public/provider/1/gbfs/v3.0/gbfs.json",
@@ -45,6 +48,17 @@ FLUO67_SLUG = "offre-de-transport-du-reseau-fluo-grand-est-bas-rhin-67"
 # Emprise de l'étude de cas (Eurométropole de Strasbourg) – lon/lat
 STRASBOURG_BBOX = (7.62, 48.47, 7.88, 48.66)   # (ouest, sud, est, nord)
 STRASBOURG_DEPT = "67"
+# Périmètre officiel de l'Eurométropole de Strasbourg (EPCI SIREN 246700488, 33 communes
+# depuis 2017 ; liste BANATIC / INSEE), codes INSEE vérifiés dans data/raw/communes.json.
+# Utilisé par src/recommend.py (zone "ems") à la place de la boîte englobante, qui incluait
+# 7 communes hors EMS (~9 300 hab.) et en tronquait 9 (~16 000 hab., dont Vendenheim).
+EMS_EPCI = "246700488"
+EMS_COMMUNES = (
+    "67001", "67043", "67049", "67065", "67118", "67119", "67124", "67131", "67137", "67152",
+    "67182", "67204", "67212", "67218", "67247", "67256", "67267", "67268", "67296", "67309",
+    "67326", "67343", "67350", "67363", "67365", "67378", "67389", "67447", "67471", "67482",
+    "67506", "67519", "67551",
+)   # Achenheim … Strasbourg, Vendenheim, La Wantzenau, Wolfisheim
 
 # --------------------------------------------------------------------------- marche à pied
 WALK_SPEED_KMH = 4.8          # vitesse piétonne usuelle (Cerema / littérature, 4,5-5 km/h)
@@ -80,6 +94,8 @@ COSTS = {
     # convention de stationnement ; exploitation : assurance, entretien, nettoyage, place.
     "citiz": {"capex": 25_000, "opex": 7_000, "label": "Station Citiz (1 véhicule)"},
     # Station vélo légère (type nextbike/Vélhop, 10 vélos) : borne + vélos + pose.
+    # 60 k€ / 5 ans / 10 vélos = 1 200 €/vélo/an : bas de la fourchette Cerema 2005-2013
+    # (1 100 à 3 200 € HT/vélo/an, investissement + fonctionnement) -> hypothèse basse.
     "bike": {"capex": 30_000, "opex": 6_000, "label": "Station vélo libre-service (10 vélos)"},
     # Arrêt de bus sur ligne existante : quai PMR + abri + signalétique.
     # + coût d'exploitation du détour, calculé selon la distance à l'arrêt existant.
@@ -108,6 +124,16 @@ BIKE_TRIPS_PER_STATION_DAY = 15              # hypothèse (station légère, vil
 BIKE_KM_PER_TRIP = 2.5
 BIKE_CAR_SHIFT = 0.15                        # part des trajets vélo qui remplacent la voiture
 BUS_CAR_SHIFT = 0.20
+# Émission marginale d'un passager supplémentaire sur une ligne EXISTANTE : ~0 (le bus roule
+# de toute façon). Les 113 g/passager.km d'impactco2 sont une moyenne qui inclut la marche du
+# véhicule ; or le surplus de km-véhicule du détour est déjà compté explicitement
+# (BUS_KGCO2_PER_VKM) -> les soustraire aussi serait un double comptage.
+BUS_PASSENGER_MARGINAL_G_PER_KM = 0.0
+# Vélo : la fréquentation d'une station croît avec son bassin. Trajets/jour =
+# BIKE_TRIPS_PER_STATION_DAY × v × min(1, pop nouvellement desservie / BIKE_REF_POP), où
+# BIKE_REF_POP = population médiane à 5 min des stations vélo existantes en France
+# (outputs/stations_served.parquet, recalculée à l'exécution ; valeur de repli ci-dessous).
+BIKE_REF_POP = 1_640
 
 # --------------------------------------------------------------------------- optimisation
 DEFAULT_BUDGET = 2_000_000    # € sur l'horizon
@@ -131,6 +157,15 @@ CALIB_BOOTSTRAP = 2000         # tirages bootstrap (rééchantillonnage par orig
 # (score_options, score_2sfca) ; cf. docstring de src/accessibility.py pour le choix.
 SCORE_BASIS = "n_options"
 SCORE_MIN_SERVED = 1.0         # score plancher d'un carreau desservi (le distingue du 0)
+# Free-floating (mode scooter) : les « stations » GBFS sont des zones de stationnement
+# virtuelles (Paris : ~31 zones à 5 min d'un habitant moyen, 78 % de son n_options). Une
+# option = un service utilisable : on compte les OPÉRATEURS free-floating distincts à 5 min,
+# pas leurs zones (False = ancien comptage par zone). N'affecte pas offer.parquet.
+FREEFLOAT_COUNT_BY_OPERATOR = True
+# pop_catchment : part de la surface de chaque carreau voisin à ≤ r du centre (sous-grille
+# CATCHMENT_SUBGRID² points, population supposée uniforme dans le carreau). Évite l'effet de
+# seuil de la grille (diagonale 282,8 m ≈ r : 5 ou 9 carreaux entiers selon r à 1 m près).
+CATCHMENT_SUBGRID = 32
 
 # ---- model.py / recommend.py
 # Modèle de « valeur d'un site » (src/model.py) : un modèle par type d'équipement.
@@ -144,24 +179,42 @@ KIND_TARGET_MODES = {
 }
 # Modes retirés des variables explicatives (cible + modes trop liés : flottes GBFS mixtes
 # vélo/trottinette ; les gares restent un contexte légitime pour le bus mais sont la cible).
+# Free-floating (scooter) exclu partout : sa présence dans les flux GBFS publics est un
+# indicateur de contrat municipal tout-ou-rien par ville (Lyon, Bordeaux, Marseille : oui ;
+# Strasbourg, Nantes, Lille, Toulouse : 0 point), donc un effet « département » et un
+# décalage de distribution vers la zone d'application (EMS : 0 point, d_scooter = 20 km
+# partout). Mesuré en CV spatiale : Citiz PR-AUC 0,456 -> 0,478, bus inchangé (0,707 -> 0,709).
 KIND_EXCLUDED_FEATURE_MODES = {
-    "citiz": ("citiz", "carsharing"),
+    "citiz": ("citiz", "carsharing", "scooter"),
     "bike": ("bike", "scooter"),
-    "bus": ("transit", "rail"),
+    "bus": ("transit", "rail", "scooter"),
 }
 MODEL_CONTEXT_HALF_M = (1000, 3000)   # demi-côtés (m) des fenêtres de contexte (carrés)
 MODEL_CV_FOLDS = 5                    # GroupKFold spatial (groupe = département)
 MODEL_MAX_TRAIN = 250_000             # sous-échantillon aléatoire max pour la CV
 MODEL_HGB = dict(max_iter=300, learning_rate=0.08, max_leaf_nodes=31,
                  min_samples_leaf=200, l2_regularization=1.0)
-MODEL_PERM_SAMPLE = 30_000            # lignes pour l'importance par permutation
+MODEL_PERM_SAMPLE = 30_000            # lignes (par pli) pour l'importance par permutation
+MODEL_PERM_REPEATS = 3                # répétitions par variable et par pli
+# Variables quasi colinéaires (r = 0,99 entre habitants et ménages à 5 min) : leur
+# importance est aussi mesurée en les permutant ENSEMBLE (sinon l'une « vole » l'autre).
+MODEL_PERM_GROUPS = {"population_5min (pop_r5+men_r5)": ("pop_r5", "men_r5")}
+MODEL_FINAL_MAX_TRAIN = 500_000       # sous-échantillon max du modèle final (et de ses plis)
 
 # Recommandation (src/recommend.py)
 # Besoin d'un carreau ∈ [0,1] = moyenne pondérée de rangs-percentiles (dans la zone) :
 NEED_WEIGHTS = {"poverty_rate": 0.4, "carfree_share": 0.2, "low_access": 0.4}
 # Valeur relative d'un site = p_site / p_ref (p_ref = propension médiane des carreaux
 # déjà desservis par ce type) bornée : 1 ≈ « aussi bon qu'un site existant typique ».
+# Borne haute : 1,5 maintenue. Testé à 3,0 avec p_ref hors pli : la saturation des sites
+# retenus tombe de 48 % à 0 % (EMS) et de 63 % à 7 % (dép. 54), mais les indicateurs
+# indépendants du modèle se dégradent (sorties de « 0 option » −22 % EMS / −34 % dép. 54,
+# part en déciles 1-3 −2 pts) ; seul le CO2, lui-même proportionnel à v, progresse.
 VALUE_CLIP = (0.05, 1.5)
+# Le multiplicateur d'USAGE (adhérents, trajets, montées -> CO2) est borné à 1,5 même si
+# VALUE_CLIP est relevé : au-delà,
+# les taux d'usage deviennent invraisemblables (ex. 0,45 montée/hab./jour pour un arrêt).
+USAGE_VALUE_CAP = 1.5
 # Bénéfice relatif d'un habitant nouvellement desservi, par type (1 = tous égaux).
 KIND_BENEFIT = {"citiz": 1.0, "bike": 1.0, "bus": 1.0}
 LOW_DENSITY_HAB_KM2 = 1500            # seuil « dense » INSEE (grille communale de densité)
@@ -208,3 +261,32 @@ BUDGET_SPLIT = {"citiz": 0.4, "bike": 0.3, "bus": 0.3}
 # Quota de budget réservé aux candidats en zone peu dense (< LOW_DENSITY_HAB_KM2) : sans
 # lui, la couverture maximale ne sert que les zones denses (cf. recommendations_summary.json).
 LOW_DENSITY_BUDGET_SHARE = 0.15
+# Couverture en recommandation (src/recommend.py) : chaque carreau de 200 m est représenté par
+# COVER_SUBSAMPLE² points (population répartie uniformément). Sans cela, candidats et carreaux
+# étant tous deux des centres de grille, un site couvre exactement 5 carreaux tant que le rayon
+# (282 m) reste sous la diagonale (282,8 m) et 9 au-delà : +42 % de « nouveaux desservis » pour
+# +1,5 m de rayon. Avec 4×4 points, la couverture varie continûment avec le rayon.
+COVER_SUBSAMPLE = 4
+# Usage du modèle dans l'objectif : v_j = clip(p_j/p_ref, VALUE_CLIP) ** MODEL_VALUE_EXPONENT,
+# et les candidats dont clip(p/p_ref) < MODEL_VALUE_MIN sont écartés (filtre « site
+# invraisemblable »). Exposant 1 = facteur fort (historique), 0 = population seule.
+# Choix 0,5 sans filtre (multiplicateur doux), évalué avec les prédictions HORS PLI : sur l'EMS
+# et la Meurthe-et-Moselle, il domine l'exposant 1 sur les indicateurs indépendants du modèle
+# (personnes distinctes nouvellement desservies, sorties de « 0 option », part en déciles 1-3) ;
+# v = 1 (sans modèle) maximise la somme par type mais empile vélo et Citiz sur les mêmes
+# carreaux denses (−10 % à −18 % de personnes distinctes). Un filtre 0,3 coûte ~3 000 personnes
+# distinctes sur l'EMS sans gain mesurable : désactivé (0), paramètre conservé.
+MODEL_VALUE_EXPONENT = 0.5
+MODEL_VALUE_MIN = 0.0
+
+# ---- territories.py / recommend.py : quel territoire, quel financeur
+# Citiz n'exploite que des stations d'autopartage : son budget est distinct de celui de la
+# collectivité (AOM), qui finance stations vélo et arrêts de bus. Montants sur HORIZON_YEARS.
+CITIZ_BUDGET = 1_000_000      # ≈ 16 stations d'1 véhicule (60 k€ / 5 ans chacune)
+PUBLIC_BUDGET = 1_000_000     # vélo + bus, réparti selon BUDGET_SPLIT (50/50 entre ces deux types)
+# Classement national des intercommunalités (src/territories.py)
+TERRITORY_MIN_POP = 100_000   # masse critique d'un réseau local d'autopartage (hypothèse)
+# Île-de-France exclue : son autopartage (Getaround, Zity, Communauto, Free2Move) est presque
+# absent des flux GBFS publics -> couverture apparente ~1 %, potentiel surestimé.
+TERRITORY_EXCLUDED_DEPS = ("75", "77", "78", "91", "92", "93", "94", "95")
+TERRITORY_SHORTLIST = 10      # EPCI du criblage simulées avec l'optimiseur (budget CITIZ_BUDGET)

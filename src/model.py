@@ -22,8 +22,18 @@ Problème positive-unlabeled (PU) : un carreau sans station n'est pas forcément
 site, il peut simplement être hors du périmètre d'un opérateur. On n'apprend donc que dans
 les communes où le réseau opère (≥ 1 carreau desservi par ce mode) : là, l'absence est
 informative (l'opérateur aurait pu s'y implanter). Il reste un biais PU résiduel (sites
-pas encore équipés) : sous l'hypothèse SCAR (Elkan & Noto 2008), p(desservi|x) = c·p(bon|x),
-le classement est inchangé ; on n'utilise la propension qu'en relatif (p / p_ref).
+pas encore équipés). Sous l'hypothèse SCAR (Elkan & Noto 2008), p(desservi|x) = c·p(bon|x)
+et le classement serait inchangé ; mais SCAR est violée par construction (ce sont les
+opérateurs qui choisissent les sites, selon x : le modèle apprend « ressembler aux sites
+choisis », biais des choix passés inclus). Si la probabilité d'équipement croît avec la
+qualité du site, le classement est préservé mais la propension est écrasée en haut et en
+bas ; sinon (stratégie d'opérateur, ancienneté du réseau, contrats) il ne l'est pas. On
+n'utilise donc la propension qu'en relatif (p / p_ref), comme un score de ressemblance.
+La restriction aux communes équipées conditionne en outre sur l'issue au niveau commune :
+dans les petites communes (≥ 1 carreau desservi par définition), le taux de positifs est
+gonflé (Citiz : 12 % pour 30-100 carreaux vs 6 % pour 100-300).
+Les candidats d'une zone d'étude étant des négatifs de l'apprentissage, la recommandation
+les score HORS PLI (modèles par pli départemental, predict_value(oof=True, dep=...)).
 Cible secondaire (autopartage, vélo) : capacité installée à 5 min (véhicules / bornes),
 proxy de l'intensité d'usage puisque l'opérateur ajoute des voitures là où la demande l'exige.
 
@@ -304,10 +314,76 @@ def training_set(F, cells, kind):
     return elig, y, cap
 
 
+def _fold_permutation_importance(fold_models, X, y, cols, rng):
+    """
+    Baisse de PR-AUC quand on permute une variable (ou un groupe de variables, permutées avec
+    la même permutation), moyennée sur les plis : chaque modèle de pli est évalué sur son pli
+    de test (≤ C.MODEL_PERM_SAMPLE lignes), C.MODEL_PERM_REPEATS répétitions.
+    """
+    from sklearn.metrics import average_precision_score
+    targets = [(c, [i]) for i, c in enumerate(cols)]
+    targets += [(g, [cols.index(c) for c in cs]) for g, cs in C.MODEL_PERM_GROUPS.items()
+                if all(c in cols for c in cs)]
+    acc = {name: [] for name, _ in targets}
+    for model, te in fold_models:
+        sub = te if len(te) <= C.MODEL_PERM_SAMPLE else rng.choice(te, C.MODEL_PERM_SAMPLE, replace=False)
+        Xs, ys = X[sub].copy(), y[sub]
+        if ys.min() == ys.max():
+            continue
+        base = average_precision_score(ys, model.predict_proba(Xs)[:, 1])
+        for name, ii in targets:
+            drops = []
+            for _ in range(C.MODEL_PERM_REPEATS):
+                Xp = Xs.copy()
+                perm = rng.permutation(len(ys))
+                Xp[:, ii] = Xs[perm][:, ii]
+                drops.append(base - average_precision_score(ys, model.predict_proba(Xp)[:, 1]))
+            acc[name].append(float(np.mean(drops)))
+    mean = {k: float(np.mean(v)) for k, v in acc.items() if v}
+    single = dict(sorted(((c, mean[c]) for c in cols if c in mean), key=lambda t: -t[1]))
+    groups = {g: mean[g] for g in C.MODEL_PERM_GROUPS if g in mean}
+    return single, groups
+
+
+def _within_dep_backtest(y, p, pop, groups, min_pos=10):
+    """
+    Par département (prédictions hors pli) : PR-AUC, ROC-AUC et précision@k (k = nb de carreaux
+    réellement desservis) du modèle vs du classement par population à 5 min. Résumé : nb de
+    départements où le modèle bat la population, moyennes simples et pondérées par k.
+    """
+    from sklearn.metrics import average_precision_score, roc_auc_score
+    rows = []
+    for d in np.unique(groups):
+        m = groups == d
+        k = int(y[m].sum())
+        if k < min_pos or k == m.sum():
+            continue
+        ym, pm, qm = y[m], p[m], pop[m].astype(float)
+        prec = {}
+        for name, s in (("model", pm), ("pop", qm)):
+            o = np.lexsort((np.arange(len(s)), -s))          # tri décroissant, ex aequo stables
+            prec[name] = float(ym[o[:k]].mean())
+        rows.append({"dep": str(d), "n": int(m.sum()), "k": k,
+                     "ap_model": float(average_precision_score(ym, pm)),
+                     "ap_pop": float(average_precision_score(ym, qm)),
+                     "auc_model": float(roc_auc_score(ym, pm)), "auc_pop": float(roc_auc_score(ym, qm)),
+                     "prec_k_model": prec["model"], "prec_k_pop": prec["pop"]})
+    R = pd.DataFrame(rows)
+    if R.empty:
+        return {}
+    out = {"n_deps": int(len(R)), "model_beats_pop_ap": int((R["ap_model"] > R["ap_pop"]).sum()),
+           "model_beats_pop_prec_k": int((R["prec_k_model"] > R["prec_k_pop"]).sum())}
+    for c in ("ap_model", "ap_pop", "auc_model", "auc_pop", "prec_k_model", "prec_k_pop"):
+        out[f"mean_{c}"] = float(R[c].mean())
+        out[f"wmean_{c}"] = float(np.average(R[c], weights=R["k"]))
+    out["by_dep"] = {r["dep"]: {k: (round(v, 4) if isinstance(v, float) else v) for k, v in r.items()
+                                if k != "dep"} for r in rows if r["dep"] in ("67", "54")}
+    return out
+
+
 def evaluate_kind(F, cells, kind, rng):
     """CV spatiale GroupKFold (département) : HGB vs logistique vs population seule."""
     from sklearn.ensemble import HistGradientBoostingRegressor
-    from sklearn.inspection import permutation_importance
     from sklearn.model_selection import GroupKFold
 
     elig, y_all, cap_all = training_set(F, cells, kind)
@@ -325,7 +401,7 @@ def evaluate_kind(F, cells, kind, rng):
     oof = {"hgb": np.zeros(len(idx)), "logit": np.zeros(len(idx)), "pop_only": np.zeros(len(idx))}
     folds = {m: [] for m in oof}
     pop = F.iloc[idx]["pop_r5"].values
-    last = None
+    fold_models = []
     for f, (tr, te) in enumerate(GroupKFold(n_splits=k).split(X, y, groups)):
         if y[tr].min() == y[tr].max() or y[te].min() == y[te].max():
             continue
@@ -340,7 +416,7 @@ def evaluate_kind(F, cells, kind, rng):
         oof["pop_only"][te] = iso.predict(pop[te])
         for m in oof:
             folds[m].append(_clf_metrics(y[te], oof[m][te]))
-        last = (hgb, te)
+        fold_models.append((hgb, te))
         print(f"   pli {f}: AUC hgb {folds['hgb'][-1]['roc_auc']:.3f} | logit "
               f"{folds['logit'][-1]['roc_auc']:.3f} | pop {folds['pop_only'][-1]['roc_auc']:.3f}")
 
@@ -351,13 +427,22 @@ def evaluate_kind(F, cells, kind, rng):
         res["models"][m] = {"pooled": _clf_metrics(y, oof[m]),
                             "fold_mean": df.mean().to_dict(), "fold_std": df.std().to_dict()}
 
-    # importance par permutation (modèle du dernier pli, sur son pli de test)
-    hgb, te = last
-    sub = te if len(te) <= C.MODEL_PERM_SAMPLE else rng.choice(te, C.MODEL_PERM_SAMPLE, replace=False)
-    pi = permutation_importance(hgb, X[sub], y[sub], scoring="average_precision", n_repeats=3,
-                                random_state=C.RANDOM_STATE, n_jobs=1)
-    res["permutation_importance"] = dict(sorted(
-        {c: float(v) for c, v in zip(cols, pi.importances_mean)}.items(), key=lambda t: -t[1]))
+    # sélection du modèle sur ces mêmes plis : 2 candidats seulement, hyperparamètres fixés a
+    # priori (C.MODEL_HGB, non réglés sur ces plis) -> optimisme de sélection faible ; l'écart
+    # hgb/logit est à lire avec fold_std.
+    res["selection_note"] = ("modèle retenu = meilleure PR-AUC agrégée parmi {hgb, logit} sur les "
+                             "mêmes plis ; hyperparamètres fixés a priori")
+
+    # importance par permutation : moyenne sur TOUS les plis (modèle HGB de chaque pli, sur son
+    # pli de test), variables seules + groupes colinéaires permutés ensemble (C.MODEL_PERM_GROUPS)
+    res["permutation_importance"], res["permutation_importance_groups"] = \
+        _fold_permutation_importance(fold_models, X, y, cols, rng)
+
+    # backtest intra-département : dans chaque département tenu à l'écart, le modèle classe-t-il
+    # les carreaux réellement desservis mieux que la population seule ? (c'est la question que
+    # pose la recommandation, qui compare des sites DANS une même zone)
+    res["within_dep_backtest"] = {m: _within_dep_backtest(y, oof[m], pop, groups)
+                                  for m in ("hgb", "logit")}
 
     # cible secondaire : capacité installée (véhicules / bornes) parmi les carreaux desservis
     pos = y_all[idx]
@@ -376,7 +461,9 @@ def evaluate_kind(F, cells, kind, rng):
             "spearman_hgb": float(spearmanr(pred, yc).correlation),
             "spearman_pop_only": float(spearmanr(pop[ii], yc).correlation),
             "mae_hgb": float(np.mean(np.abs(np.expm1(pred) - cap[ii]))),
+            # NB : malgré son nom (conservé pour app.py), baseline = MÉDIANE globale constante
             "mae_mean_baseline": float(np.mean(np.abs(np.median(cap[ii]) - cap[ii]))),
+            "baseline": "médiane constante",
             "unit": "véhicules" if kind == "citiz" else "places / vélos"}
     return res, y, oof
 
@@ -384,17 +471,38 @@ def evaluate_kind(F, cells, kind, rng):
 def fit_final(F, cells, kind, rng, algo="hgb"):
     """
     Modèle final sur toutes les communes éligibles ; `algo` = meilleur modèle en CV spatiale
-    (PR-AUC agrégée). p_ref = propension médiane des carreaux déjà desservis.
+    (PR-AUC agrégée).
+
+    Prédiction HORS PLI pour la recommandation : les carreaux non desservis d'une zone étudiée
+    (ex. EMS) sont des NÉGATIFS de l'apprentissage ; le modèle complet a appris à leur donner
+    une propension basse (fuite PU classique). On entraîne donc aussi un modèle par pli
+    GroupKFold départemental : chaque département est scoré par le modèle qui ne l'a pas vu
+    (predict_value(..., oof=True, dep=...)). p_ref = médiane HORS PLI des propensions des
+    carreaux desservis (même échelle que les candidats scorés hors pli) ; p_ref_insample =
+    médiane in-sample du modèle complet (à n'utiliser qu'avec oof=False).
     """
+    from sklearn.model_selection import GroupKFold
     elig, y_all, _ = training_set(F, cells, kind)
     idx = np.flatnonzero(elig)
-    if len(idx) > 2 * C.MODEL_MAX_TRAIN:
-        idx = np.sort(rng.choice(idx, 2 * C.MODEL_MAX_TRAIN, replace=False))
+    if len(idx) > C.MODEL_FINAL_MAX_TRAIN:
+        idx = np.sort(rng.choice(idx, C.MODEL_FINAL_MAX_TRAIN, replace=False))
     cols = feature_columns(kind)
-    model = (_hgb_clf() if algo == "hgb" else _logit()).fit(F.iloc[idx][cols].values, y_all[idx])
-    p = model.predict_proba(F.iloc[idx][cols].values)[:, 1]
+    X, y = F.iloc[idx][cols].values, y_all[idx]
+    make = _hgb_clf if algo == "hgb" else _logit
+    model = make().fit(X, y)
+    p_in = model.predict_proba(X)[:, 1]
+    deps = cells["dep"].values[idx].astype(str)
+    fold_models, dep_fold, p_oof = [], {}, np.full(len(idx), np.nan)
+    for f, (tr, te) in enumerate(GroupKFold(n_splits=min(C.MODEL_CV_FOLDS, len(np.unique(deps))))
+                                 .split(X, y, deps)):
+        mf = make().fit(X[tr], y[tr])
+        fold_models.append(mf)
+        p_oof[te] = mf.predict_proba(X[te])[:, 1]
+        dep_fold.update({d: f for d in np.unique(deps[te])})
     bundle = {"kind": kind, "algo": algo, "model": model, "features": cols,
-              "p_ref": float(np.median(p[y_all[idx]])), "trained_on": int(len(idx))}
+              "fold_models": fold_models, "dep_fold": dep_fold,
+              "p_ref": float(np.median(p_oof[y])), "p_ref_insample": float(np.median(p_in[y])),
+              "trained_on": int(len(idx))}
     if kind == "citiz":
         # pénétration nationale : adhérents Citiz / habitants à 5 min d'une station Citiz
         pop_citiz = float(cells["ind"].values[F["n_citiz_r5"].values > 0].sum())
@@ -413,10 +521,34 @@ def load_bundle(kind):
     return _BUNDLES[kind]
 
 
-def predict_value(features_df, kind):
-    """Propension p(site de type `kind` | variables) ∈ [0,1] pour chaque ligne de build_features()."""
+def predict_value(features_df, kind, oof=False, dep=None):
+    """
+    Propension p(site de type `kind` | variables) ∈ [0,1] pour chaque ligne de build_features().
+
+    oof=False (défaut, rétrocompatible) : modèle complet ; à comparer à b["p_ref_insample"].
+    oof=True : chaque ligne est scorée par le modèle de pli qui n'a PAS vu son département
+    (un département absent de l'apprentissage -> modèle complet) ; à comparer à b["p_ref"].
+    `dep` : code(s) département des lignes (scalaire ou tableau aligné), sinon colonne "dep"
+    de features_df ; obligatoire avec oof=True.
+    """
     b = load_bundle(kind)
-    return b["model"].predict_proba(features_df[b["features"]].values.astype(float))[:, 1]
+    X = features_df[b["features"]].values.astype(float)
+    if not oof:
+        return b["model"].predict_proba(X)[:, 1]
+    if "fold_models" not in b:
+        raise ValueError(f"bundle {kind} sans modèles de pli : relancer python -m src.model")
+    if dep is None:
+        if "dep" not in features_df:
+            raise ValueError("predict_value(oof=True) exige dep=... (codes département des lignes)")
+        dep = features_df["dep"].values
+    dep = np.broadcast_to(np.asarray(dep, dtype=object).astype(str), (len(X),))
+    fold = pd.Series(dep).map(b["dep_fold"]).fillna(-1).astype(int).values
+    out = np.empty(len(X))
+    for f in np.unique(fold):
+        m = fold == f
+        mdl = b["model"] if f < 0 else b["fold_models"][f]
+        out[m] = mdl.predict_proba(X[m])[:, 1]
+    return out
 
 
 # --------------------------------------------------------------------------- figures
@@ -490,6 +622,32 @@ def cached_features(force=False):
     return cells, F, src
 
 
+def _oof_diagnostics(F, cells, kind, b, deps=("67", "54")):
+    """
+    Effet de la fuite PU sur les candidats des zones d'étude : propensions in-sample vs hors pli
+    des carreaux habités NON desservis du département, et part des candidats saturés
+    (p/p_ref ≥ borne haute de C.VALUE_CLIP) dans chaque cas.
+    """
+    _BUNDLES[kind] = b
+    y, _ = target(F, kind)
+    hi = C.VALUE_CLIP[1]
+    out = {}
+    for d in deps:
+        m = (cells["dep"].values == d) & ~y & (cells["ind"].values > 0)
+        if m.sum() == 0:
+            continue
+        Fd = F[m]
+        p_in = predict_value(Fd, kind)
+        p_oof = predict_value(Fd, kind, oof=True, dep=d)
+        out[d] = {"n_candidates": int(m.sum()),
+                  "median_p_insample": float(np.median(p_in)), "median_p_oof": float(np.median(p_oof)),
+                  "mean_p_insample": float(p_in.mean()), "mean_p_oof": float(p_oof.mean()),
+                  "spearman_in_vs_oof": float(spearmanr(p_in, p_oof).correlation),
+                  "share_saturated_insample": float((p_in / b["p_ref_insample"] >= hi).mean()),
+                  "share_saturated_oof": float((p_oof / b["p_ref"] >= hi).mean())}
+    return out
+
+
 def main(force=False):
     t0 = time.time()
     cells, F, src = cached_features(force)
@@ -505,6 +663,8 @@ def main(force=False):
         b = fit_final(F, cells, kind, rng, algo)
         res["selected_model"] = algo
         res["p_ref"] = b["p_ref"]
+        res["p_ref_insample"] = b["p_ref_insample"]
+        res["oof_vs_insample"] = _oof_diagnostics(F, cells, kind, b)
         if "penetration" in b:
             res["citiz_penetration"] = b["penetration"]
             res["pop_served_citiz_fr"] = b["pop_served_citiz_fr"]

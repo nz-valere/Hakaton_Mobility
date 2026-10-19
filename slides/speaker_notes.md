@@ -6,17 +6,17 @@ Ouvrir `slides/presentation.html` dans un navigateur : ← → pour naviguer, `#
 
 | Orateur | Partie | Slides | Questions probables du jury |
 |---|---|---|---|
-| **A** – produit / métier | problème, chiffres, apport pour Citiz, suite | 1, 2, 3, 11, 14 (suite) | « Qu'est-ce que Citiz en fait concrètement ? » |
+| **A** – produit / métier | problème, chiffres, apport pour Citiz, suite | 1, 2, 3, 12, 15 (suite) | « Qu'est-ce que Citiz en fait concrètement ? Pourquoi Nice ? » |
 | **B** – données / accessibilité | carte, sources, calibration marche, équité | 4, 5, 6 | « Pourquoi 282 m ? Pourquoi pas le 2SFCA ? DROM ? » |
-| **C** – modèle / optimisation | modèle, optimisation, recommandation, comparaison | 7, 8, 9, 10 | « Fuite spatiale ? Biais PU ? Garantie du glouton ? » |
-| **D** – éthique / démo | éthique, limites, démo live | 12, 13, 14 (démo) | « Stigmatisation ? Vie privée ? CO2 ? » |
+| **C** – modèle / optimisation | modèle, optimisation, choix du territoire, recommandation, comparaison | 7, 8, 9, 10, 11 | « Fuite spatiale ? Biais PU ? Garantie du glouton ? Modèle appris où ? » |
+| **D** – éthique / démo | éthique, limites, démo live | 13, 14, 15 (démo) | « Stigmatisation ? Vie privée ? CO2 ? » |
 
-Tous les chiffres sont dans `outputs/` : `access_summary.json`, `walk_calibration.json`, `model_metrics.json`, `recommendations_summary.json` et `recommendations.csv`.
+Tous les chiffres sont dans `outputs/` : `access_summary.json`, `walk_calibration.json`, `model_metrics.json`, `territories_summary.json`, `territories_citiz.csv`, `recommendations_summary.json` et `recommendations.csv` (Nice), `recommendations_summary_ems.json` (Strasbourg, témoin).
 
 ---
 
 ### 1. Titre (A, 20 s)
-« Notre question est simple : qui a vraiment une option de transport à 5 minutes à pied de chez soi, et où faut-il en ajouter ? On y répond pour toute la France, puis on fait une recommandation chiffrée pour Strasbourg. »
+« Notre question est simple : qui a vraiment une option de transport à 5 minutes à pied de chez soi, et où faut-il en ajouter ? On y répond pour toute la France, on choisit le territoire où Citiz a le plus à gagner (Nice), puis on y fait une recommandation chiffrée. »
 
 ### 2. Le problème (A, 45 s)
 - Citiz a environ 2 800 voitures dans environ 280 villes et doit choisir où ouvrir. Une station mal placée immobilise une voiture.
@@ -51,56 +51,67 @@ Tous les chiffres sont dans `outputs/` : `access_summary.json`, `walk_calibratio
   1. **Anti-fuite** : les modes cibles sont exclus des variables.
   2. **Positif-non étiqueté** : on n'apprend que dans les communes où le réseau existe, sinon une absence ne veut rien dire.
   3. **Validation croisée spatiale par département** : une validation aléatoire mesurerait surtout la proximité géographique.
-- Résultat Citiz : PR-AUC de 0,46 contre 0,26 pour la population seule. On choisit la PR-AUC car seulement 8 % des carreaux sont positifs.
+- Résultat Citiz : PR-AUC de 0,48 contre 0,26 pour la population seule. On choisit la PR-AUC car seulement 8 % des carreaux sont positifs.
+- **Quel modèle, appris où ?** Un gradient boosting (HistGradientBoosting de scikit-learn), retenu face à une régression logistique sur la PR-AUC. Il est appris sur les 80 départements où l'autopartage existe (107 672 carreaux), **pas sur Strasbourg seule** : 2 800 carreaux ne suffiraient pas, et le modèle doit être transposable à Nice. Strasbourg sert de **test** : avec le Bas-Rhin tenu hors de l'apprentissage, le modèle retrouve les carreaux réellement équipés avec une PR-AUC de 0,66 contre 0,59 pour la population seule. Il bat la population seule dans 55 départements sur 67. Pour Nice, chaque carreau est scoré par un modèle qui n'a pas vu les Alpes-Maritimes.
 - **Honnêteté** : le modèle ne sait pas dire combien de voitures mettre. Pour la capacité, il ne bat pas la baseline. On l'a mesuré, et on ne le prétend pas.
 
 ### 8. Optimisation (C, 60 s)
 - On maximise les habitants **nouvellement** desservis, pondérés par le besoin et par la valeur du modèle, à budget fixé. Les zones déjà desservies ne comptent pas.
 - C'est un problème NP-difficile. On utilise un glouton paresseux avec une garantie théorique de (1 − 1/e)/2. **On l'a testé contre la force brute** : 97 % de l'optimum en moyenne.
-- **Les enveloppes par financeur et le quota peu dense sont des choix politiques**, pas des sorties du modèle. Ils sont réglables dans `Config.py` et leur coût est chiffré (slide 10).
+- **Un budget par financeur** : Citiz ne gère que l'autopartage. On sépare donc 1 M€ Citiz (stations d'autopartage) et 1 M€ collectivité (vélo et bus), avec deux listes indépendantes.
+- **Le quota peu dense (15 %) est un choix politique**, pas une sortie du modèle. Il est réglable dans `Config.py`.
 
-### 9. Recommandation Strasbourg (C, 60 s)
-- Avec 2 M€ sur 5 ans, on obtient **28 sites** : 14 stations vélo, 12 stations Citiz et 2 arrêts de bus.
-- **68 465 habitants** gagnent une option à 5 minutes, pour **29 € par habitant**.
-- Environ **106 tonnes de CO2** sont évitées par an.
-- **50,4 %** des nouveaux desservis sont dans les 3 déciles les plus modestes.
-- Pourquoi Strasbourg : Citiz y est déjà très présent (46,5 % de la population à 5 minutes d'une station Citiz ou d'autopartage), les données y sont complètes (CTS, Vélhop, Citiz, OSM), et le territoire mêle un centre dense et du périurbain.
+### 9. Quel territoire ? (C, 75 s)
+- Le sujet demande où Citiz doit s'implanter. Avant de placer des stations, on choisit **le territoire**.
+- **Criblage** des 99 intercommunalités de plus de 100 000 habitants. Pour chacune, on calcule les habitants des quartiers denses sans aucun autopartage à 5 min, pondérés par la valeur du modèle.
+- **Simulation** : sur les 10 premières, on lance le vrai optimiseur avec 1 M€ Citiz, et on classe par adhérents potentiels.
+- **Nice arrive en tête** : 16 stations y desservent 85 573 habitants et 7 300 adhérents potentiels, contre 33 740 et 1 400 à Strasbourg. Suivent Lyon et Montpellier.
+- **Pourquoi pas Strasbourg ?** Citiz y couvre déjà 45 % des habitants : il reste des quartiers moins denses. On garde Strasbourg comme **territoire témoin**, là où le modèle est le mieux validé.
+- **Contexte terrain** : Mobilize Share (Renault), le principal autopartage en stations de la métropole niçoise, a fermé fin juin 2026. Le vide est récent.
+- **Île-de-France exclue** : son autopartage (Getaround, Zity, Communauto) n'est presque pas publié en GBFS, d'où une couverture apparente de 1 %.
 
-### 10. Avec ou sans l'outil (C, 45 s)
-- À budget égal, la stratégie naïve « là où il y a du monde » ne dessert que 39 067 nouveaux habitants. Elle met des stations là où les gens en ont déjà.
-- **Notre recommandation dessert 1,75 fois plus d'habitants**, et évite 106 t de CO2 contre 22 t.
-- Transparence : sans les enveloppes et le quota, on pourrait atteindre 90 324 habitants, mais avec presque uniquement du vélo en centre-ville, 35 t de CO2 et moins de ménages modestes. C'est un arbitrage que la collectivité doit faire en connaissance de cause.
+### 10. Recommandation Nice (C, 60 s)
+- **Pour Citiz**, avec 0,96 M€ sur 5 ans : **16 stations**, dont 14 à Nice, une à Beaulieu-sur-Mer et une à Saint-Martin-du-Var (quota peu dense).
+- **85 573 habitants** passent à 5 minutes d'une voiture partagée, pour **11 € par habitant** (28 € à Strasbourg).
+- Environ **121 t de CO2** évitées par an ; **48 %** des nouveaux desservis sont dans les 3 déciles les plus modestes.
+- **Pour la collectivité**, liste séparée : 9 stations vélo et 2 arrêts de bus, soit 48 494 nouveaux desservis pour 0,95 M€. Attention : Vélo Bleu existe mais ne publie pas de flux GBFS, ces stations vélo sont à confronter au réseau réel.
 
-### 11. Ce que ça apporte à Citiz (A, 50 s)
-- **Où** : 12 stations nommées, avec coordonnées. Elles touchent 28 320 nouveaux habitants à 5 minutes d'une voiture partagée.
-- **Pourquoi** : chaque site est justifié par les habitants gagnés, le coût, le CO2 et le profil des ménages.
-- **Partout** : `--dep 54` relance l'analyse sur la Meurthe-et-Moselle en quelques secondes.
-- **Climat** : les stations Citiz pèsent 90 t sur les 106 t de CO2 évitées. Une voiture partagée remplace plusieurs voitures personnelles (ADEME/6t).
+### 11. Avec ou sans l'outil (C, 45 s)
+- On montre cette comparaison sur Strasbourg, car c'est là que l'offre existante pèse : à Nice, il n'y a rien à éviter.
+- À budget Citiz égal, la stratégie naïve « là où il y a du monde » ne dessert que 13 800 nouveaux habitants, contre 33 740 : **2,4 fois moins**, car elle place des stations à côté des existantes.
+- **Honnêteté sur le modèle** : sans lui, on toucherait 19 % d'habitants de plus (41 493), mais avec 28 % de CO2 évité en moins (94 t contre 120 t). Le modèle vise les sites où l'usage attendu est plus fort. C'est un arbitrage, pas un gain gratuit.
 
-### 12. Éthique (D, 60 s)
+### 12. Ce que ça apporte à Citiz (A, 50 s)
+- **Où s'implanter** : un classement national simulé à budget égal, avec Nice en tête, Lyon et Montpellier ensuite.
+- **Où ouvrir** : 16 stations nommées, avec coordonnées, et pour chacune les habitants gagnés, la valeur du modèle, le coût et le CO2.
+- **Combien de voitures** : la demande estimée justifierait jusqu'à environ 10 voitures par station. C'est une borne haute (pénétration nationale Citiz) : on recommande un pilote à 1-2 voitures par station, suivi des réservations.
+- **Partout** : `--area epci:<siren>` ou `--dep 54` relance l'analyse en quelques secondes.
+
+### 13. Éthique (D, 60 s)
 - **CO2** : hypothèses prudentes. Le détour des bus est retranché ; en Meurthe-et-Moselle, deux arrêts ont un bilan négatif, et on l'affiche.
 - **Équité** : les zones déjà desservies valent zéro, 15 % du budget va au peu dense, et λ règle la priorité sociale. On montre toujours la comparaison avec λ = 0.
-- **Stigmatisation** : on parle d'« offre à développer », avec des rangs relatifs à la zone et aucun palmarès de communes.
+- **Stigmatisation** : on parle d'« offre à développer », avec des rangs relatifs à la zone et aucun palmarès de communes. Le classement des territoires mesure un potentiel pour Citiz, pas un retard.
 - **Vie privée** : aucune statistique sociale sous 11 ménages. Seuls 23 % des carreaux atteignent ce seuil seuls, mais ils regroupent 82 % des habitants. Les autres sont lissés au km² ou masqués.
 
-### 13. Limites (D, 45 s)
+### 14. Limites (D, 45 s)
 - Dire les limites avant que le jury les cite :
   - le cercle est calibré sur une seule ville ;
   - il n'y a pas de fréquence de passage ;
   - les coûts sont hypothétiques ;
-  - la valeur du modèle est plafonnée sur les meilleurs sites, donc c'est la population qui départage ;
+  - le modèle mesure une ressemblance avec les sites existants, pas une fréquentation ;
   - le modèle apprend des biais passés des opérateurs ;
-  - il n'y a pas de free-floating à Strasbourg dans les flux publics ;
-  - l'emprise est une boîte, pas la liste des communes.
-- Renvoyer vers le document interne DEMARCHE.pdf, section 8.
+  - l'offre non publiée en GBFS est invisible (Getaround, Vélo Bleu à Nice) : le classement des territoires est à confirmer sur le terrain ;
+  - le nombre de voitures par station est une borne haute.
+- Renvoyer vers EXPLICATIONS.md, section « Ce qu'il faut garder en tête ».
 
-### 14. Démo et suite (D pour la démo, A pour la suite ; 2-3 min de démo)
+### 15. Démo et suite (D pour la démo, A pour la suite ; 2-3 min de démo)
 - Lancer `.venv/bin/python -m streamlit run app.py` **avant** la soutenance : le premier chargement est plus lent.
 - Parcours de la démo :
   1. carte nationale ;
-  2. zoom sur l'Eurométropole ;
-  3. onglet « Qui est concerné » (stations et habitants servis) ;
-  4. onglet « Où investir » : bouger le curseur λ et le budget, montrer que la liste et les indicateurs changent.
+  2. onglet « Où s'implanter (France) » : le classement, Nice en tête, Strasbourg en témoin ;
+  3. territoire prioritaire (Nice), onglet « Qui est concerné » (stations et habitants servis) ;
+  4. onglet « Où investir » : bouger le budget Citiz, le budget collectivité et λ, montrer que les deux listes changent ;
+  5. si le temps le permet, basculer sur Strasbourg pour comparer.
 - Suite (A) :
   - confronter le modèle aux réservations Citiz réelles ;
   - pondérer par la fréquence ;

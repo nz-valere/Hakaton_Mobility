@@ -9,5 +9,5 @@ outputs/*.joblib
 outputs/*.pkl
 outputs/cache/
 # documents internes au groupe
-DEMARCHE.md
-DEMARCHE.pdf
+EXPLICATIONS.md
+EXPLICATIONS.pdf

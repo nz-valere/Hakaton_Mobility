@@ -11,22 +11,31 @@ Rayon « 5 minutes »
 étant calibré sur le graphe piéton OSM de Strasbourg (src/walk_calibration.py : r ≈ 282 m,
 détour ≈ 1,42, critère d'égalité des effectifs ; précision 0,92 / rappel 0,98 sur la population
 desservie, biais de comptage +5 %). Distances mesurées depuis le *centre* du carreau.
+Sensibilité à l'IC 95 % du rayon (278-286 m) : part sans option 36,5 % / 35,6 % (vs 36,0 %),
+n_options moyen −2,5 % / +2,6 % (access_summary.json -> radius_sensitivity).
 
 Indicateurs par carreau i (voisinage V(i) = points / carreaux à ≤ r du centre de i)
 -----------------------------------------------------------------------------------
-- n_<mode>       = nombre de points d'offre du mode dans V(i) ;
+- n_<mode>       = nombre de points d'offre du mode dans V(i) ; exception, le free-floating (scooter) :
+                   nombre d'OPÉRATEURS distincts ayant au moins une zone dans V(i) si
+                   C.FREEFLOAT_COUNT_BY_OPERATOR (défaut). Les zones GBFS free-floating sont des places
+                   virtuelles (Paris : 31 zones à 5 min en moyenne, 78 % de n_options) : les compter une à
+                   une mesure le maillage du stationnement, pas le nombre de services utilisables ;
 - n_options      = Σ_mode C.MODE_WEIGHT[mode] · n_<mode> (poids 1 par défaut : « nombre d'options ») ;
 - n_modes        = nombre de modes distincts accessibles (diversité) ;
 - served_<mode>  = n_<mode> > 0 ;
-- pop_catchment  = habitants des carreaux dont le centre est à ≤ r du centre de i (i inclus) :
-                   la population qui « se partage » les mêmes options ;
+- pop_catchment  = habitants à ≤ r du centre de i : Σ_k f_ik · ind_k, f_ik = part de la surface du
+                   carreau k à ≤ r (population uniforme dans le carreau ; geo.cell_offsets_fraction).
+                   Un critère « centre de k à ≤ r » serait instable : r ≈ 282 m ≈ diagonale du carreau
+                   (282,8 m), soit 5 carreaux à 282 m et 9 à 283 m (+68 % de pop_catchment) ;
 - options_per_1000 = 1000 · n_options / pop_catchment : offre par habitant, version simple ;
 - access_2sfca   = Two-Step Floating Catchment Area (Luo & Wang 2003), mesure standard de
                    « l'offre par habitant » en accessibilité : étape 1, chaque point j reçoit un
                    ratio R_j = w_j / P_j où P_j = habitants à ≤ r de j ; étape 2, A_i = 1000 · Σ_{j∈V(i)} R_j
                    (options pour 1000 habitants, concurrence entre habitants prise en compte point par
                    point). Propriété : Σ_i ind_i · A_i = 1000 · Σ_j w_j (l'offre est intégralement répartie
-                   entre ses usagers potentiels) ;
+                   entre ses usagers potentiels ; points ne desservant personne exclus). Ici chaque zone
+                   free-floating reste une unité d'offre ;
 - score_options / score_2sfca (0-100, froid -> chaud) = 0 si aucune option à 5 min ; sinon
                    SCORE_MIN_SERVED + (100 - SCORE_MIN_SERVED) · rang-percentile national pondéré par la
                    population de n_options (resp. access_2sfca) parmi les carreaux desservis.
@@ -40,16 +49,28 @@ Indicateurs par carreau i (voisinage V(i) = points / carreaux à ≤ r du centre
                    habitant* » (mesure au carreau, pondérée par la population dans tous les agrégats).
                    La version ratio (2SFCA) répond à une autre question — la *capacité* partagée — et
                    produit un artefact connu : un hameau avec un arrêt (ratio 1 / 30 hab.) devient
-                   « chaud » et le centre de Strasbourg « froid » (score moyen pondéré : carreaux
-                   desservis peu denses 82 vs Strasbourg 28 en 2SFCA ; 23 vs 58 en n_options).
+                   « chaud » et le centre de Strasbourg « froid » (score moyen pondéré des carreaux
+                   desservis, access_summary.json -> score_by_group_served : densité à ~1 km
+                   < C.LOW_DENSITY_HAB_KM2 : 64 en 2SFCA contre 31 en n_options ; commune de
+                   Strasbourg : 30 contre 63). Les deux scores sont peu concordants (Spearman pondéré
+                   0,21, score_concordance) : le choix de lecture n'est pas neutre. Leurs moyennes
+                   nationales sont en revanche égales PAR CONSTRUCTION (rang moyen 0,5 × part desservie).
                    Sans fréquence ni capacité par arrêt, diviser par la population pénalise la
                    densité au lieu de mesurer la saturation. access_2sfca reste exporté pour la
                    lecture « concurrence » et pour l'analyse de sensibilité.
 
 Indicateurs par point d'offre j
 -------------------------------
-pop_served = Σ ind des carreaux à ≤ r ; households_served = Σ men ; pop_served_exclusive = habitants
-des carreaux pour lesquels j est le seul point de son mode à ≤ r (perte nette si le point fermait).
+pop_served = Σ ind des carreaux dont le centre est à ≤ r (échantillonnage au centre : sans biais en
+moyenne pour des points non alignés sur la grille) ; households_served = Σ men ; pop_served_exclusive =
+habitants des carreaux pour lesquels j est le seul point de son mode à ≤ r (perte nette si le point
+fermait ; pour le free-floating, seule zone, tous opérateurs confondus).
+
+Résumé (access_summary.json) : national, territoires, EMS ; courbe par décile national de revenu
+(tous carreaux, carreaux ≥ 11 ménages — 77 % des carreaux ont un revenu imputé par l'INSEE —, EMS) ;
+scores par groupe de densité ; concordance des deux scores ; parts autopartage homogènes ;
+sensibilité aux bornes de l'IC 95 % du rayon ; statistiques des points d'offre limitées aux
+territoires couverts par Filosofi (crs_id ≥ 0).
 
 Confidentialité (C.PRIVACY_MIN_HOUSEHOLDS = 11)
 ------------------------------------------------
@@ -80,28 +101,41 @@ CELL_COLS = ["key", "crs_id", "x", "y", "lon", "lat", "com", "dep", "ind", "men"
 
 
 # --------------------------------------------------------------------------- voisinages
-def cell_neighbours(cells, radius):
-    """
-    Paires (i, k) de carreaux dont les centres sont à ≤ radius, i ≠ k inclus et i = k inclus.
-    Les carreaux sont sur une grille exacte de 200 m : on énumère les décalages (dl, dc) admissibles
-    et on retrouve les voisins par leur clé (population.cell_key), sans KD-tree.
-    """
-    keys = cells["key"].to_numpy()
+def _grid_lookup(keys, offsets):
+    """Pour chaque décalage (dl, dc) : (i, k) tels que le carreau k = carreau i + (dl, dc)."""
     order = np.argsort(keys)
     sk = keys[order]
-    m = int(np.floor(radius / C.CELL))
-    I, K = [], []
-    for dl in range(-m, m + 1):
-        for dc in range(-m, m + 1):
-            if C.CELL * np.hypot(dl, dc) > radius + 1e-9:
-                continue
-            target = keys + dl * 10**6 + dc
-            pos = np.searchsorted(sk, target)
-            pos = np.minimum(pos, len(sk) - 1)
-            ok = sk[pos] == target
-            I.append(np.flatnonzero(ok))
-            K.append(order[pos[ok]])
-    return np.concatenate(I), np.concatenate(K)
+    for dl, dc in offsets:
+        target = keys + int(dl) * 10**6 + int(dc)
+        pos = np.minimum(np.searchsorted(sk, target), len(sk) - 1)
+        ok = sk[pos] == target
+        yield np.flatnonzero(ok), order[pos[ok]]
+
+
+def cell_neighbours(cells, radius):
+    """
+    Paires (i, k) de carreaux voisins et poids f = part de la surface de k à ≤ radius du centre
+    de i (geo.cell_offsets_fraction ; f = 1 pour i = k). Les carreaux sont sur une grille exacte
+    de 200 m : on énumère les décalages (dl, dc) et on retrouve les voisins par leur clé
+    (population.cell_key), sans KD-tree. La fraction évite l'effet de seuil d'un critère
+    « centre à ≤ r » quand r ≈ 282 m ≈ diagonale du carreau (5 ou 9 carreaux à 1 m près).
+    """
+    dl, dc, f = geo.cell_offsets_fraction(radius)
+    I, K, W = [], [], []
+    for (i, k), w in zip(_grid_lookup(cells["key"].to_numpy(), zip(dl, dc)), f):
+        I.append(i)
+        K.append(k)
+        W.append(np.full(len(i), w))
+    return np.concatenate(I), np.concatenate(K), np.concatenate(W)
+
+
+def grid_box_sum(cells, values, half):
+    """Σ values sur le carré de (2·half+1)² carreaux centré sur chaque carreau."""
+    out = np.zeros(len(cells))
+    offs = [(a, b) for a in range(-half, half + 1) for b in range(-half, half + 1)]
+    for i, k in _grid_lookup(cells["key"].to_numpy(), offs):
+        out[i] += values[k]
+    return out
 
 
 def weighted_rank(values, weights):
@@ -139,16 +173,24 @@ def compute(cells, offer, radius):
     # paires carreau -> point d'offre (KD-tree par territoire)
     ci, oj = geo.pairs_within(cells.crs_id.values, cells.x.values, cells.y.values,
                               offer.crs_id.values, offer.x.values, offer.y.values, radius)
-    n = np.bincount(ci * nm + mode_code[oj], minlength=nc * nm).reshape(nc, nm).astype(np.int32)
+    n_raw = np.bincount(ci * nm + mode_code[oj], minlength=nc * nm).reshape(nc, nm).astype(np.int32)
+    n = n_raw.copy()
+    if C.FREEFLOAT_COUNT_BY_OPERATOR and "scooter" in MODES and "operator" in offer.columns:
+        # free-floating : une option = un opérateur distinct à ≤ r (pas une zone de stationnement)
+        k_sc = MODES.index("scooter")
+        op = pd.factorize(offer["operator"].astype(str))[0].astype(np.int64)
+        sc = mode_code[oj] == k_sc
+        cell_op = np.unique(ci[sc].astype(np.int64) * (op.max() + 1) + op[oj[sc]])
+        n[:, k_sc] = np.bincount(cell_op // (op.max() + 1), minlength=nc)
 
-    # population à ≤ r de chaque carreau (grille)
-    a, b = cell_neighbours(cells, radius)
-    pop_catch = np.bincount(a, weights=ind[b], minlength=nc)
+    # population à ≤ r de chaque carreau (grille, couverture fractionnaire des voisins)
+    a, b, f = cell_neighbours(cells, radius)
+    pop_catch = np.bincount(a, weights=ind[b] * f, minlength=nc)
 
-    # par point d'offre
+    # par point d'offre (exclusivité : point seul de son mode à ≤ r, zones free-floating comprises)
     pop_served = np.bincount(oj, weights=ind[ci], minlength=no)
     hh_served = np.bincount(oj, weights=men[ci], minlength=no)
-    excl = n[ci, mode_code[oj]] == 1
+    excl = n_raw[ci, mode_code[oj]] == 1
     pop_excl = np.bincount(oj[excl], weights=ind[ci[excl]], minlength=no)
 
     # 2SFCA
@@ -217,7 +259,7 @@ def commune_table(ca):
     return res.reset_index()
 
 
-def summary(ca, st, radius, offer_path, seconds):
+def summary(ca, st, radius, offer_path, seconds, sensitivity=None):
     ind = ca["ind"].to_numpy()
     tot = ind.sum()
     none = ca["n_options"].to_numpy() == 0
@@ -236,28 +278,120 @@ def summary(ca, st, radius, offer_path, seconds):
         }
 
     out = {"radius_m": radius, "score_basis": C.SCORE_BASIS, "detour": geo.detour_factor(), "offer_file": str(offer_path),
+           "freefloat_count_by_operator": bool(C.FREEFLOAT_COUNT_BY_OPERATOR),
            "population": float(tot), "n_cells": int(len(ca)), "national": block(np.ones(len(ca), bool)),
            "by_territory": {t: block((ca["territory"] == t).to_numpy()) for t in ca["territory"].unique()}}
-    # déciles de revenu : niveau de vie moyen du carreau, déciles pondérés population (national)
+    lon, lat = ca["lon"].to_numpy(), ca["lat"].to_numpy()
+    w_, s_, e_, n_ = C.STRASBOURG_BBOX
+    ems = ((ca["dep"] == C.STRASBOURG_DEPT).to_numpy() & (lon >= w_) & (lon <= e_) & (lat >= s_) & (lat <= n_))
+    out["ems"] = block(ems)
+
+    # déciles de revenu : niveau de vie moyen du carreau, déciles pondérés population (national).
+    # Attention : 77 % des carreaux (< 11 ménages) ont des variables Filosofi imputées par l'INSEE ;
+    # on publie donc aussi la courbe restreinte aux carreaux ≥ 11 ménages (seuils nationaux) et
+    # la courbe de l'EMS (seuils nationaux, puis seuils propres à la zone).
     inc = ca["income_pc"].to_numpy()
     ok = np.isfinite(inc)
-    r = weighted_rank(inc[ok], ind[ok])
-    dec = np.full(len(ca), -1)
-    dec[ok] = np.minimum((r * 10).astype(int), 9) + 1
-    out["by_income_decile"] = {}
-    for d in range(1, 11):
-        m = dec == d
-        b = block(m)
-        b["income_pc_range"] = [float(inc[m].min()), float(inc[m].max())]
-        out["by_income_decile"][str(d)] = b
+
+    def deciles(mask):
+        dec = np.full(len(ca), -1)
+        mk = ok & mask
+        r = weighted_rank(inc[mk], ind[mk])
+        dec[mk] = np.minimum((r * 10).astype(int), 9) + 1
+        return dec
+
+    dec_nat = deciles(np.ones(len(ca), bool))
+    thr = [float(inc[dec_nat == d].max()) for d in range(1, 10)]
+
+    def curve(dec, mask, full=False):
+        res = {}
+        for d in range(1, 11):
+            m = (dec == d) & mask
+            if not m.any():
+                continue
+            b = block(m)
+            b["income_pc_range"] = [float(inc[m].min()), float(inc[m].max())]
+            res[str(d)] = b if full else {k: b[k] for k in ("population", "share_no_option", "n_options_mean",
+                                                             "score_mean", "income_pc_range")}
+        return res
+
+    priv = ca["privacy_ok"].to_numpy() if "privacy_ok" in ca else ca["men"].to_numpy() >= C.PRIVACY_MIN_HOUSEHOLDS
+    out["by_income_decile"] = curve(dec_nat, np.ones(len(ca), bool), full=True)
+    out["income_decile_thresholds"] = thr
+    out["by_income_decile_privacy_ok"] = curve(dec_nat, priv)
+    out["ems_by_income_decile_national"] = curve(dec_nat, ems)
+    out["ems_by_income_decile_local"] = curve(deciles(ems), ems)
+
+    # densité locale (≈ dens_1k du modèle : carré de 11 × 11 carreaux, hab/km²) et score par densité
+    dens = grid_box_sum(ca, ind, 5) / (11 * C.CELL / 1000) ** 2
+    served = ca["n_options"].to_numpy() > 0
+
+    def wmean(col, m):
+        return float(np.average(ca[col].to_numpy()[m], weights=ind[m])) if m.any() else None
+
+    groups = {"strasbourg_commune": (ca["com"] == "67482").to_numpy(), "ems": ems,
+              f"dens_lt_{C.LOW_DENSITY_HAB_KM2}": dens < C.LOW_DENSITY_HAB_KM2,
+              f"dens_ge_{C.LOW_DENSITY_HAB_KM2}": dens >= C.LOW_DENSITY_HAB_KM2,
+              "paris": ca["com"].astype(str).str.startswith("751").to_numpy()}
+    out["score_by_group_served"] = {
+        g: {"population_served": float(ind[m & served].sum()),
+            "score_options_mean": wmean("score_options", m & served),
+            "score_2sfca_mean": wmean("score_2sfca", m & served),
+            "n_options_mean": wmean("n_options", m & served)} for g, m in groups.items()}
+
+    # concordance des deux scores (les moyennes sont égales par construction : rang moyen 0,5 ×
+    # part desservie) : corrélation de rang pondérée et matrice de transition par quintile
+    so, s2, wv = ca["score_options"].to_numpy()[served], ca["score_2sfca"].to_numpy()[served], ind[served]
+    ro, r2 = weighted_rank(so, wv), weighted_rank(s2, wv)
+    cov = np.cov(ro, r2, aweights=wv)
+    q_o = np.minimum((ro * 5).astype(int), 4)
+    q_2 = np.minimum((r2 * 5).astype(int), 4)
+    trans = np.zeros((5, 5))
+    np.add.at(trans, (q_o, q_2), wv)
+    out["score_concordance"] = {
+        "weighted_spearman": float(cov[0, 1] / np.sqrt(cov[0, 0] * cov[1, 1])),
+        "quintile_transition_rows_options_cols_2sfca": (trans / trans.sum(1, keepdims=True)).round(3).tolist(),
+        "share_same_quintile": float(np.trace(trans) / trans.sum()),
+        "note": "moyennes nationales de score_options et score_2sfca égales par construction"}
+
+    # autopartage : parts homogènes (Citiz seul / Citiz + autre autopartage), national et EMS
+    cs = (ca["served_citiz"] | ca["served_carsharing"]).to_numpy()
+    out["carsharing_served_share"] = {
+        z: {"citiz": float(ind[m & ca["served_citiz"].to_numpy()].sum() / ind[m].sum()),
+            "citiz_or_carsharing": float(ind[m & cs].sum() / ind[m].sum())}
+        for z, m in (("national", np.ones(len(ca), bool)), ("ems", ems))}
+
+    # points d'offre : statistiques sur les territoires couverts par Filosofi (crs_id ≥ 0) ; les
+    # points hors carreaux (Guadeloupe, Guyane, Mayotte, étranger) ont pop_served = 0 par construction
+    sti = st[st["crs_id"] >= 0]
     out["offer"] = {
         m: {"n_points": int((st["mode"] == m).sum()),
-            "n_points_in_territories": int(((st["mode"] == m) & (st["crs_id"] >= 0)).sum()),
-            "pop_served_median": float(st.loc[st["mode"] == m, "pop_served"].median()),
-            "share_points_serving_nobody": float((st.loc[st["mode"] == m, "pop_served"] == 0).mean())}
-        for m in MODES if (st["mode"] == m).any()}
+            "n_points_in_territories": int((sti["mode"] == m).sum()),
+            "pop_served_median": float(sti.loc[sti["mode"] == m, "pop_served"].median()),
+            "pop_served_exclusive_median": float(sti.loc[sti["mode"] == m, "pop_served_exclusive"].median()),
+            "share_points_serving_nobody": float((sti.loc[sti["mode"] == m, "pop_served"] == 0).mean())}
+        for m in MODES if (sti["mode"] == m).any()}
+    if sensitivity:
+        out["radius_sensitivity"] = sensitivity
     out["seconds"] = round(seconds, 1)
     return out
+
+
+def radius_sensitivity(cells, offer, radii):
+    """Indicateurs nationaux clés recalculés pour d'autres rayons (bornes de l'IC 95 % du détour)."""
+    ind = cells["ind"].to_numpy()
+    res = {}
+    for r in radii:
+        ca, st = compute(cells, offer, r)
+        sti = st[st["crs_id"] >= 0]
+        res[f"{r:.1f}"] = {
+            "share_no_option": float(ind[ca["n_options"].to_numpy() == 0].sum() / ind.sum()),
+            "n_options_mean": float(np.average(ca["n_options"], weights=ind)),
+            "pop_catchment_mean": float(np.average(ca["pop_catchment"], weights=ind)),
+            "share_served_citiz": float(np.average(ca["served_citiz"], weights=ind)),
+            "pop_served_median": {m: float(v) for m, v in sti.groupby("mode")["pop_served"].median().items()},
+        }
+    return res
 
 
 def build(offer_path=C.INTERIM / "offer.parquet"):
@@ -273,7 +407,13 @@ def build(offer_path=C.INTERIM / "offer.parquet"):
     ca.to_parquet(C.OUT / "cells_access.parquet", index=False)
     st.to_parquet(C.OUT / "stations_served.parquet", index=False)
     commune_table(ca).to_parquet(C.OUT / "commune_access.parquet", index=False)
-    s = summary(ca, st, radius, offer_path, time.time() - t0)
+    sens = None
+    f_cal = C.OUT / "walk_calibration.json"
+    if f_cal.exists():
+        lo, hi = json.loads(f_cal.read_text())["ci95"]["r_equal_count"]
+        print(f"  sensibilité au rayon : {lo:.0f} / {hi:.0f} m", flush=True)
+        sens = radius_sensitivity(cells, offer, [lo, radius, hi])
+    s = summary(ca, st, radius, offer_path, time.time() - t0, sens)
     (C.OUT / "access_summary.json").write_text(json.dumps(s, indent=2, ensure_ascii=False))
     nat = s["national"]
     print(f"  population sans option à 5 min : {nat['share_no_option']:.1%}")

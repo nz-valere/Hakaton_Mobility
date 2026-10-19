@@ -99,6 +99,36 @@ def pairs_within(src_crs, src_x, src_y, dst_crs, dst_x, dst_y, radius):
     return np.concatenate(I), np.concatenate(J)
 
 
+def cell_fraction_within(dx, dy, radius, cell=None, sub=None):
+    """
+    Part de la surface d'un carreau (côté `cell`, centre décalé de (dx, dy) m par rapport à un
+    point P) située à ≤ radius de P, estimée sur une sous-grille sub × sub (centres des
+    sous-cellules). Vectorisé sur dx, dy. Sert de couverture fractionnaire : population
+    du carreau à ≤ r de P = frac · ind, sous hypothèse de population uniforme dans le carreau.
+    Supprime l'effet de seuil d'un comptage « centre du carreau à ≤ r » (r ≈ diagonale 282,8 m).
+    """
+    cell = C.CELL if cell is None else cell
+    sub = C.CATCHMENT_SUBGRID if sub is None else sub
+    u = (np.arange(sub) + 0.5) / sub * cell - cell / 2
+    ux, uy = np.meshgrid(u, u)
+    dx = np.asarray(dx, float)[..., None]
+    dy = np.asarray(dy, float)[..., None]
+    d2 = (dx + ux.ravel()) ** 2 + (dy + uy.ravel()) ** 2
+    return (d2 <= radius * radius).mean(-1)
+
+
+def cell_offsets_fraction(radius, cell=None, sub=None):
+    """Décalages (dl, dc) en carreaux et fraction de surface du carreau voisin à ≤ radius du
+    centre du carreau d'origine (fraction > 0 seulement)."""
+    cell = C.CELL if cell is None else cell
+    m = int(np.ceil((radius + cell / 2 * np.sqrt(2)) / cell))
+    dl, dc = np.meshgrid(np.arange(-m, m + 1), np.arange(-m, m + 1), indexing="ij")
+    dl, dc = dl.ravel(), dc.ravel()
+    f = cell_fraction_within(dc * cell, dl * cell, radius, cell, sub)
+    k = f > 0
+    return dl[k], dc[k], f[k]
+
+
 def nearest(src_crs, src_x, src_y, dst_crs, dst_x, dst_y, max_dist=np.inf):
     """
     Distance (m) de chaque point source au point destination le plus proche du même

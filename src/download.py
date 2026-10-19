@@ -47,6 +47,8 @@ def dl_static():
     fetch(C.URLS["gbfs_catalog"], C.RAW / "gbfs_systems.csv", force=False)
     fetch(C.URLS["communes"], C.RAW / "communes.json")
     fetch(C.URLS["pan_api"], C.RAW / "pan_datasets.json")
+    fetch(C.URLS["epcis"], C.RAW / "epcis.json")
+    fetch(C.URLS["communes_epci"], C.RAW / "communes_epci.json")
 
 
 def dl_stops():

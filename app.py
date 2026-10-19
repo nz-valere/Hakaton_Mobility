@@ -1,6 +1,7 @@
 """
-Mobili'Score – démo live (Streamlit).  Lancement : .venv/bin/streamlit run app.py
-Onglets : carte d'accessibilité · qui est concerné · où investir · méthode & limites.
+Mobili'Score – démo live (Streamlit).  Lancement : python -m streamlit run app.py  (ou .venv/bin/python -m streamlit run app.py)
+Onglets : carte d'accessibilité · qui est concerné · où s'implanter (France) · où investir (une liste
+par financeur : Citiz / collectivité) · méthode & limites.
 Toutes les données lourdes passent par src/app_data.py (cache, agrégation, confidentialité).
 """
 import json
@@ -55,6 +56,24 @@ def deck(layers, view, tooltip=True, height=600):
                              tooltip=tt), height=height, use_container_width=True)
 
 
+SCORE_READING = ("Nombre d'options de transport accessibles à 5 min à pied depuis le domicile de chaque "
+                 "habitant ; score = rang parmi les habitants desservis ; gris = aucune option.")
+if getattr(C, "SCORE_BASIS", "n_options") != "n_options":
+    SCORE_READING = ("Options à 5 min rapportées aux habitants qui les partagent (2SFCA) ; "
+                     "score = rang parmi les habitants desservis ; gris = aucune option.")
+
+EQUITY_OFF = "Sans pondération d'équité (λ = 0)"
+EQUITY_OFF_HELP = ("λ = 0 retire seulement la pondération d'équité : chaque habitant non desservi pèse "
+                   "selon sa population et la valeur du site (modèle). Ce n'est PAS « maximiser le nombre "
+                   "d'habitants desservis » : avec les enveloppes par type, le quota peu dense et "
+                   "l'optimisation gloutonne, λ = 0 peut desservir moins de monde qu'un λ positif.")
+NO_MODEL = "Offre existante, sans modèle (v = 1)"
+USAGE_HELP = ("Usage estimé à partir d'hypothèses explicites, pas une prédiction observée : habitants "
+              "nouvellement desservis × taux d'usage de référence (constantes Config.py) × valeur relative "
+              "du site, avec des plafonds (adhérents par véhicule Citiz, trajets par station vélo). "
+              "Ordre de grandeur pour comparer les sites entre eux.")
+
+
 def legend_score():
     st.markdown(
         f"""<div style="font-size:13px;color:{INK2};margin-top:4px">
@@ -64,8 +83,9 @@ def legend_score():
         </div>
         <div style="margin-top:6px">Score d'accessibilité (0 → 100)</div>
         <div style="height:14px;border-radius:4px;background:{ad.ramp_css()}"></div>
-        <div style="display:flex;justify-content:space-between"><span>froid · peu d'options par habitant</span>
-        <span>chaud · beaucoup d'options par habitant</span></div></div>""",
+        <div style="display:flex;justify-content:space-between"><span>froid · peu d'options à 5 min</span>
+        <span>chaud · beaucoup d'options à 5 min</span></div>
+        <div style="margin-top:4px">{SCORE_READING}</div></div>""",
         unsafe_allow_html=True)
 
 
@@ -82,12 +102,121 @@ def missing(what, cmd):
             f"`{cmd}` aura produit ses sorties (rechargez la page).")
 
 
+FUNDER_TITLE = {"citiz": "Pour Citiz : stations d'autopartage",
+                "collectivite": "Pour la collectivité / AOM : stations vélo et arrêts de bus"}
+FUNDER_SHORT = {"citiz": "Citiz", "collectivite": "collectivité"}
+
+
+def funder_block(key, rec, summ, off, bbox, lam, area):
+    """KPIs, liste priorisée et comparaison des stratégies pour un financeur."""
+    sel = summ.get("selected") or {}
+    ref = ad.strategy(summ, "no_model")
+    distinct = ad.field(sel, "distinct")
+    zero1 = ad.field(sel, "zero_to_one")
+    k1, k2, k3, k4 = st.columns(4)
+    k1.metric("Habitants nouvellement desservis", fmt(sel.get("pop_newly_served")),
+              f"{fmt(distinct)} personnes distinctes" if distinct is not None and key != "citiz" else None,
+              delta_color="off",
+              help="Somme sur les types d'équipement : un habitant nouvellement desservi à la fois par une "
+                   "station vélo et un arrêt de bus compte deux fois.")
+    co2 = sel.get("co2_avoided_t_yr")
+    k2.metric("CO₂ évité", f"{co2:.0f} t/an" if co2 is not None else "–")
+    k3.metric("Coût (5 ans)", f"{sel.get('cost_eur', 0) / 1e6:.2f} M€", f"{sel.get('n_sites', len(rec))} sites",
+              delta_color="off")
+    epr = sel.get("eur_per_new_resident")
+    k4.metric("Coût par habitant desservi", f"{epr:.0f} €" if epr is not None else "–")
+    if key == "citiz":
+        w, s_, e_, n_ = bbox
+        existing = int(((off["mode"] == "citiz") & off["lon"].between(w, e_) & off["lat"].between(s_, n_)).sum())
+        a, b, c = st.columns(3)
+        a.metric("Stations Citiz existantes à proximité", existing)
+        b.metric("Conducteurs (usage estimé, hypothèses)", fmt(rec["usage_pred"].sum()), help=USAGE_HELP)
+        c.metric("Véhicules justifiés par la demande", fmt(rec["vehicles_suggested"].sum()),
+                 f"{fmt(rec['demand_potential'].sum())} adhérents potentiels", delta_color="off")
+        st.caption(f"Estimation sous hypothèses, pas une prédiction : adhérents = habitants nouvellement desservis × "
+                   f"taux d'adhésion national Citiz observé autour des stations existantes × valeur du site ; "
+                   f"conducteurs plafonnés à {C.CITIZ_DRIVERS_FR / C.CITIZ_CARS_FR:.0f} par véhicule "
+                   f"({C.CITIZ_DRIVERS_FR:,} conducteurs / {C.CITIZ_CARS_FR:,} voitures).".replace(",", " "))
+    lines = []
+    if zero1 is not None and key != "citiz":
+        lines.append(f"Dont **{fmt(zero1)} personnes** qui passent de 0 à au moins 1 option à 5 min.")
+    if ref:
+        lines.append(f"Même budget, même offre existante : Mobili'Score (modèle de valeur) "
+                     f"**{fmt(sel.get('pop_newly_served'))}** habitants nouvellement desservis · {NO_MODEL} "
+                     f"**{fmt(ref.get('pop_newly_served'))}**. La référence sans modèle traite tous les sites comme "
+                     "également utilisés ; le modèle arbitre vers les sites où l'usage attendu est plus fort.")
+    for ln in lines:
+        st.caption(ln)
+    show = pd.DataFrame({
+        "Rang": rec["rank"], "Équipement": rec["type"].map(ad.KIND_LABEL), "Commune": rec["commune"],
+        "Habitants nouvellement desservis": rec["pop_newly_served"],
+        f"Habitants {C.GROWTH_HORIZON}": rec[f"pop_{C.GROWTH_HORIZON}"],
+        "Usage estimé (hypothèses)": rec["usage_pred"].astype(str) + " " + rec["usage_unit"],
+        "Valeur relative (modèle)": rec["value_rel"],
+        "Coût 5 ans (€)": rec["cost_eur"], "Cumul (€)": rec["cost_cum_eur"],
+        "€ / habitant": rec["eur_per_new_resident"], "CO₂ évité (t/an)": rec["co2_avoided_t_yr"],
+    })
+    if key == "citiz":
+        show["Véhicules justifiés"] = rec["vehicles_suggested"]
+    st.dataframe(show, hide_index=True, height=min(420, 38 + 35 * len(show)),
+                 column_config={"Usage estimé (hypothèses)": st.column_config.TextColumn(help=USAGE_HELP),
+                                "Coût 5 ans (€)": st.column_config.NumberColumn(format="%d"),
+                                "Cumul (€)": st.column_config.NumberColumn(format="%d"),
+                                "Valeur relative (modèle)": st.column_config.ProgressColumn(
+                                    min_value=0.0, max_value=1.5, format="%.2f")})
+    st.download_button(f"Exporter la liste {FUNDER_SHORT[key]} (CSV)", rec.to_csv(index=False).encode("utf-8"),
+                       file_name=f"recommandations_{key}_{area}_{lam:.1f}.csv".replace(":", "_"),
+                       mime="text/csv", key=f"dl_{key}")
+    with st.expander("Comparaison des stratégies (même budget)"):
+        strat = [("Mobili'Score (λ = %.1f)" % lam, sel), (NO_MODEL, ad.strategy(summ, "no_model")),
+                 (EQUITY_OFF, ad.strategy(summ, "no_equity")),
+                 ("Naïve : population seule", ad.strategy(summ, "naive"))]
+
+        def _pct(d, k):
+            v = d.get(k)
+            return 100 * v if v is not None else np.nan
+
+        rows = []
+        for n, d in strat:
+            if not d:
+                continue
+            r = {"Stratégie": n, "Sites": d.get("n_sites"),
+                 "Habitants nouvellement desservis": d.get("pop_newly_served", 0)}
+            if key != "citiz":
+                r["Personnes distinctes"] = ad.field(d, "distinct")
+            r.update({"De 0 à ≥ 1 option": ad.field(d, "zero_to_one"),
+                      "€ / habitant": d.get("eur_per_new_resident"), "CO₂ évité (t/an)": d.get("co2_avoided_t_yr"),
+                      "% déciles 1-3": _pct(d, "share_new_in_income_deciles_1_3"),
+                      "% zone peu dense": _pct(d, "share_new_in_low_density")})
+            rows.append(r)
+        cdf = pd.DataFrame(rows)
+        if len(cdf):
+            st.altair_chart(alt.Chart(cdf).mark_bar(cornerRadiusTopRight=4, cornerRadiusBottomRight=4)
+                            .encode(y=alt.Y("Stratégie:N", sort=None, title=None),
+                                    x=alt.X("Habitants nouvellement desservis:Q"),
+                                    color=alt.condition(alt.datum["Stratégie"] == rows[0]["Stratégie"],
+                                                        alt.value("#2a78d6"), alt.value("#b5b4ae")),
+                                    tooltip=list(cdf.columns))
+                            .properties(height=40 + 34 * len(cdf)), use_container_width=True)
+            st.dataframe(cdf.round(1), hide_index=True)
+        st.caption(f"{NO_MODEL} : même optimisation et même offre existante, mais chaque site a la même valeur "
+                   "(pas de modèle). " + EQUITY_OFF + " : " + EQUITY_OFF_HELP + " Stratégie naïve : "
+                   + C.NAIVE_LABEL + ". Tous les indicateurs sont recalculés sur la population réellement NON "
+                   "desservie aujourd'hui.")
+    with st.expander("Hypothèses de ce calcul"):
+        st.json(summ.get("hypotheses", {}), expanded=False)
+        st.caption(f"Temps de calcul : {summ.get('runtime_s')}")
+
+
 # =========================================================================== barre latérale
 with st.sidebar:
     st.title("Mobili'Score")
     st.caption("Qui a vraiment une option de mobilité à 5 min de chez soi, et où en ajouter ?")
-    choices = ["ems", "fr", "972", "974", "dep"]
+    choices = ["top", "ems", "fr", "972", "974", "dep"]
+    if ad.top_epci() is None:
+        choices.remove("top")
     labels = {**ad.ZONES, "dep": "Un département…"}
+    labels["top"] = ad.zone_label("top")
     zsel = st.radio("Territoire", choices, format_func=labels.get, index=0)
     if zsel == "dep":
         deps = ad.dep_index(V)
@@ -98,10 +227,14 @@ with st.sidebar:
     else:
         zone = zsel
     if zone == "fr":
-        size_m = st.select_slider("Maille d'agrégation", options=[5000, 10000], value=5000,
+        size_m = st.select_slider("Maille d'agrégation", options=[1000, 2000, 5000, 10000], value=5000,
                                   format_func=lambda v: f"{v // 1000} km")
+        if size_m < 5000:
+            st.caption("⚠️ Maille fine sur toute la France : plusieurs centaines de milliers de carrés, "
+                       "affichage lent sur un ordinateur modeste.")
     else:
-        n_cells = int(ad.dep_index(V).set_index("dep")["n_cells"].get(zone, 0)) if zone != "ems" else 2600
+        n_cells = (int(ad.dep_index(V).set_index("dep")["n_cells"].get(zone, 0)) if zone not in ("ems", "top")
+                   else ad.zone_n_cells(zone, V))
         auto = 200 if n_cells <= 30000 else 400
         size_m = st.select_slider("Maille d'affichage", options=[200, 400, 1000, 2000], value=auto,
                                   format_func=lambda v: f"{v} m" if v < 1000 else f"{v // 1000} km")
@@ -110,11 +243,13 @@ with st.sidebar:
                f"(= {C.WALK_NETWORK_M:.0f} m de réseau / détour {geo.detour_factor():.2f}).")
     st.caption("Données : INSEE Filosofi 2021 (carreaux 200 m), GTFS transport.data.gouv.fr, "
                "GBFS (MobilityData), RP 2021, Omphale, OpenStreetMap.")
-    st.caption(f"Confidentialité : aucun agrégat de moins de {C.PRIVACY_MIN_HOUSEHOLDS} ménages n'est affiché.")
+    st.caption(f"Confidentialité : revenu, pauvreté et motorisation ne sont affichés que sur des agrégats "
+               f"d'au moins {C.PRIVACY_MIN_HOUSEHOLDS} ménages ; l'accessibilité, purement géographique, "
+               f"est affichée au carreau.")
 
 st.markdown(f"### {ad.zone_label(zone)}")
-tab1, tab2, tab3, tab4 = st.tabs(["Carte d'accessibilité", "Qui est concerné", "Où investir",
-                                  "Méthode & limites"])
+tab1, tab2, tab_fr, tab3, tab4 = st.tabs(["Carte d'accessibilité", "Qui est concerné",
+                                          "Où s'implanter (France)", "Où investir", "Méthode & limites"])
 
 # =========================================================================== 1. carte
 with tab1:
@@ -138,13 +273,11 @@ with tab1:
         if prov:
             notes.append("Score **provisoire** : rang percentile calculé à l'intérieur du territoire affiché "
                          "(le score national sera utilisé dès que `outputs/cells_access.parquet` existera).")
-        if size_m <= C.CELL:
-            notes.append(f"Carreaux de moins de {C.PRIVACY_MIN_HOUSEHOLDS} ménages : valeur lissée sur leur carré "
-                         f"de 1 km ; masqués si le carré reste sous le seuil ({fmt(masked_pop)} hab. concernés).")
-        else:
-            notes.append(f"Carrés de moins de {C.PRIVACY_MIN_HOUSEHOLDS} ménages masqués ({fmt(masked_pop)} hab.).")
-        notes.append("Le score compare l'offre (nombre d'options à 5 min, tous modes) rapportée aux habitants "
-                     "qui la partagent ; il décrit une offre, pas un quartier.")
+        notes.append(f"Le score est géographique (options à 5 min) et affiché pour chaque carré, y compris "
+                     f"peu peuplé. Revenu, pauvreté et motorisation n'apparaissent dans l'infobulle que pour les "
+                     f"carrés d'au moins {C.PRIVACY_MIN_HOUSEHOLDS} ménages ({fmt(masked_pop)} hab. vivent dans "
+                     f"des carrés où ils sont masqués).")
+        notes.append("Le score décrit une offre de transport, pas un quartier.")
         for n in notes:
             st.caption(n)
 
@@ -155,25 +288,33 @@ with tab2:
         missing("L'accessibilité nationale", "python -m src.accessibility")
     else:
         st.markdown("#### Population couverte à 5 min de marche, par mode")
-        cols = st.columns(len(ad.MODES) + 1)
-        cols[0].metric("Aucune option", fmt(k["pop_no_option"]),
-                       f"{100 * k['pop_no_option'] / k['population']:.1f} %", delta_color="off")
-        for c, m in zip(cols[1:], ad.MODES):
+        items = [("Aucune option", k["pop_no_option"], f"{100 * k['pop_no_option'] / k['population']:.1f} %")]
+        for m in ad.MODES:
             v = k["by_mode"].get(m)
-            c.metric(C.MODES[m], fmt(v) if v is not None else "–",
-                     f"{100 * v / k['population']:.0f} %" if v is not None else None, delta_color="off")
+            items.append((C.MODES[m], v, f"{100 * v / k['population']:.0f} %" if v is not None else None))
+        per_row = 4   # 4 par ligne : nombres et libellés entiers, sans troncature
+        for i in range(0, len(items), per_row):
+            cols = st.columns(per_row)
+            for c, (lab, v, d) in zip(cols, items[i:i + per_row]):
+                c.metric(lab, fmt(v) if v is not None else "–", d, delta_color="off")
 
+    show_pts = True
     if zone == "fr":
-        st.info("Les points d'offre (~200 000) s'affichent par territoire : choisissez Strasbourg, "
-                "un département ou un DROM dans le panneau de gauche.")
-    else:
+        show_pts = st.checkbox("Afficher les ~200 000 points d'offre de toute la France (lourd)", value=False,
+                               help="Désactivé au lancement pour ne pas surcharger le navigateur. "
+                                    "Pour une vue plus légère, choisissez un territoire dans le panneau de gauche.")
+    if show_pts:
         with st.spinner("Population desservie par chaque point…"):
             sts, src = ad.zone_stations(zone, V)
+    if show_pts and sts is None:
+        missing("Les points d'offre nationaux", "python -m src.accessibility")
+    elif show_pts:
         present = [m for m in ad.MODES if (sts["mode"] == m).any()]
         sel = st.multiselect("Types d'offre affichés", present, default=present, format_func=C.MODES.get)
         s = sts[sts["mode"].isin(sel)].copy()
         s["tip"] = ("<b>" + s["name"] + "</b><br/>" + s["mode_label"] + "<br/>" + s["operator"]
-                    + "<br/>≈ " + s["pop_txt"] + " habitants à 5 min")
+                    + "<br/>≈ " + s["pop_txt"] + " habitants à 5 min"
+                    + "<br/>dont ≈ " + s["excl_txt"] + " perdraient tout accès à ce mode si ce point fermait")
         # petits points (arrêts de bus) dessous, offre partagée par-dessus
         order = {"transit": 0, "rail": 1, "scooter": 2, "bike": 3, "carsharing": 4, "citiz": 5}
         s = s.sort_values("mode", key=lambda x: x.map(order))
@@ -184,16 +325,19 @@ with tab2:
         deck([layer], view_for(sts), height=560)
         legend_modes(sel)
         st.caption(f"Taille du point ∝ √(habitants à 5 min). Source de la population desservie : {src}. "
-                   "Un habitant peut être compté par plusieurs points proches.")
+                   "Un habitant peut être compté par plusieurs points proches ; « perdraient tout accès » = "
+                   "habitants dont c'est le seul point de ce mode à 5 min.")
         tbl = (s.groupby("mode_label").agg(points=("pop_served", "size"),
                                             habitants_median=("pop_served", "median"),
                                             habitants_max=("pop_served", "max")).round(0)
                .rename_axis("Mode").reset_index())
         with st.expander("Tableau par mode et points les plus utiles"):
             st.dataframe(tbl, hide_index=True)
-            top = s.nlargest(20, "pop_served")[["name", "mode_label", "operator", "pop_served"]]
+            top = s.nlargest(20, "pop_served")[["name", "mode_label", "operator", "pop_served",
+                                                 "pop_served_exclusive"]]
             st.dataframe(top.rename(columns={"name": "Point", "mode_label": "Mode", "operator": "Opérateur",
-                                             "pop_served": "Habitants à 5 min"}).round(0),
+                                             "pop_served": "Habitants à 5 min",
+                                             "pop_served_exclusive": "Sans autre point du mode"}).round(0),
                          hide_index=True)
 
     st.markdown("#### Équité : accès selon le niveau de revenu des habitants")
@@ -221,60 +365,114 @@ with tab2:
         with st.expander("Synthèse nationale (access_summary.json)"):
             st.json(summ, expanded=False)
 
-# =========================================================================== 3. où investir
+# =========================================================================== 3. où s'implanter (France)
+with tab_fr:
+    st.markdown("#### Où Citiz doit-il s'implanter en priorité ?")
+    tr = ad.territories_ranking(V)
+    if tr is None:
+        missing("Le classement national des territoires", "python -m src.territories")
+    else:
+        ts = ad.read_json(ad.F_TERR_SUM) or {}
+        top = tr.iloc[0]
+        ref = tr[tr["reference"]]
+        k1, k2, k3, k4 = st.columns(4)
+        k1.metric("Territoire prioritaire", top["territoire"], top["statut"], delta_color="off")
+        k2.metric("Habitants à 5 min des nouvelles stations", fmt(top["sim_pop_newly_served"]),
+                  f"{int(top['sim_sites'])} stations · {C.CITIZ_BUDGET / 1e6:.1f} M€ sur {C.HORIZON_YEARS} ans",
+                  delta_color="off")
+        k3.metric("Adhérents potentiels", fmt(top["sim_members_potential"]),
+                  f"≈ {int(top['sim_vehicles_suggested'])} véhicules justifiés", delta_color="off", help=USAGE_HELP)
+        if len(ref):
+            r0 = ref.iloc[0]
+            k4.metric("Même budget à Strasbourg (témoin)", fmt(r0["sim_pop_newly_served"]) + " hab.",
+                      f"{fmt(r0['sim_members_potential'])} adhérents potentiels", delta_color="off")
+        st.caption(
+            f"Méthode en deux temps. 1) **Criblage** des {ts.get('n_epci_eligible', '')} intercommunalités "
+            f"de plus de {C.TERRITORY_MIN_POP:,} habitants : habitants des quartiers denses sans autopartage à "
+            "5 min, pondérés par la valeur du site prédite par le modèle (entraîné sur les stations Citiz et "
+            "d'autopartage existantes, propensions hors pli départemental). 2) **Simulation** : sur les "
+            f"{C.TERRITORY_SHORTLIST} premières, l'optimiseur place les stations Citiz que permet le même budget ; "
+            "classement par adhérents potentiels. Île-de-France exclue : son autopartage est presque absent des "
+            "flux GBFS publics.".replace(",", " "))
+        sh = tr[tr["rank"].notna() | tr["reference"]].copy()
+        sh["Territoire"] = sh["territoire"] + np.where(sh["reference"], " (témoin)", "")
+        st.altair_chart(
+            alt.Chart(sh).mark_bar(cornerRadiusTopRight=4, cornerRadiusBottomRight=4)
+            .encode(y=alt.Y("Territoire:N", sort="-x", title=None),
+                    x=alt.X("sim_members_potential:Q", title="Adhérents potentiels (même budget Citiz)"),
+                    color=alt.Color("statut:N", title=None,
+                                    scale=alt.Scale(domain=["nouveau territoire", "extension"],
+                                                    range=["#eb6834", "#2a78d6"])),
+                    tooltip=[alt.Tooltip("Territoire:N"), alt.Tooltip("statut:N"),
+                             alt.Tooltip("population:Q", format=",.0f", title="Habitants"),
+                             alt.Tooltip("sim_pop_newly_served:Q", format=",.0f", title="Nouveaux desservis"),
+                             alt.Tooltip("sim_members_potential:Q", format=",.0f", title="Adhérents potentiels"),
+                             alt.Tooltip("sim_top_communes:N", title="Communes")])
+            .properties(height=40 + 30 * len(sh)), use_container_width=True)
+        tbl = pd.DataFrame({
+            "Rang": sh["rank"], "Territoire": sh["Territoire"], "Statut Citiz": sh["statut"],
+            "Habitants": sh["population"],
+            "Couverts par l'autopartage (%)": (100 * sh["share_carsharing_served"]).round(1),
+            "Ménages sans voiture (%)": (100 * sh["share_carfree_households"]).round(0),
+            "Potentiel (criblage)": sh["potential"], "Stations": sh["sim_sites"],
+            "Nouveaux desservis": sh["sim_pop_newly_served"], "Adhérents potentiels": sh["sim_members_potential"],
+            "CO₂ évité (t/an)": sh["sim_co2_t_yr"]})
+        st.dataframe(tbl, hide_index=True)
+        with st.expander("Criblage complet (toutes les intercommunalités éligibles)"):
+            st.dataframe(tr[tr["eligible"]][["screen_rank", "territoire", "statut", "population",
+                                              "share_carsharing_served", "share_citiz_served", "pop_dense_unserved",
+                                              "mean_value_unserved", "potential"]], hide_index=True)
+        st.caption("« Nouveau territoire » : aucune station Citiz aujourd'hui. Strasbourg, où Citiz est déjà bien "
+                   "implanté, sert de témoin : le même budget y rapporte beaucoup moins, car les quartiers denses "
+                   "y sont déjà couverts. Limite : un autopartage local qui ne publie pas de flux GBFS n'est pas vu.")
+
+# =========================================================================== 4. où investir
 with tab3:
     area = ad.reco_area(zone)
-    st.markdown("#### Où implanter les prochaines stations ? Liste priorisée sous budget")
-    c1, c2, c3 = st.columns([1.2, 1, 1.4])
-    budget = c1.slider("Budget sur 5 ans (€)", 100_000, 10_000_000, int(C.DEFAULT_BUDGET), step=100_000,
-                       format="%d €")
-    lam = c2.slider("Priorité équité λ", 0.0, 1.0, float(C.EQUITY_LAMBDA), 0.1,
-                    help="0 = maximiser le nombre d'habitants desservis ; 1 = forte priorité aux ménages "
-                         "modestes, sans voiture et aujourd'hui peu desservis.")
-    kinds = c3.multiselect("Équipements", list(C.MODEL_KINDS), default=list(C.MODEL_KINDS),
-                           format_func=ad.KIND_LABEL.get)
+    st.markdown("#### Où implanter les prochaines stations ? Une liste par financeur")
+    c1, c2, c3 = st.columns(3)
+    b_citiz = c1.slider("Budget Citiz sur 5 ans (€)", 0, 5_000_000, int(C.CITIZ_BUDGET), step=100_000,
+                        format="%d €", help="Stations d'autopartage, financées et exploitées par Citiz.")
+    b_public = c2.slider("Budget collectivité sur 5 ans (€)", 0, 5_000_000, int(C.PUBLIC_BUDGET), step=100_000,
+                         format="%d €", help="Stations vélo et arrêts de bus, financés par la collectivité / AOM.")
+    lam = c3.slider("Priorité équité λ", 0.0, 1.0, float(C.EQUITY_LAMBDA), 0.1,
+                    help="0 = sans pondération d'équité (chaque habitant pèse selon la population et la "
+                         "valeur du site ; ce n'est pas un maximum du nombre de personnes desservies) ; "
+                         "1 = forte priorité aux ménages modestes, sans voiture et aujourd'hui peu desservis.")
     if area is None:
-        st.info("L'optimisation se lance sur un territoire : choisissez Strasbourg, un département ou un DROM.")
-    elif not kinds:
-        st.warning("Choisissez au moins un type d'équipement.")
-    elif not ad.model_ready(kinds):
+        st.info("L'optimisation se lance sur un territoire : choisissez le territoire prioritaire, Strasbourg, "
+                "un département ou un DROM.")
+    elif b_citiz + b_public <= 0:
+        st.warning("Indiquez au moins un budget.")
+    elif not ad.model_ready():
         missing("Le modèle de valeur des sites", "python -m src.model")
         if ad.exists(ad.F_RECO):
-            st.caption("Dernière liste calculée (Strasbourg, paramètres par défaut) :")
+            st.caption("Dernière liste calculée (territoire prioritaire, paramètres par défaut) :")
             st.dataframe(pd.read_csv(ad.F_RECO), hide_index=True)
     else:
         try:
             with st.spinner("Optimisation en cours (premier calcul d'un territoire : ~5-30 s)…"):
-                rec, summ = ad.run_recommend(area, budget, lam, tuple(kinds), V)
+                rec, full = ad.run_recommend_funders(area, b_citiz, b_public, lam, V)
         except Exception as e:  # message clair plutôt qu'une trace
             st.error(f"Le calcul de recommandation a échoué : {e}")
-            rec, summ = pd.DataFrame(), None
-        if summ is not None and len(rec) == 0:
+            rec, full = pd.DataFrame(), None
+        if full is not None and len(rec) == 0:
             st.warning("Aucun site retenu (budget trop faible ou territoire déjà entièrement desservi).")
-        if summ is not None and len(rec):
-            sel = summ["selected"]
-            naive = summ.get("comparison", {}).get("naive_population_only", {})
-            k1, k2, k3, k4 = st.columns(4)
-            gain = sel["pop_newly_served"] / max(naive.get("pop_newly_served", 0), 1) - 1 if naive else None
-            k1.metric("Habitants nouvellement desservis", fmt(sel["pop_newly_served"]),
-                      f"{100 * gain:+.0f} % vs stratégie naïve" if gain is not None else None)
-            k2.metric("CO₂ évité", f"{sel['co2_avoided_t_yr']:.0f} t/an")
-            k3.metric("Coût (5 ans)", f"{sel['cost_eur'] / 1e6:.2f} M€",
-                      f"{sel['n_sites']} sites", delta_color="off")
-            k4.metric("Coût par habitant desservi", f"{sel['eur_per_new_resident']:.0f} €")
-
+        if full is not None and len(rec):
+            funders = full.get("funders") or {}
             sites = tuple((t, float(lo), float(la)) for t, lo, la in zip(rec["type"], rec["lon"], rec["lat"]))
             cov = ad.newly_served_cells(area, sites)
             pts = rec.assign(
                 r=[ad.KIND_COLOR[t][0] for t in rec["type"]], g=[ad.KIND_COLOR[t][1] for t in rec["type"]],
                 b=[ad.KIND_COLOR[t][2] for t in rec["type"]], label=rec["rank"].astype(str),
-                tip=[f"<b>#{r} · {ad.KIND_LABEL[t]}</b><br/>{c}<br/>{fmt(p)} habitants nouvellement desservis"
-                     f"<br/>{fmt(co)} € sur 5 ans · {e if pd.notna(e) else '–'} €/hab."
-                     for r, t, c, p, co, e in zip(rec["rank"], rec["type"], rec["commune"],
-                                                  rec["pop_newly_served"], rec["cost_eur"],
-                                                  rec["eur_per_new_resident"])])
+                tip=[f"<b>#{r} · {ad.KIND_LABEL[t]}</b> ({FUNDER_SHORT[f]})<br/>{c}<br/>{fmt(p)} habitants "
+                     f"nouvellement desservis<br/>{fmt(co)} € sur 5 ans · {e if pd.notna(e) else '–'} €/hab."
+                     for f, r, t, c, p, co, e in zip(rec["financeur"], rec["rank"], rec["type"], rec["commune"],
+                                                     rec["pop_newly_served"], rec["cost_eur"],
+                                                     rec["eur_per_new_resident"])])
             off = ad.load_offer(V)
             w, s_, e_, n_ = pts["lon"].min() - .05, pts["lat"].min() - .03, pts["lon"].max() + .05, pts["lat"].max() + .03
+            kinds = sorted(rec["type"].unique())
             ex_modes = sorted({m for kd in kinds for m in C.KIND_TARGET_MODES[kd]})
             ex = off[off["mode"].isin(ex_modes) & off["lon"].between(w, e_) & off["lat"].between(s_, n_)].copy()
             ex["tip"] = "Offre existante : " + ex["mode"].map(C.MODES) + "<br/>" + ex["name"].fillna("")
@@ -292,81 +490,32 @@ with tab3:
                           get_text="label", get_size=12, get_color=[255, 255, 255], font_weight=700,
                           get_alignment_baseline="'center'", pickable=False),
             ]
-            deck(layers, view_for(pts), height=600)
+            deck(layers, view_for(pts), height=560)
             leg = "".join(f'<span style="display:inline-flex;align-items:center;gap:6px;margin-right:14px">'
                           f'<span style="width:12px;height:12px;border-radius:50%;background:rgb{ad.KIND_COLOR[t]}">'
                           f'</span>{ad.KIND_LABEL[t]}</span>' for t in kinds)
             st.markdown(f'<div style="font-size:13px;color:{INK2}">{leg}<span style="margin-left:6px">'
-                        f'· carrés clairs = carreaux nouvellement desservis · points gris = offre existante '
-                        f'du même type</span></div>', unsafe_allow_html=True)
+                        f'· numéros = rang dans la liste de chaque financeur · carrés clairs = carreaux nouvellement '
+                        f'desservis · points gris = offre existante du même type</span></div>', unsafe_allow_html=True)
 
-            st.markdown("##### Liste priorisée")
-            show = pd.DataFrame({
-                "Rang": rec["rank"], "Équipement": rec["type"].map(ad.KIND_LABEL), "Commune": rec["commune"],
-                "Habitants nouvellement desservis": rec["pop_newly_served"],
-                f"Habitants {C.GROWTH_HORIZON}": rec[f"pop_{C.GROWTH_HORIZON}"],
-                "Usage prédit": rec["usage_pred"].astype(str) + " " + rec["usage_unit"],
-                "Valeur relative (modèle)": rec["value_rel"],
-                "Coût 5 ans (€)": rec["cost_eur"], "Cumul (€)": rec["cost_cum_eur"],
-                "€ / habitant": rec["eur_per_new_resident"], "CO₂ évité (t/an)": rec["co2_avoided_t_yr"],
-            })
-            st.dataframe(show, hide_index=True, height=min(420, 38 + 35 * len(show)),
-                         column_config={"Coût 5 ans (€)": st.column_config.NumberColumn(format="%d"),
-                                        "Cumul (€)": st.column_config.NumberColumn(format="%d"),
-                                        "Valeur relative (modèle)": st.column_config.ProgressColumn(
-                                            min_value=0.0, max_value=1.5, format="%.2f")})
-            st.download_button("Exporter la liste (CSV)", rec.to_csv(index=False).encode("utf-8"),
-                               file_name=f"recommandations_{area}_{int(budget)}_{lam:.1f}.csv", mime="text/csv")
+            for key in ("citiz", "collectivite"):
+                summ = funders.get(key)
+                part = rec[rec["financeur"] == key]
+                if not summ:
+                    continue
+                st.divider()
+                st.markdown(f"### {FUNDER_TITLE[key]}")
+                if len(part) == 0:
+                    st.write("Aucun site retenu avec ce budget.")
+                    continue
+                kz = ad.zone_kpis(zone, V) if key == "collectivite" else None
+                if kz and kz["by_mode"].get("bike", 1) == 0 and (part["type"] == "bike").any():
+                    st.warning("Aucune station vélo publiée en GBFS sur ce territoire : si un service existe sans "
+                               "flux ouvert (à Nice, Vélo Bleu), ces stations vélo peuvent doublonner l'existant. "
+                               "À vérifier avec la collectivité avant toute décision.")
+                funder_block(key, part, summ, off, (w, s_, e_, n_), lam, area)
 
-            c1, c2 = st.columns([1.3, 1])
-            with c1:
-                st.markdown("##### Comparaison des stratégies (même budget)")
-                comp = summ.get("comparison", {})
-                strat = [("Mobili'Score (λ = %.1f)" % lam, sel), ("Efficacité pure (λ = 0)", comp.get("lambda_0")),
-                         ("Naïve : population seule", comp.get("naive_population_only"))]
-                rows = [{"Stratégie": n, "Sites": d.get("n_sites"),
-                         "Habitants nouvellement desservis": d.get("pop_newly_served", 0),
-                         "€ / habitant": d.get("eur_per_new_resident"), "CO₂ évité (t/an)": d.get("co2_avoided_t_yr"),
-                         "% déciles 1-3": 100 * d.get("share_new_in_income_deciles_1_3", np.nan),
-                         "% zone peu dense": 100 * d.get("share_new_in_low_density", np.nan)}
-                        for n, d in strat if d]
-                cdf = pd.DataFrame(rows)
-                st.altair_chart(alt.Chart(cdf).mark_bar(cornerRadiusTopRight=4, cornerRadiusBottomRight=4)
-                                .encode(y=alt.Y("Stratégie:N", sort=None, title=None),
-                                        x=alt.X("Habitants nouvellement desservis:Q"),
-                                        color=alt.condition(alt.datum["Stratégie"] == rows[0]["Stratégie"],
-                                                            alt.value("#2a78d6"), alt.value("#b5b4ae")),
-                                        tooltip=list(cdf.columns))
-                                .properties(height=150), use_container_width=True)
-                st.dataframe(cdf.round(1), hide_index=True)
-                st.caption("Stratégie naïve : " + C.NAIVE_LABEL + ". Tous les indicateurs sont recalculés "
-                           "sur la population réellement NON desservie aujourd'hui.")
-            with c2:
-                cz = rec[rec["type"] == "citiz"]
-                existing_citiz = int(((off["mode"] == "citiz") & off["lon"].between(w, e_)
-                                      & off["lat"].between(s_, n_)).sum())
-                with st.container(border=True):
-                    st.markdown("##### Pour Citiz")
-                    if len(cz) == 0:
-                        st.write("Aucune station Citiz retenue avec ces paramètres (essayez de cocher seulement "
-                                 "« Station Citiz » ou d'augmenter le budget).")
-                    else:
-                        a, b = st.columns(2)
-                        a.metric("Nouvelles stations", len(cz), f"{existing_citiz} existantes à proximité",
-                                 delta_color="off")
-                        b.metric("Conducteurs potentiels", fmt(cz["usage_pred"].sum()))
-                        a.metric("Habitants à 5 min", fmt(cz["pop_newly_served"].sum()))
-                        b.metric("Investissement", f"{cz['cost_eur'].sum() / 1e6:.2f} M€")
-                        st.caption(f"Conducteurs = habitants nouvellement desservis × taux d'adhésion national "
-                                   f"Citiz observé autour des stations existantes × valeur du site, plafonné à "
-                                   f"{C.CITIZ_DRIVERS_FR / C.CITIZ_CARS_FR:.0f} adhérents par véhicule "
-                                   f"({C.CITIZ_DRIVERS_FR:,} conducteurs / {C.CITIZ_CARS_FR:,} voitures). "
-                                   f"Top 3 : " + ", ".join(cz["commune"].head(3)) + ".")
-            with st.expander("Hypothèses de ce calcul"):
-                st.json(summ.get("hypotheses", {}), expanded=False)
-                st.caption(f"Temps de calcul : {summ.get('runtime_s')}")
-
-# =========================================================================== 4. méthode
+# =========================================================================== 5. méthode
 with tab4:
     st.markdown("#### Comment c'est calculé")
     calib = ad.read_json(ad.F_CALIB)
@@ -389,6 +538,15 @@ with tab4:
         missing("Les métriques du modèle", "python -m src.model")
     else:
         st.caption(f"{mm.get('cv', '')} · {mm.get('pu_note', '')}")
+        bt = ((mm["kinds"].get("citiz") or {}).get("within_dep_backtest") or {}).get("hgb", {})
+        b67 = (bt.get("by_dep") or {}).get("67")
+        if b67:
+            st.caption(f"Modèle Citiz appris sur {mm['kinds']['citiz'].get('n_departements', '')} départements où "
+                       f"l'autopartage existe, dont le "
+                       f"Bas-Rhin. Test sur Strasbourg (Bas-Rhin tenu hors de l'apprentissage) : il retrouve les "
+                       f"carreaux réellement équipés avec une PR-AUC de {b67['ap_model']:.2f}, contre "
+                       f"{b67['ap_pop']:.2f} pour la population seule ; il bat la population seule dans "
+                       f"{bt.get('model_beats_pop_ap')} départements sur {bt.get('n_deps')}.")
         rows = []
         mlab = {"hgb": "Gradient boosting", "logit": "Régression logistique", "pop_only": "Population seule"}
         for kd, r in mm["kinds"].items():
@@ -453,9 +611,10 @@ with tab4:
         "- **Distance de marche** : rayon euclidien corrigé par un détour calibré sur Strasbourg, "
         "appliqué partout (plus fort en zone peu maillée).\n"
         "- **Modèle positive-unlabeled** : il apprend où les opérateurs se sont déjà implantés ; il reproduit "
-        "donc en partie leurs choix passés. Le terme d'équité λ et la stratégie naïve servent de garde-fous.\n"
+        "donc en partie leurs choix passés. Le terme d'équité λ et la comparaison avec la référence sans modèle (v = 1) servent de garde-fous.\n"
         "- **Données GBFS** incomplètes (certains opérateurs ne publient pas), free-floating = zones virtuelles.\n"
         "- **Impact CO₂** : ordres de grandeur sous hypothèses explicites, pas une mesure.\n"
         "- **Coûts** : retours d'expérience publics, à ajuster par l'opérateur ou la collectivité.\n"
-        f"- **Confidentialité** : agrégats < {C.PRIVACY_MIN_HOUSEHOLDS} ménages lissés ou masqués ; vocabulaire "
+        f"- **Confidentialité** : revenu, pauvreté, motorisation jamais affichés sur moins de "
+        f"{C.PRIVACY_MIN_HOUSEHOLDS} ménages (l'accessibilité, géographique, reste au carreau) ; vocabulaire "
         "centré sur l'offre (« offre à développer ») pour ne pas stigmatiser un territoire.")

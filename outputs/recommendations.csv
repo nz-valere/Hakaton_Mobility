@@ -1,29 +1,28 @@
-rank,type,equipement,lon,lat,commune,code_commune,pop_newly_served,pop_2040,propensity,value_rel,usage_pred,usage_unit,cost_eur,cost_cum_eur,eur_per_new_resident,co2_avoided_t_yr,share_poor_households,share_carfree_households
-1,bike,Station vélo libre-service (10 vélos),7.71405,48.58057,Strasbourg,67482,3795.0,3967.0,0.6817,1.5,22.5,trajets/jour,60000.0,60000.0,16.0,0.67,0.359,0.386
-2,bike,Station vélo libre-service (10 vélos),7.74615,48.59023,Strasbourg,67482,4160.0,4349.0,0.9687,1.5,22.5,trajets/jour,60000.0,120000.0,14.0,0.67,0.215,0.386
-3,bike,Station vélo libre-service (10 vélos),7.75525,48.56881,Strasbourg,67482,3696.0,3864.0,0.9401,1.5,22.5,trajets/jour,60000.0,180000.0,16.0,0.67,0.148,0.386
-4,bike,Station vélo libre-service (10 vélos),7.73047,48.57731,Strasbourg,67482,3253.0,3401.0,0.937,1.5,22.5,trajets/jour,60000.0,240000.0,18.0,0.67,0.265,0.386
-5,bike,Station vélo libre-service (10 vélos),7.76624,48.56544,Strasbourg,67482,3280.0,3429.0,0.8663,1.5,22.5,trajets/jour,60000.0,300000.0,18.0,0.67,0.178,0.386
-6,bike,Station vélo libre-service (10 vélos),7.77356,48.58358,Strasbourg,67482,3235.0,3382.0,0.9333,1.5,22.5,trajets/jour,60000.0,360000.0,19.0,0.67,0.321,0.386
-7,bike,Station vélo libre-service (10 vélos),7.75747,48.57966,Strasbourg,67482,3148.0,3290.0,0.9727,1.5,22.5,trajets/jour,60000.0,420000.0,19.0,0.67,0.256,0.386
-8,bike,Station vélo libre-service (10 vélos),7.76846,48.57628,Strasbourg,67482,3068.0,3207.0,0.8944,1.5,22.5,trajets/jour,60000.0,480000.0,20.0,0.67,0.339,0.386
-9,bike,Station vélo libre-service (10 vélos),7.76337,48.56898,Strasbourg,67482,3188.0,3332.0,0.9335,1.5,22.5,trajets/jour,60000.0,540000.0,19.0,0.67,0.17,0.386
-10,bike,Station vélo libre-service (10 vélos),7.7189,48.59327,Strasbourg,67482,2830.0,2959.0,0.7972,1.5,22.5,trajets/jour,60000.0,600000.0,21.0,0.67,0.185,0.386
-11,citiz,Station Citiz (1 véhicule),7.71397,48.58237,Strasbourg,67482,2796.0,2924.0,0.566,1.018,46.4,adhérents,60000.0,660000.0,21.0,7.59,0.334,0.386
-12,citiz,Station Citiz (1 véhicule),7.77707,48.56565,Strasbourg,67482,1588.0,1660.0,0.8607,1.5,46.4,adhérents,60000.0,720000.0,38.0,7.59,0.356,0.386
-13,citiz,Station Citiz (1 véhicule),7.74514,48.55241,Strasbourg,67482,2362.0,2470.0,0.4844,0.871,46.4,adhérents,60000.0,780000.0,25.0,7.59,0.207,0.386
-14,bike,Station vélo libre-service (10 vélos),7.79571,48.57322,Strasbourg,67482,1441.0,1506.0,0.5782,1.361,20.4,trajets/jour,60000.0,840000.0,42.0,0.61,0.513,0.386
-15,citiz,Station Citiz (1 véhicule),7.75897,48.60669,Schiltigheim,67447,1562.0,1632.0,0.6328,1.138,46.4,adhérents,60000.0,900000.0,38.0,7.59,0.275,0.29
-16,citiz,Station Citiz (1 véhicule),7.69985,48.59468,Strasbourg,67482,3400.0,3555.0,0.3002,0.54,46.4,adhérents,60000.0,960000.0,18.0,7.59,0.408,0.386
-17,citiz,Station Citiz (1 véhicule),7.71307,48.60215,Strasbourg,67482,2774.0,2900.0,0.376,0.676,46.4,adhérents,60000.0,1020000.0,22.0,7.59,0.338,0.386
-18,citiz,Station Citiz (1 véhicule),7.73705,48.61164,Schiltigheim,67447,1828.0,1912.0,0.5665,1.018,46.4,adhérents,60000.0,1080000.0,33.0,7.59,0.439,0.276
-19,citiz,Station Citiz (1 véhicule),7.76638,48.62303,Hœnheim,67204,2876.0,3007.0,0.3573,0.642,46.4,adhérents,60000.0,1140000.0,21.0,7.59,0.168,0.17
-20,citiz,Station Citiz (1 véhicule),7.7722,48.61415,Strasbourg,67482,3486.0,3644.0,0.2488,0.447,46.4,adhérents,60000.0,1200000.0,17.0,7.59,0.42,0.386
-21,citiz,Station Citiz (1 véhicule),7.70272,48.59114,Strasbourg,67482,2252.0,2354.0,0.3953,0.711,46.4,adhérents,60000.0,1260000.0,27.0,7.59,0.389,0.386
-22,citiz,Station Citiz (1 véhicule),7.76431,48.60859,Schiltigheim,67447,2668.0,2789.0,0.334,0.601,46.4,adhérents,60000.0,1320000.0,22.0,7.59,0.273,0.283
-23,bus,Arrêt de bus (quai PMR + abri),7.73745,48.60265,Schiltigheim,67447,1706.0,1783.0,0.8779,1.497,383.0,montées/jour,207412.0,1527412.0,122.0,4.6,0.162,0.29
-24,bike,Station vélo libre-service (10 vélos),7.6694,48.49145,Lipsheim,67268,615.0,643.0,0.855,1.5,22.5,trajets/jour,60000.0,1587412.0,98.0,0.67,0.054,0.05
-25,bus,Arrêt de bus (quai PMR + abri),7.75355,48.60658,Schiltigheim,67447,1394.0,1458.0,0.881,1.5,313.8,montées/jour,212812.0,1800224.0,153.0,2.24,0.233,0.29
-26,citiz,Station Citiz (1 véhicule),7.6936,48.61255,Mittelhausbergen,67296,728.0,762.0,0.5115,0.92,39.2,adhérents,60000.0,1860224.0,82.0,6.42,0.057,0.054
-27,bike,Station vélo libre-service (10 vélos),7.79849,48.57148,Strasbourg,67482,438.0,458.0,0.5051,1.189,17.8,trajets/jour,60000.0,1920224.0,137.0,0.53,0.279,0.386
-28,bike,Station vélo libre-service (10 vélos),7.66496,48.58675,Wolfisheim,67551,894.0,935.0,0.3165,0.745,11.2,trajets/jour,60000.0,1980224.0,67.0,0.33,0.069,0.08
+financeur,rank,type,equipement,stage,lon,lat,commune,code_commune,pop_newly_served,pop_2040,pop_new_distinct,pop_from_zero_option,propensity,value_rel,usage_pred,usage_unit,cost_eur,cost_cum_eur,eur_per_new_resident,co2_avoided_t_yr,share_poor_households,share_carfree_households,demand_potential,vehicles_suggested,dist_existing_same_type_m
+citiz,1,citiz,Station Citiz (1 véhicule),global,7.26287,43.7071,Nice,06088,7109.0,7162.0,7109.0,0.0,0.6807,1.5,46.4,adhérents,60000.0,60000.0,8.0,7.59,0.287,0.366,624.8,14.0,20000.0
+citiz,2,citiz,Station Citiz (1 véhicule),global,7.28539,43.70228,Nice,06088,7760.0,7816.0,7760.0,0.0,0.8433,1.5,46.4,adhérents,60000.0,120000.0,8.0,7.59,0.19,0.366,681.9,15.0,20000.0
+citiz,3,citiz,Station Citiz (1 véhicule),global,7.26006,43.71424,Nice,06088,6491.0,6538.0,6491.0,0.0,0.617,1.5,46.4,adhérents,60000.0,180000.0,9.0,7.59,0.191,0.366,570.4,13.0,20000.0
+citiz,4,citiz,Station Citiz (1 véhicule),global,7.25579,43.69969,Nice,06088,6233.0,6279.0,6233.0,0.0,0.7152,1.5,46.4,adhérents,60000.0,240000.0,10.0,7.59,0.234,0.366,547.8,12.0,20000.0
+citiz,5,citiz,Station Citiz (1 véhicule),global,7.25485,43.71952,Nice,06088,6083.0,6128.0,6083.0,0.0,0.427,1.454,46.4,adhérents,60000.0,300000.0,10.0,7.59,0.186,0.366,518.3,12.0,20000.0
+citiz,6,citiz,Station Citiz (1 véhicule),global,7.29017,43.70602,Nice,06088,6191.0,6236.0,6191.0,0.0,0.881,1.5,46.4,adhérents,60000.0,360000.0,10.0,7.59,0.223,0.366,544.0,12.0,20000.0
+citiz,7,citiz,Station Citiz (1 véhicule),global,7.20497,43.67485,Nice,06088,5542.0,5582.0,5542.0,0.0,0.4041,1.376,46.4,adhérents,60000.0,420000.0,11.0,7.59,0.419,0.366,446.8,10.0,20000.0
+citiz,8,citiz,Station Citiz (1 véhicule),global,7.29461,43.71696,Nice,06088,5681.0,5722.0,5681.0,0.0,0.4798,1.5,46.4,adhérents,60000.0,480000.0,11.0,7.59,0.286,0.366,499.2,11.0,20000.0
+citiz,9,citiz,Station Citiz (1 véhicule),global,7.26313,43.70169,Nice,06088,5526.0,5567.0,5526.0,0.0,0.7121,1.5,46.4,adhérents,60000.0,540000.0,11.0,7.59,0.242,0.366,485.6,11.0,20000.0
+citiz,10,citiz,Station Citiz (1 véhicule),global,7.28983,43.71323,Nice,06088,5815.0,5858.0,5815.0,0.0,0.6076,1.5,46.4,adhérents,60000.0,600000.0,10.0,7.59,0.16,0.366,511.0,12.0,20000.0
+citiz,11,citiz,Station Citiz (1 véhicule),global,7.25536,43.7087,Nice,06088,5268.0,5306.0,5268.0,0.0,0.7605,1.5,46.4,adhérents,60000.0,660000.0,11.0,7.59,0.228,0.366,462.9,10.0,20000.0
+citiz,12,citiz,Station Citiz (1 véhicule),global,7.27038,43.70549,Nice,06088,5298.0,5337.0,5298.0,0.0,0.8671,1.5,46.4,adhérents,60000.0,720000.0,11.0,7.59,0.236,0.366,465.6,11.0,20000.0
+citiz,13,citiz,Station Citiz (1 véhicule),global,7.24973,43.723,Nice,06088,5489.0,5529.0,5489.0,0.0,0.3433,1.169,46.4,adhérents,60000.0,780000.0,11.0,7.59,0.172,0.366,376.0,9.0,20000.0
+citiz,14,citiz,Station Citiz (1 véhicule),global,7.28446,43.72211,Nice,06088,4335.0,4367.0,4335.0,0.0,0.4637,1.5,46.4,adhérents,60000.0,840000.0,14.0,7.59,0.28,0.366,381.0,9.0,20000.0
+citiz,15,citiz,Station Citiz (1 véhicule),quota_peu_dense,7.32976,43.70705,Beaulieu-sur-Mer,06011,1700.0,1712.0,1700.0,0.0,0.3411,1.162,46.4,adhérents,60000.0,900000.0,35.0,7.59,0.183,0.256,115.7,3.0,20000.0
+citiz,16,citiz,Station Citiz (1 véhicule),quota_peu_dense,7.19039,43.82249,Saint-Martin-du-Var,06126,1053.0,1060.0,1053.0,165.0,0.7456,1.5,46.4,adhérents,60000.0,960000.0,57.0,7.59,0.13,0.087,92.5,2.0,20000.0
+collectivite,1,bike,Station vélo libre-service (10 vélos),enveloppe_bike,7.28539,43.70228,Nice,06088,7760.0,7816.0,7760.0,0.0,0.7318,1.5,22.5,trajets/jour,60000.0,60000.0,8.0,0.67,0.19,0.366,,,20000.0
+collectivite,2,bike,Station vélo libre-service (10 vélos),enveloppe_bike,7.26287,43.7071,Nice,06088,7109.0,7162.0,7109.0,0.0,0.5381,1.307,19.6,trajets/jour,60000.0,120000.0,8.0,0.59,0.287,0.366,,,20000.0
+collectivite,3,bike,Station vélo libre-service (10 vélos),enveloppe_bike,7.26014,43.71244,Nice,06088,6382.0,6429.0,6382.0,0.0,0.6481,1.5,22.5,trajets/jour,60000.0,180000.0,9.0,0.67,0.194,0.366,,,20000.0
+collectivite,4,bike,Station vélo libre-service (10 vélos),enveloppe_bike,7.25579,43.69969,Nice,06088,6233.0,6279.0,6233.0,0.0,0.824,1.5,22.5,trajets/jour,60000.0,240000.0,10.0,0.67,0.234,0.366,,,20000.0
+collectivite,5,bike,Station vélo libre-service (10 vélos),enveloppe_bike,7.29017,43.70602,Nice,06088,6191.0,6236.0,6191.0,0.0,0.917,1.5,22.5,trajets/jour,60000.0,300000.0,10.0,0.67,0.223,0.366,,,20000.0
+collectivite,6,bike,Station vélo libre-service (10 vélos),enveloppe_bike,7.26313,43.70169,Nice,06088,5526.0,5567.0,5526.0,0.0,0.5868,1.426,21.4,trajets/jour,60000.0,360000.0,11.0,0.64,0.242,0.366,,,20000.0
+collectivite,7,bike,Station vélo libre-service (10 vélos),enveloppe_bike,7.25494,43.71772,Nice,06088,5900.0,5944.0,5900.0,0.0,0.5291,1.285,19.3,trajets/jour,60000.0,420000.0,10.0,0.58,0.185,0.366,,,20000.0
+collectivite,8,bike,Station vélo libre-service (10 vélos),quota_peu_dense,7.32984,43.70525,Beaulieu-sur-Mer,06011,1544.0,1556.0,1544.0,0.0,0.5655,1.374,19.4,trajets/jour,60000.0,480000.0,39.0,0.58,0.19,0.256,,,20000.0
+collectivite,9,bike,Station vélo libre-service (10 vélos),quota_peu_dense,7.33215,43.70892,Beaulieu-sur-Mer,06011,1026.0,1034.0,1026.0,0.0,0.6053,1.47,13.8,trajets/jour,60000.0,540000.0,58.0,0.41,0.161,0.256,,,20000.0
+collectivite,10,bus,Arrêt de bus (quai PMR + abri),enveloppe_bus,7.13951,43.74707,Saint-Jeannet,06122,469.0,473.0,469.0,469.0,0.7301,1.347,94.8,montées/jour,204869.0,744869.0,437.0,-1.0,0.169,0.068,,,292.0
+collectivite,11,bus,Arrêt de bus (quai PMR + abri),enveloppe_bus,7.14131,43.66046,Cagnes-sur-Mer,06027,353.0,355.0,353.0,353.0,0.9149,1.5,79.4,montées/jour,207265.0,952134.0,587.0,-2.09,0.087,0.182,,,296.0

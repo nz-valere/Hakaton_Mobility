@@ -64,11 +64,14 @@ def test_served_cells_ignored():
     ev = R.evaluate(ctx, picks)
     served = gx < 15
     # la population comptée comme nouvellement desservie exclut les carreaux déjà desservis
+    sub = R._sub(ctx)
     covered_unserved = set()
     for _, s in picks.iterrows():
-        covered_unserved |= {(s["kind"], c) for c in s["covered"] if not served[c]}
-    pop = ctx["cells"]["ind"].values
-    assert np.isclose(ev["pop_new"].sum(), sum(pop[c] for _, c in covered_unserved))
+        covered_unserved |= {(s["kind"], c) for c in s["covered"] if not served[sub["cell"][c]]}
+    pop = ctx["cells"]["ind"].values / sub["S2"]
+    assert np.isclose(ev["pop_new"].sum(), sum(pop[sub["cell"][c]] for _, c in covered_unserved))
+    # personnes distinctes <= somme par type
+    assert ev["pop_new_distinct"].sum() <= ev["pop_new"].sum() + 1e-6
 
 
 def test_lambda_changes_order():
@@ -77,7 +80,8 @@ def test_lambda_changes_order():
     p0 = R.solve(ctx, budget=600_000, equity_lambda=0.0)
     p1 = R.solve(ctx, budget=600_000, equity_lambda=3.0)
     assert list(p0["cell"]) != list(p1["cell"])
-    share = lambda p: np.mean([poor[c].mean() for c in p["covered"]])  # noqa: E731
+    cell = R._sub(ctx)["cell"]
+    share = lambda p: np.mean([poor[cell[c]].mean() for c in p["covered"]])  # noqa: E731
     assert share(p1) > share(p0)
 
 
@@ -90,7 +94,42 @@ def test_bus_detour_cost_and_exclusion():
     assert np.allclose(picks["cost"], C.facility_cost("bus", R.bus_extra_annual(800.0)))
 
 
+def test_coverage_continuous_in_radius():
+    """Pas d'effet de seuil de grille : la population couverte croît continûment avec le rayon."""
+    from src import geo
+    ctx = synthetic_ctx()
+    orig = geo.walk_radius_m
+    cov = []
+    try:
+        for r in (280.0, 282.0, 283.5, 286.0):
+            geo.walk_radius_m = lambda r=r: r
+            c = R._coverage(ctx, np.array([465]))[0]            # carreau central
+            cov.append(len(c) / R._sub(ctx)["S2"])              # carreaux-équivalents couverts
+    finally:
+        geo.walk_radius_m = orig
+    assert all(b >= a for a, b in zip(cov, cov[1:]))
+    assert cov[-1] / cov[0] < 1.15                               # ~ (286/280)² = 1,04, pas 9/5
+    assert abs(cov[1] - np.pi * 282 ** 2 / 200 ** 2) < 1.0       # ≈ 6,25 carreaux
+
+
+def test_zero_option_and_distinct():
+    ctx = synthetic_ctx()
+    ctx["F"]["n_options_r5"] = 0.0                               # personne n'a d'option
+    ctx.pop("sub", None)
+    picks = R.solve_split(ctx, budget=300_000, rural_share=0.0)
+    ev = R.evaluate(ctx, picks)
+    assert np.isclose(ev["pop_new_from_zero_option"].sum(), ev["pop_new_distinct"].sum())
+
+
+def test_ems_communes():
+    assert len(C.EMS_COMMUNES) == 33 and len(set(C.EMS_COMMUNES)) == 33
+    assert "67482" in C.EMS_COMMUNES and "67363" in C.EMS_COMMUNES   # Strasbourg, Osthoffen
+
+
 if __name__ == "__main__":
+    test_coverage_continuous_in_radius()
+    test_zero_option_and_distinct()
+    test_ems_communes()
     test_budget_respected()
     test_served_cells_ignored()
     test_lambda_changes_order()

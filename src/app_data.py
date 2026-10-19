@@ -4,9 +4,11 @@ Chargement, agrégation et mise en forme des données pour l'application Streaml
 Principes :
     - jamais 2,3 M points dans le navigateur : vue nationale agrégée sur une grille de
       quelques km, vue « territoire » au carreau 200 m filtrée sur la zone ;
-    - confidentialité : aucun agrégat de moins de C.PRIVACY_MIN_HOUSEHOLDS ménages n'est
-      affiché. Au carreau 200 m, un carreau sous le seuil prend la valeur moyenne de son
-      carré de 1 km (lissage) ; si le carré lui-même est sous le seuil, il est masqué ;
+    - confidentialité (seuil INSEE de 11 ménages) : l'indicateur d'accessibilité (nombre d'options à
+      5 min) est purement géographique et s'affiche tel quel au carreau, sans lissage ni
+      masquage. Seules les variables socio-économiques (revenu, pauvreté, motorisation)
+      sont soumises au seuil de C.PRIVACY_MIN_HOUSEHOLDS ménages : elles ne figurent dans
+      une infobulle ou un agrégat que si celui-ci compte au moins ce nombre de ménages ;
     - dégradation propre : si outputs/cells_access.parquet (ou stations_served.parquet)
       n'existe pas encore, l'accessibilité de la ZONE est recalculée à la volée avec la même
       définition (points d'offre à ≤ geo.walk_radius_m()), le score étant alors un rang
@@ -37,6 +39,8 @@ F_CALIB = C.OUT / "walk_calibration.json"
 F_METRICS = C.OUT / "model_metrics.json"
 F_RECO = C.OUT / "recommendations.csv"
 F_RECO_SUM = C.OUT / "recommendations_summary.json"
+F_TERR = C.OUT / "territories_citiz.csv"
+F_TERR_SUM = C.OUT / "territories_summary.json"
 
 CELL_COLS = ["key", "crs_id", "x", "y", "lon", "lat", "com", "dep", "ind", "men",
              "income_pc", "poverty_rate", "carfree_share"]
@@ -86,7 +90,8 @@ DEP_NAMES = {
 
 # Zones prédéfinies : clé -> (libellé, filtre)
 ZONES = {
-    "ems": "Eurométropole de Strasbourg (étude de cas)",
+    "top": "Territoire prioritaire pour Citiz",
+    "ems": "Eurométropole de Strasbourg (territoire témoin)",
     "fr": "France métropolitaine (vue nationale agrégée)",
     "972": "Martinique (DROM)",
     "974": "La Réunion (DROM)",
@@ -108,7 +113,7 @@ def read_json(path):
 def versions():
     """Signature des fichiers de sortie : invalide les caches quand un module les régénère."""
     models = [C.OUT / f"model_{k}.joblib" for k in C.MODEL_KINDS]
-    return tuple(mtime(f) for f in [F_CELLS, F_OFFER, F_ACCESS, F_STATIONS, F_METRICS] + models)
+    return tuple(mtime(f) for f in [F_CELLS, F_OFFER, F_ACCESS, F_STATIONS, F_METRICS, F_TERR_SUM] + models)
 
 
 def mtime(path):
@@ -167,7 +172,18 @@ def dep_index(v=None):
     return g.sort_values("dep").reset_index(drop=True)
 
 
+def top_epci():
+    """(code EPCI, nom) du territoire prioritaire (outputs/territories_summary.json) ou None."""
+    s = read_json(F_TERR_SUM)
+    if not s or not s.get("top"):
+        return None
+    return str(s["top"]["epci"]), s["top"]["territoire"]
+
+
 def zone_label(zone):
+    if zone == "top":
+        t = top_epci()
+        return f"{t[1]} (territoire prioritaire pour Citiz)" if t else ZONES["ems"]
     if zone in ZONES:
         return ZONES[zone]
     return f"{zone} – {DEP_NAMES.get(zone, '')}"
@@ -175,6 +191,12 @@ def zone_label(zone):
 
 def zone_filters(zone):
     """Filtres pyarrow (lecture parquet) d'une zone."""
+    if zone == "top":
+        t = top_epci()
+        if t is None:
+            return zone_filters("ems")
+        from src import territories
+        return [("com", "in", list(territories.epci_communes(t[0])))]
     if zone == "ems":
         w, s, e, n = C.STRASBOURG_BBOX
         return [("dep", "==", C.STRASBOURG_DEPT), ("lon", ">=", w), ("lon", "<=", e),
@@ -186,6 +208,12 @@ def zone_filters(zone):
 
 def reco_area(zone):
     """Paramètre `area` de src.recommend.recommend() ; None si zone trop grande."""
+    if zone == "top":
+        t = top_epci()
+        if t is None:
+            return "ems"
+        from src import territories
+        return territories.area_of(t[0])
     if zone == "ems":
         return "ems"
     if zone == "fr":
@@ -233,7 +261,7 @@ def _fallback_access(cells, offer):
     sc = np.zeros(len(cells))
     srv = n_opt > 0
     if srv.any():
-        v = out["options_per_1000"].values[srv]
+        v = out["n_options"].values[srv]  # même base que C.SCORE_BASIS dans src/accessibility
         o_ = np.argsort(v, kind="stable")
         cum = np.cumsum(ind[srv][o_]) / max(ind[srv].sum(), 1)
         rk = np.empty(len(v))
@@ -244,6 +272,13 @@ def _fallback_access(cells, offer):
     men = cells["men"].fillna(0).values
     o["pop_served"] = np.bincount(J, weights=ind[I], minlength=len(o))
     o["households_served"] = np.bincount(J, weights=men[I], minlength=len(o))
+    # habitants dont ce point est le seul de son mode à 5 min (perdraient l'accès s'il fermait)
+    n_same = np.zeros(len(I))
+    for m in MODES:
+        sel = mode_j == m
+        n_same[sel] = out[f"n_{m}"].values[I[sel]]
+    excl = n_same == 1
+    o["pop_served_exclusive"] = np.bincount(J[excl], weights=ind[I[excl]], minlength=len(o))
     return out, o
 
 
@@ -272,30 +307,59 @@ def zone_cells(zone, v=None):
 
 
 # --------------------------------------------------------------------------- agrégation pour la carte
-def _tip_cells(score, ind, n_opt, n_modes, com, smoothed):
+SOCIO = [("income_pc", "ind"), ("poverty_rate", "men"), ("carfree_share", "men")]
+
+
+def _socio_html(inc, pov, carfree):
+    """Lignes socio-économiques d'une infobulle (déjà filtrées par le seuil de ménages)."""
+    parts = []
+    if np.isfinite(inc):
+        parts.append(f"Revenu disponible ≈ {fmt_int(round(inc, -2))} €/hab./an")
+    if np.isfinite(pov):
+        parts.append(f"Ménages pauvres ≈ {100 * pov:.0f} %")
+    if np.isfinite(carfree):
+        parts.append(f"Ménages sans voiture ≈ {100 * carfree:.0f} %")
+    return "<br/>".join(parts)
+
+
+def _tip_cells(score, ind, n_opt, n_modes, com, priv_ok, inc, pov, carfree):
     lab = level_label(score)
     tips = []
-    for s, p, no, nm, c, sm, lb in zip(score, ind, n_opt, n_modes, com, smoothed, lab):
-        if sm:
-            tips.append(f"<b>{c}</b><br/>{lb}<br/>Score moyen du carré 1 km : {s:.0f}/100"
-                        f"<br/><i>Valeur lissée (secret statistique &lt; {PRIV} ménages)</i>")
+    for s, p, no, nm, c, ok, a, b, d, lb in zip(score, ind, n_opt, n_modes, com, priv_ok, inc, pov,
+                                               carfree, lab):
+        t = f"<b>{c}</b><br/>{lb}<br/>Score : {s:.0f}/100<br/>"
+        t += (f"{no:.0f} option(s) à 5 min · {nm:.0f} mode(s)" if np.isfinite(no) else "")
+        t += f"<br/>≈ {fmt_int(p)} habitants"
+        if ok:
+            soc = _socio_html(a, b, d)
+            t += f"<br/>{soc}" if soc else ""
         else:
-            tips.append(f"<b>{c}</b><br/>{lb}<br/>Score : {s:.0f}/100<br/>"
-                        f"{no:.0f} option(s) à 5 min · {nm:.0f} mode(s)<br/>≈ {fmt_int(p)} habitants")
+            t += (f"<br/><i>Revenu, pauvreté, motorisation non affichés "
+                  f"(secret statistique &lt; {PRIV} ménages)</i>")
+        tips.append(t)
     return tips
 
 
 def _wmean(df, keys, col, w="ind"):
-    g = df.assign(_wx=df[col] * df[w]).groupby(keys)
-    return g["_wx"].sum() / g[w].sum().replace(0, np.nan)
+    """Moyenne pondérée par groupe, en ignorant les valeurs manquantes."""
+    x = df[col].astype(float)
+    ww = df[w].astype(float).where(np.isfinite(x), 0.0)
+    g = df.assign(_wx=(x.fillna(0) * ww), _w=ww).groupby(keys)
+    return g["_wx"].sum() / g["_w"].sum().replace(0, np.nan)
+
+
+def _col(df, c):
+    return df[c].astype(float).values if c in df.columns else np.full(len(df), np.nan)
 
 
 @st.cache_data(show_spinner=False, max_entries=16)
 def map_cells(zone, size_m=200, v=None):
     """
     Données de la carte d'accessibilité (une ligne par carré affiché) :
-    lon, lat, r, g, b, tip, + stats. size_m = 200 (carreaux, lissage confidentialité)
-    ou agrégation sur une grille de size_m mètres. Renvoie (df, n_masked_pop, provisoire).
+    lon, lat, r, g, b, tip, + stats. size_m = 200 (carreaux) ou agrégation sur une grille
+    de size_m mètres. Le score (géographique) n'est jamais lissé ni masqué ; les variables
+    socio-économiques n'apparaissent dans l'infobulle que si le carré compte ≥ PRIV ménages.
+    Renvoie (df, population des carrés dont le socio-économique est masqué, provisoire).
     """
     df, prov, _ = zone_cells(zone, v)
     if "score" not in df.columns:
@@ -304,29 +368,18 @@ def map_cells(zone, size_m=200, v=None):
     df = df[df["ind"] > 0].copy()
     df["men"] = df["men"].fillna(0)
     df["no_opt"] = (df["score"] <= 0) * df["ind"]
-    if "n_options" not in df.columns:
-        df["n_options"] = np.nan
-    if "n_modes" not in df.columns:
-        df["n_modes"] = np.nan
+    for c in ("n_options", "n_modes") + tuple(c for c, _ in SOCIO):
+        if c not in df.columns:
+            df[c] = np.nan
     if size_m <= C.CELL:
-        # lissage : carreaux < seuil -> valeur du carré 1 km
-        bx = (df["x"] // 1000).astype(np.int64)
-        by = (df["y"] // 1000).astype(np.int64)
-        keys = [df["crs_id"], bx, by]
-        bmen = df.groupby(keys)["men"].transform("sum")
-        bscore = df.assign(_wx=df["score"] * df["ind"]).groupby(keys)["_wx"].transform("sum") \
-            / df.groupby(keys)["ind"].transform("sum")
-        small = (df["men"] < PRIV).values
-        hide = small & (bmen < PRIV).values
-        masked_pop = float(df["ind"].values[hide].sum())
-        df["disp_score"] = np.where(small, bscore, df["score"])
-        df = df[~hide]
-        small = small[~hide]
+        ok = (df["men"] >= PRIV).values
+        masked_pop = float(df["ind"].values[~ok].sum())
         out = pd.DataFrame({
             "lon": df["lon"].round(5).values, "lat": df["lat"].round(5).values,
-            "score": df["disp_score"].round(1).values,
-            "tip": _tip_cells(df["disp_score"].values, df["ind"].values, df["n_options"].values,
-                              df["n_modes"].values, df["com"].map(names).fillna(df["com"]).values, small),
+            "score": df["score"].round(1).values,
+            "tip": _tip_cells(df["score"].values, df["ind"].values, _col(df, "n_options"),
+                              _col(df, "n_modes"), df["com"].map(names).fillna(df["com"]).values, ok,
+                              _col(df, "income_pc"), _col(df, "poverty_rate"), _col(df, "carfree_share")),
         })
         out["radius"] = C.CELL / 2 * np.sqrt(2)
     else:
@@ -337,25 +390,45 @@ def map_cells(zone, size_m=200, v=None):
         g = df.groupby(keys).agg(ind=("ind", "sum"), men=("men", "sum"), no_opt=("no_opt", "sum"),
                                  com=("com", "first"))
         g["score"] = _wmean(df, keys, "score")
+        for c, w in SOCIO:
+            g[c] = _wmean(df, keys, c, w)
         g = g.reset_index()
-        hide = g["men"] < PRIV
-        masked_pop = float(g.loc[hide, "ind"].sum())
-        g = g[~hide]
+        ok = (g["men"] >= PRIV).values
+        masked_pop = float(g.loc[~ok, "ind"].sum())
         lon, lat = geo.unproject((g["gx"].values + .5) * size_m, (g["gy"].values + .5) * size_m,
                                  g["crs"].values)
         share0 = g["no_opt"].values / g["ind"].values
         cname = g["com"].map(names).fillna(g["com"]).values
         lab = level_label(g["score"].values)
-        out = pd.DataFrame({
-            "lon": np.round(lon, 5), "lat": np.round(lat, 5), "score": g["score"].round(1).values,
-            "tip": [f"<b>Secteur de {c}</b> (carré {size_m // 1000} km)<br/>{lb}<br/>Score moyen : {s:.0f}/100"
-                    f"<br/>{fmt_int(p)} habitants · {100 * z:.0f} % sans option à 5 min"
-                    for c, lb, s, p, z in zip(cname, lab, g["score"].values, g["ind"].values, share0)],
-        })
+        side = f"{size_m} m" if size_m < 1000 else f"{size_m / 1000:g} km"
+        tips = []
+        for c, lb, s_, p, z, k, a, b, d in zip(cname, lab, g["score"].values, g["ind"].values, share0, ok,
+                                              g["income_pc"].values, g["poverty_rate"].values,
+                                              g["carfree_share"].values):
+            t = (f"<b>Secteur de {c}</b> (carré {side})<br/>{lb}<br/>Score moyen : {s_:.0f}/100"
+                 f"<br/>{fmt_int(p)} habitants · {100 * z:.0f} % sans option à 5 min")
+            if k:
+                soc = _socio_html(a, b, d)
+                t += f"<br/>{soc}" if soc else ""
+            else:
+                t += (f"<br/><i>Revenu, pauvreté, motorisation non affichés "
+                      f"(secret statistique &lt; {PRIV} ménages)</i>")
+            tips.append(t)
+        out = pd.DataFrame({"lon": np.round(lon, 5), "lat": np.round(lat, 5),
+                            "score": g["score"].round(1).values, "tip": tips})
         out["radius"] = size_m / 2 * np.sqrt(2)
     rgb = score_rgb(out["score"].values)
     out["r"], out["g"], out["b"] = rgb[:, 0], rgb[:, 1], rgb[:, 2]
     return out, masked_pop, prov
+
+
+@st.cache_data(show_spinner=False, max_entries=16)
+def zone_n_cells(zone, v=None):
+    """Nombre de carreaux habités d'une zone (lecture légère, colonne `key` seule)."""
+    try:
+        return int(len(pd.read_parquet(F_CELLS, columns=["key"], filters=zone_filters(zone))))
+    except Exception:
+        return 0
 
 
 # --------------------------------------------------------------------------- KPIs & équité
@@ -404,23 +477,27 @@ def equity_deciles(zone, v=None):
 @st.cache_data(show_spinner=False, max_entries=16)
 def zone_stations(zone, v=None):
     """Points d'offre de la zone avec population desservie. Renvoie (df, source)."""
-    if zone == "fr":
-        return None, None
-    df, _, o = zone_cells(zone, v)
-    w, s, e, n = df["lon"].min(), df["lat"].min(), df["lon"].max(), df["lat"].max()
-    if exists(F_STATIONS):
-        st_ = pd.read_parquet(F_STATIONS, filters=[("lon", ">=", w), ("lon", "<=", e),
-                                                   ("lat", ">=", s), ("lat", "<=", n)])
+    if zone == "fr":   # vue nationale : tous les points (~200 000), sans recalcul à la volée
+        if not exists(F_STATIONS):
+            return None, None
+        st_ = pd.read_parquet(F_STATIONS)
         src = "stations_served.parquet"
-    elif o is not None:
-        st_ = o[(o["lon"] >= w) & (o["lon"] <= e) & (o["lat"] >= s) & (o["lat"] <= n)].copy()
-        src = "calcul provisoire (zone)"
     else:
-        _, o = _fallback_access(df, load_offer())
-        st_ = o[(o["lon"] >= w) & (o["lon"] <= e) & (o["lat"] >= s) & (o["lat"] <= n)].copy()
-        src = "calcul provisoire (zone)"
+        df, _, o = zone_cells(zone, v)
+        w, s, e, n = df["lon"].min(), df["lat"].min(), df["lon"].max(), df["lat"].max()
+        if exists(F_STATIONS):
+            st_ = pd.read_parquet(F_STATIONS, filters=[("lon", ">=", w), ("lon", "<=", e),
+                                                       ("lat", ">=", s), ("lat", "<=", n)])
+            src = "stations_served.parquet"
+        else:
+            if o is None:
+                _, o = _fallback_access(df, load_offer())
+            st_ = o[(o["lon"] >= w) & (o["lon"] <= e) & (o["lat"] >= s) & (o["lat"] <= n)].copy()
+            src = "calcul provisoire (zone)"
     if "pop_served" not in st_.columns:
         st_["pop_served"] = np.nan
+    if "pop_served_exclusive" not in st_.columns:
+        st_["pop_served_exclusive"] = np.nan
     st_ = st_[st_["mode"].isin(MODES)].copy()
     st_["mode_label"] = st_["mode"].map(C.MODES)
     rgb = np.array([MODE_COLOR[m] for m in st_["mode"]], dtype=np.uint8).reshape(-1, 3)
@@ -428,6 +505,8 @@ def zone_stations(zone, v=None):
     ps = st_["pop_served"].fillna(0).values
     st_["radius"] = 12 + 1.6 * np.sqrt(ps)
     st_["pop_txt"] = [fmt_int(round(p, -1)) if p >= 0 else "–" for p in ps]
+    ex = st_["pop_served_exclusive"].astype(float).values
+    st_["excl_txt"] = [fmt_int(round(p, -1)) if np.isfinite(p) else "–" for p in ex]
     st_["name"] = st_["name"].fillna("").astype(str)
     st_["operator"] = st_["operator"].fillna("").astype(str) if "operator" in st_.columns else ""
     return st_.reset_index(drop=True), src
@@ -445,11 +524,21 @@ def _recommend_module():
 
 
 @st.cache_data(show_spinner=False, max_entries=32)
-def run_recommend(area, budget, equity_lambda, kinds, v=None):
+def run_recommend_funders(area, citiz_budget, public_budget, equity_lambda, v=None):
+    """Deux listes : Citiz (stations d'autopartage) et collectivité (vélo + bus), budgets séparés."""
     rec = _recommend_module()
-    df, summary = rec.recommend(area=area, budget=float(budget), equity_lambda=float(equity_lambda),
-                                kinds=tuple(kinds), compare=True, write=False)
+    df, summary = rec.recommend_by_funder(area=area, citiz_budget=float(citiz_budget),
+                                          public_budget=float(public_budget),
+                                          equity_lambda=float(equity_lambda), compare=True)
     return df, json.loads(json.dumps(summary, default=float))
+
+
+@st.cache_data(show_spinner=False)
+def territories_ranking(v=None):
+    """Classement national des intercommunalités pour Citiz (src/territories.py) ou None."""
+    if not exists(F_TERR):
+        return None
+    return pd.read_csv(F_TERR, dtype={"epci": str, "dep": str})
 
 
 @st.cache_data(show_spinner=False, max_entries=32)
@@ -476,9 +565,76 @@ def newly_served_cells(area, sites):
         sel = sel[~served[sel]]
         rows.append(pd.DataFrame({"lon": cells["lon"].values[sel], "lat": cells["lat"].values[sel],
                                   "kind": k}))
-    out = pd.concat(rows, ignore_index=True).drop_duplicates(["lon", "lat"])
+    # une ligne par (carreau, type) : un carreau desservi par deux types apparaît deux fois
+    out = pd.concat(rows, ignore_index=True).drop_duplicates(["lon", "lat", "kind"])
+    if len(out) == 0:
+        return pd.DataFrame(columns=["lon", "lat", "kind", "r", "g", "b", "radius", "tip"])
     rgb = np.array([KIND_COLOR[k] for k in out["kind"]], dtype=np.uint8).reshape(-1, 3)
     out["r"], out["g"], out["b"] = rgb[:, 0], rgb[:, 1], rgb[:, 2]
     out["radius"] = C.CELL / 2 * np.sqrt(2)
-    out["tip"] = "Carreau nouvellement desservi (" + out["kind"].map(KIND_LABEL) + ")"
+    lab = out["kind"].map(KIND_LABEL)
+    all_kinds = lab.groupby([out["lon"], out["lat"]]).transform(lambda x: ", ".join(sorted(set(x))))
+    out["tip"] = "Carreau nouvellement desservi : " + all_kinds
     return out
+
+
+# --------------------------------------------------------------------------- lecture tolérante du résumé
+# Le schéma de recommendations_summary.json évolue : on cherche chaque champ sous plusieurs
+# noms possibles, puis par mots-clés, et on renvoie None s'il est absent (jamais d'exception).
+STRATEGY_KEYS = {
+    "no_equity": (["no_equity_weight", "lambda_0_no_equity", "no_equity", "unweighted", "lambda_0"],
+                  [("lambda", "0"), ("equity",)]),
+    "no_model": (["existing_offer_no_model", "no_model_value_1", "existing_no_model", "no_model_v1",
+                  "offer_no_model", "no_model"],
+                 [("no_model",), ("sans_modele",), ("value_1",)]),
+    "naive": (["naive_population_only", "naive"], [("naive",)]),
+}
+FIELD_KEYS = {
+    "distinct": (["pop_newly_served_distinct", "persons_newly_served", "pop_distinct_newly_served",
+                  "distinct_pop_newly_served", "people_newly_served_distinct", "pop_newly_served_unique"],
+                 [("distinct",), ("unique",), ("persons",)]),
+    "zero_to_one": (["pop_from_zero_option", "pop_zero_to_one_option", "pop_from_0_to_1_option", "pop_0_to_1", "pop_first_option",
+                     "pop_newly_any_option", "pop_no_option_to_served", "pop_gaining_first_option"],
+                    [("zero",), ("0_to",), ("first_option",), ("any_option",), ("no_option",)]),
+}
+
+
+def _lookup(d, exact, fuzzy, exclude=()):
+    if not isinstance(d, dict):
+        return None, None
+    for k in exact:
+        if k in d and d[k] is not None:
+            return k, d[k]
+    for words in fuzzy:
+        for k, v in d.items():
+            kl = str(k).lower()
+            if k not in exclude and all(w in kl for w in words) and v is not None:
+                return k, v
+    return None, None
+
+
+def strategy(summary, which):
+    """Bloc de comparaison d'une stratégie ('no_equity', 'no_model', 'naive') ou None."""
+    comp = (summary or {}).get("comparison") or {}
+    exact, fuzzy = STRATEGY_KEYS[which]
+    excl = ()
+    if which == "no_equity":       # ne pas confondre avec d'autres ablations
+        excl = tuple(k for k in comp if "model" in k or "naive" in k or "quota" in k)
+    _, d = _lookup(comp, exact, fuzzy, excl)
+    return d if isinstance(d, dict) else None
+
+
+def field(d, which):
+    """Valeur numérique d'un champ optionnel ('distinct', 'zero_to_one') d'un bloc, ou None."""
+    exact, fuzzy = FIELD_KEYS[which]
+    # mots-clés : uniquement des comptes de personnes (pas un coût, une part, du CO2…)
+    excl = tuple(k for k in (d or {}) if any(w in str(k).lower() for w in
+                                             ("eur", "share", "co2", "by_type", "by_stage", "horizon")))
+    _, v = _lookup(d, exact, fuzzy, excl)
+    if isinstance(v, dict):         # p. ex. {"total": ..., "by_type": ...}
+        v = v.get("total", v.get("pop"))
+    try:
+        v = float(v)
+        return v if np.isfinite(v) else None
+    except (TypeError, ValueError):
+        return None

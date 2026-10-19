@@ -15,7 +15,8 @@ Géométrie commune : `src/geo.py` (projection, `walk_radius_m()`, `pairs_within
 | 3b | `src/walk_calibration.py` | raw OSM + offer | `outputs/walk_calibration.json` |
 | 4 | `src/accessibility.py` | cells, offer, calibration | `outputs/cells_access.parquet`, `outputs/stations_served.parquet` |
 | 5 | `src/model.py` | cells_access, offer | `outputs/model_metrics.json`, `outputs/model_*.joblib`/pkl, fonction `predict_value()` |
-| 6 | `src/optimize.py` (algo) + `src/recommend.py` (orchestration) | tout | `outputs/recommendations.csv` |
+| 5b | `src/territories.py` | features, modèle Citiz, EPCI | `outputs/territories_citiz.csv`, `outputs/territories_summary.json` (territoire prioritaire `top`) |
+| 6 | `src/optimize.py` (algo) + `src/recommend.py` (orchestration) | tout | `outputs/recommendations.csv` (colonne `financeur` : `citiz` / `collectivite`) |
 | 7 | `app.py` (Streamlit) | outputs | démo live |
 
 ## cells.parquet (une ligne par carreau 200 m habité)

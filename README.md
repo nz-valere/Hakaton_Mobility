@@ -2,7 +2,7 @@
 
 **Qui a vraiment une option de transport à 5 minutes de chez soi, et où en ajouter ?**
 Mobili'Score croise l'offre ouverte (GTFS, GBFS) avec la population au carreau de 200 m (INSEE) pour cartographier l'accès à la mobilité en France, DROM couverts par Filosofi inclus.
-Un modèle prédictif et un optimiseur sous budget proposent ensuite une liste priorisée de stations Citiz, de stations vélo et d'arrêts de bus, avec leur coût, les habitants gagnés et le CO2 évité.
+Un modèle prédictif et un optimiseur sous budget choisissent ensuite **le territoire** où Citiz a le plus à gagner, puis y proposent deux listes priorisées, une par financeur : les stations Citiz (budget Citiz) et les stations vélo et arrêts de bus (budget de la collectivité). Chaque site vient avec son coût, les habitants gagnés et le CO2 évité.
 
 Hackathon Mobility, Epitech x Citiz x Microsoft. Sources : [SOURCES.md](SOURCES.md). Contrats entre modules : [CONTRACTS.md](CONTRACTS.md). Présentation : [slides/presentation.html](slides/presentation.html).
 
@@ -25,15 +25,24 @@ Tous les chiffres viennent des fichiers de `outputs/`.
 | Vélo | régression logistique | 0,87 | 0,64 | 0,53 |
 | Bus | gradient boosting | 0,85 | 0,71 | 0,67 |
 
-**Recommandation pour l'Eurométropole de Strasbourg** (`outputs/recommendations_summary.json` : budget de 2 M€ sur 5 ans, λ = 0,5, horizon 2040)
+**Où Citiz doit-il s'implanter ?** (`outputs/territories_summary.json`, `outputs/territories_citiz.csv`)
 
-- **28 sites** : 14 stations vélo, 12 stations Citiz et 2 arrêts de bus, pour 1,98 M€.
-- **68 465 habitants nouvellement desservis**, soit 71 574 à l'horizon 2040. Le coût revient à **29 € par nouvel habitant desservi**.
-- Environ **106 t de CO2 évitées par an** (hypothèses ADEME, détaillées dans `Config.py` et `outputs/recommendations_summary.json`).
-- **50,4 %** des nouveaux desservis vivent dans les 3 premiers déciles de revenu de la zone.
-- À budget égal, la stratégie naïve « population seule » (sans modèle et sans tenir compte de l'offre existante) ne dessert réellement que 39 067 nouveaux habitants, pour 22 t de CO2 évitées par an.
+- Criblage des 99 intercommunalités de plus de 100 000 habitants (Île-de-France exclue : son autopartage est presque absent des flux GBFS publics), puis simulation de l'optimiseur avec le même budget Citiz (1 M€ sur 5 ans) sur les 10 premières.
+- **Territoire prioritaire : Métropole Nice Côte d'Azur** (549 000 habitants, aucune station d'autopartage publiée ; Mobilize Share y a fermé fin juin 2026). 16 stations y desservent **85 573 habitants** et 7 324 adhérents potentiels. Suivent Lyon (3 925) et Montpellier (3 874).
+- **Strasbourg, territoire témoin** : Citiz y couvre déjà 45 % des habitants, et le même budget n'y dessert que 33 740 habitants (1 391 adhérents potentiels).
+- **Modèle** : gradient boosting appris sur les 80 départements où l'autopartage existe. Test sur Strasbourg, avec le Bas-Rhin tenu hors de l'apprentissage : PR-AUC 0,66 contre 0,59 pour la population seule.
 
-Une seconde étude de cas, la Meurthe-et-Moselle (`--dep 54`), est disponible dans `outputs/recommendations_summary_dep54.json`.
+**Recommandation pour la Métropole Nice Côte d'Azur** (`outputs/recommendations_summary.json`, `outputs/recommendations.csv` : λ = 0,5, horizon 2040)
+
+| Financeur | Budget | Sites | Habitants nouvellement desservis | € / habitant | CO2 évité |
+|---|---|---|---|---|---|
+| **Citiz** | 1 M€ | 16 stations Citiz (14 à Nice, Beaulieu-sur-Mer, Saint-Martin-du-Var) | **85 573** | 11 € | 121 t/an |
+| Collectivité / AOM | 1 M€ | 9 stations vélo, 2 arrêts de bus | 48 494 | 20 € | 2 t/an |
+
+- 48 % des nouveaux desservis par Citiz vivent dans les 3 premiers déciles de revenu de la métropole.
+- Vélo Bleu (Nice) ne publie pas de flux GBFS : les stations vélo recommandées sont à confronter au réseau réel.
+
+Mêmes sorties pour le témoin Strasbourg (`outputs/recommendations_ems.csv`, `recommendations_summary_ems.json`) et pour la Meurthe-et-Moselle (`--dep 54`, `recommendations_dep54.csv`). À Strasbourg, ignorer l'offre existante divise par 2,4 le nombre d'habitants gagnés par Citiz (13 800 contre 33 740).
 
 ## Installation
 
@@ -57,10 +66,11 @@ Chaque étape est un module : `python -m src.<module>`. Tous les paramètres chi
 | 3b | `python -m src.walk_calibration` | calibre le rayon 5 min sur le réseau piéton OSM | `outputs/walk_calibration.json`, `outputs/figures/walk_detour.png` |
 | 4 | `python -m src.accessibility` | options à 5 min par carreau, population servie par point d'offre | `outputs/cells_access.parquet`, `stations_served.parquet`, `commune_access.parquet`, `access_summary.json` |
 | 5 | `python -m src.model` | modèles de valeur d'un site (Citiz, vélo, bus) | `outputs/model_metrics.json`, `outputs/model_*.joblib`, `outputs/figures/model_*.png` |
-| 6 | `python -m src.recommend` | liste priorisée sous budget (par défaut : Eurométropole de Strasbourg) | `outputs/recommendations.csv`, `outputs/recommendations_summary.json` |
+| 5b | `python -m src.territories` | classement national des intercommunalités pour Citiz (criblage + simulation) | `outputs/territories_citiz.csv`, `outputs/territories_summary.json` |
+| 6 | `python -m src.recommend` | deux listes priorisées (Citiz ; collectivité vélo + bus), par défaut sur le territoire prioritaire | `outputs/recommendations.csv`, `outputs/recommendations_summary.json` |
 | 7 | `python -m src.figures` | figures de la présentation | `outputs/figures/slides_*.png` |
 
-Options de `src.recommend` : `--dep 54` (autre territoire), `--budget 2000000`, `--lambda 0.5` (poids de l'équité), `--no-split` (pas d'enveloppes par type).
+Options de `src.recommend` : `--area ems` (Strasbourg, témoin), `--area epci:<siren>` (toute intercommunalité), `--dep 54` (département), `--citiz-budget 1000000`, `--public-budget 1000000`, `--lambda 0.5` (poids de l'équité), `--no-split` (vélo et bus sans enveloppes). Une zone autre que le territoire prioritaire écrit des fichiers suffixés (`recommendations_ems.csv`…).
 
 ## Démo
 
@@ -78,11 +88,13 @@ N'utilisez pas `.venv/bin/streamlit` : son shebang est cassé.
 python -m pytest
 ```
 
-8 tests passent en environ 3,5 s :
+24 tests passent en environ 6 s :
 
 - `tests/test_accessibility.py` : comptage des options, population servie et score 0 des carreaux sans option.
 - `tests/test_optimize.py` : comparaison du glouton à la force brute sur 40 petites instances. Il atteint en moyenne 97,3 % de l'optimum, et 88,4 % au minimum.
 - `tests/test_recommend.py` : respect du budget, exclusion des carreaux déjà desservis, effet de λ, coût de détour des arrêts de bus.
+- `tests/test_model.py` : variables autorisées, sommes sur grille, prédiction hors pli, backtest par département.
+- `tests/test_territories.py` : rattachement des communes (et arrondissements de Paris, Lyon, Marseille) aux intercommunalités, criblage, séparation des financeurs.
 
 ## Temps d'exécution mesurés
 
@@ -114,6 +126,7 @@ Les durées de `download`, `population` et `offer` n'ont pas été mesurées dan
 │   ├── walk_calibration.py# 3b. calibration du rayon de marche (OSM)
 │   ├── accessibility.py   # 4. indicateurs d'accessibilité
 │   ├── model.py           # 5. modèles de valeur d'un site
+│   ├── territories.py     # 5b. classement national des territoires pour Citiz
 │   ├── optimize.py        # 6. glouton budgété (algorithme)
 │   ├── recommend.py       # 6. orchestration de la recommandation
 │   ├── figures.py         # figures de la présentation
