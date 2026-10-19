@@ -1,0 +1,14 @@
+# Python 3.9 – versions installées dans .venv (pip freeze), dépendances directes uniquement
+numpy==2.0.2
+pandas==2.3.3
+pyarrow==21.0.0
+scipy==1.13.1
+scikit-learn==1.6.1
+pyproj==3.6.1
+requests==2.32.5
+openpyxl==3.1.5
+matplotlib==3.9.4
+joblib==1.5.3
+streamlit==1.50.0
+pydeck==0.9.3
+pytest==8.4.2

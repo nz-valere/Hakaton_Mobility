@@ -1,0 +1,399 @@
+{
+  "offer_source": "offer.parquet@1792404814",
+  "walk_radius_m": 282.00789622109414,
+  "cv": "GroupKFold par département",
+  "pu_note": "apprentissage restreint aux communes où le réseau du type opère (positive-unlabeled)",
+  "kinds": {
+    "citiz": {
+      "n_train": 107672,
+      "n_eligible": 107672,
+      "positive_rate": 0.0837915149713946,
+      "n_departements": 80,
+      "folds": 5,
+      "features": [
+        "pop_r5",
+        "men_r5",
+        "dens_1k",
+        "dens_3k",
+        "income_pc_1k",
+        "poverty_rate_1k",
+        "share_18_39_1k",
+        "share_65p_1k",
+        "share_kids_1k",
+        "share_1ind_1k",
+        "share_coll_1k",
+        "share_soc_1k",
+        "share_owner_1k",
+        "carfree_share",
+        "multicar_share",
+        "log_com_pop",
+        "d_com_centre",
+        "n_rail_r5",
+        "n_rail_1k",
+        "d_rail",
+        "n_transit_r5",
+        "n_transit_1k",
+        "d_transit",
+        "n_bike_r5",
+        "n_bike_1k",
+        "d_bike",
+        "n_scooter_r5",
+        "n_scooter_1k",
+        "d_scooter"
+      ],
+      "models": {
+        "hgb": {
+          "pooled": {
+            "roc_auc": 0.8964064740995232,
+            "pr_auc": 0.45586123200361833,
+            "brier": 0.058879085211592214
+          },
+          "fold_mean": {
+            "roc_auc": 0.8990125052731708,
+            "pr_auc": 0.46624922405887126,
+            "brier": 0.058877880783962035
+          },
+          "fold_std": {
+            "roc_auc": 0.011820916295534771,
+            "pr_auc": 0.06353365948576752,
+            "brier": 0.009937899810720912
+          }
+        },
+        "logit": {
+          "pooled": {
+            "roc_auc": 0.8837260082719463,
+            "pr_auc": 0.4357086823587439,
+            "brier": 0.05866119341406941
+          },
+          "fold_mean": {
+            "roc_auc": 0.8887375034765617,
+            "pr_auc": 0.45092507656224623,
+            "brier": 0.058658319479162245
+          },
+          "fold_std": {
+            "roc_auc": 0.018824895562573163,
+            "pr_auc": 0.09068223029619045,
+            "brier": 0.010975547457640296
+          }
+        },
+        "pop_only": {
+          "pooled": {
+            "roc_auc": 0.8148210113859201,
+            "pr_auc": 0.26188060500227517,
+            "brier": 0.06835553386461551
+          },
+          "fold_mean": {
+            "roc_auc": 0.821268126188928,
+            "pr_auc": 0.2795013177449156,
+            "brier": 0.0683528766367881
+          },
+          "fold_std": {
+            "roc_auc": 0.018021702700429354,
+            "pr_auc": 0.07604999865414744,
+            "brier": 0.0096464842599361
+          }
+        }
+      },
+      "permutation_importance": {
+        "men_r5": 0.27791117837834717,
+        "log_com_pop": 0.04718724603581381,
+        "share_18_39_1k": 0.04648894744264925,
+        "d_transit": 0.04482708179729694,
+        "d_rail": 0.02957340687800229,
+        "dens_3k": 0.027893784573608766,
+        "d_bike": 0.026346646424891523,
+        "dens_1k": 0.021935726404303708,
+        "share_soc_1k": 0.021669777478132073,
+        "share_coll_1k": 0.020321536891946528,
+        "n_rail_1k": 0.01901229095308175,
+        "n_transit_r5": 0.018713188555740556,
+        "income_pc_1k": 0.01822932204383528,
+        "n_transit_1k": 0.01638797124252402,
+        "carfree_share": 0.01431940864396782,
+        "share_1ind_1k": 0.01026449383158797,
+        "n_scooter_1k": 0.004993779653988173,
+        "poverty_rate_1k": 0.0017614902669536396,
+        "share_owner_1k": 0.0017386691754262735,
+        "n_rail_r5": 6.650434032127543e-05,
+        "share_kids_1k": -0.0032096925641085794,
+        "share_65p_1k": -0.006928988373562835,
+        "multicar_share": -0.008433855367283563,
+        "d_com_centre": -0.012724627598314534,
+        "d_scooter": -0.013145347807109131,
+        "n_bike_1k": -0.024829106818826403,
+        "n_bike_r5": -0.03189131036342916,
+        "pop_r5": -0.03695123212020122,
+        "n_scooter_r5": -0.046442792158644775
+      },
+      "capacity": {
+        "n": 8962,
+        "spearman_hgb": 0.44251707489883413,
+        "spearman_pop_only": 0.45991428351884767,
+        "mae_hgb": 1.5252949675956586,
+        "mae_mean_baseline": 1.4870564937591553,
+        "unit": "véhicules"
+      },
+      "selected_model": "hgb",
+      "p_ref": 0.5562471733194709,
+      "citiz_penetration": 0.05858386573299006,
+      "pop_served_citiz_fr": 2219041.0
+    },
+    "bike": {
+      "n_train": 133039,
+      "n_eligible": 133039,
+      "positive_rate": 0.1630273829478574,
+      "n_departements": 66,
+      "folds": 5,
+      "features": [
+        "pop_r5",
+        "men_r5",
+        "dens_1k",
+        "dens_3k",
+        "income_pc_1k",
+        "poverty_rate_1k",
+        "share_18_39_1k",
+        "share_65p_1k",
+        "share_kids_1k",
+        "share_1ind_1k",
+        "share_coll_1k",
+        "share_soc_1k",
+        "share_owner_1k",
+        "carfree_share",
+        "multicar_share",
+        "log_com_pop",
+        "d_com_centre",
+        "n_rail_r5",
+        "n_rail_1k",
+        "d_rail",
+        "n_transit_r5",
+        "n_transit_1k",
+        "d_transit",
+        "n_carsharing_r5",
+        "n_carsharing_1k",
+        "d_carsharing",
+        "n_citiz_r5",
+        "n_citiz_1k",
+        "d_citiz"
+      ],
+      "models": {
+        "hgb": {
+          "pooled": {
+            "roc_auc": 0.8661673837921438,
+            "pr_auc": 0.6126914517457056,
+            "brier": 0.09514498238626745
+          },
+          "fold_mean": {
+            "roc_auc": 0.8635113205803482,
+            "pr_auc": 0.5981534631114075,
+            "brier": 0.09515625404802404
+          },
+          "fold_std": {
+            "roc_auc": 0.030811879809011296,
+            "pr_auc": 0.11853963358559653,
+            "brier": 0.022037738661854628
+          }
+        },
+        "logit": {
+          "pooled": {
+            "roc_auc": 0.8730484238729049,
+            "pr_auc": 0.6385445647862797,
+            "brier": 0.09042112822616305
+          },
+          "fold_mean": {
+            "roc_auc": 0.8701522065279906,
+            "pr_auc": 0.6092876701906565,
+            "brier": 0.09042976481866183
+          },
+          "fold_std": {
+            "roc_auc": 0.022166351210195775,
+            "pr_auc": 0.11733287311888078,
+            "brier": 0.01817665425358792
+          }
+        },
+        "pop_only": {
+          "pooled": {
+            "roc_auc": 0.8260949643636646,
+            "pr_auc": 0.526404913017315,
+            "brier": 0.10422898438931481
+          },
+          "fold_mean": {
+            "roc_auc": 0.8242034990405873,
+            "pr_auc": 0.5008964738031075,
+            "brier": 0.10423907838915214
+          },
+          "fold_std": {
+            "roc_auc": 0.031384632152199665,
+            "pr_auc": 0.1424519452630531,
+            "brier": 0.021351162108295345
+          }
+        }
+      },
+      "permutation_importance": {
+        "men_r5": 0.21021641906848845,
+        "share_1ind_1k": 0.050624007577076635,
+        "share_18_39_1k": 0.026505918574802223,
+        "d_rail": 0.02588584256606563,
+        "dens_3k": 0.025022557309302435,
+        "share_owner_1k": 0.023363864775482097,
+        "d_citiz": 0.016245133363698483,
+        "dens_1k": 0.015015840076056238,
+        "d_transit": 0.014876263640668075,
+        "n_transit_r5": 0.011295261193153642,
+        "d_carsharing": 0.00982360219053883,
+        "d_com_centre": 0.008227774013701636,
+        "share_coll_1k": 0.006561646316212921,
+        "poverty_rate_1k": 0.006031879036217047,
+        "pop_r5": 0.005918601525661482,
+        "multicar_share": 0.00417899333415032,
+        "share_65p_1k": 0.003442025943425205,
+        "share_soc_1k": 0.002917420824335659,
+        "income_pc_1k": 0.0025409324046092863,
+        "log_com_pop": 0.0019608292245134975,
+        "n_rail_r5": 0.001936735725055705,
+        "n_carsharing_r5": 0.0014954096564328,
+        "n_citiz_r5": 0.0005373807325662616,
+        "n_carsharing_1k": 0.00020095179240623798,
+        "n_citiz_1k": 5.2892722870456765e-05,
+        "n_rail_1k": -0.0002545920185867227,
+        "n_transit_1k": -0.0006814699638720464,
+        "share_kids_1k": -0.0019198122929113826,
+        "carfree_share": -0.005195081378099579
+      },
+      "capacity": {
+        "n": 21609,
+        "spearman_hgb": 0.7429376480025898,
+        "spearman_pop_only": 0.6601981628973314,
+        "mae_hgb": 13.177130786423412,
+        "mae_mean_baseline": 18.73529624938965,
+        "unit": "places / vélos"
+      },
+      "selected_model": "logit",
+      "p_ref": 0.42478803542843674
+    },
+    "bus": {
+      "n_train": 250000,
+      "n_eligible": 1715294,
+      "positive_rate": 0.28736,
+      "n_departements": 98,
+      "folds": 5,
+      "features": [
+        "pop_r5",
+        "men_r5",
+        "dens_1k",
+        "dens_3k",
+        "income_pc_1k",
+        "poverty_rate_1k",
+        "share_18_39_1k",
+        "share_65p_1k",
+        "share_kids_1k",
+        "share_1ind_1k",
+        "share_coll_1k",
+        "share_soc_1k",
+        "share_owner_1k",
+        "carfree_share",
+        "multicar_share",
+        "log_com_pop",
+        "d_com_centre",
+        "n_bike_r5",
+        "n_bike_1k",
+        "d_bike",
+        "n_scooter_r5",
+        "n_scooter_1k",
+        "d_scooter",
+        "n_carsharing_r5",
+        "n_carsharing_1k",
+        "d_carsharing",
+        "n_citiz_r5",
+        "n_citiz_1k",
+        "d_citiz"
+      ],
+      "models": {
+        "hgb": {
+          "pooled": {
+            "roc_auc": 0.8536172645059295,
+            "pr_auc": 0.7067093062246557,
+            "brier": 0.13516882975682185
+          },
+          "fold_mean": {
+            "roc_auc": 0.8525635840631193,
+            "pr_auc": 0.7098997485883094,
+            "brier": 0.13516354461257823
+          },
+          "fold_std": {
+            "roc_auc": 0.01880877653645433,
+            "pr_auc": 0.021839247076281626,
+            "brier": 0.015468205982323456
+          }
+        },
+        "logit": {
+          "pooled": {
+            "roc_auc": 0.8474695127306051,
+            "pr_auc": 0.6958788677129993,
+            "brier": 0.1375367859818269
+          },
+          "fold_mean": {
+            "roc_auc": 0.84657676909075,
+            "pr_auc": 0.7009409980280736,
+            "brier": 0.1375336469783193
+          },
+          "fold_std": {
+            "roc_auc": 0.015301767620118919,
+            "pr_auc": 0.01794722700247971,
+            "brier": 0.014507702297433958
+          }
+        },
+        "pop_only": {
+          "pooled": {
+            "roc_auc": 0.8336921183556134,
+            "pr_auc": 0.6725228954150353,
+            "brier": 0.14338298280951708
+          },
+          "fold_mean": {
+            "roc_auc": 0.83336428260234,
+            "pr_auc": 0.6744335479728881,
+            "brier": 0.1433796548723817
+          },
+          "fold_std": {
+            "roc_auc": 0.01891481271546841,
+            "pr_auc": 0.019287594856485176,
+            "brier": 0.015227725425135204
+          }
+        }
+      },
+      "permutation_importance": {
+        "men_r5": 0.35201839142565655,
+        "dens_1k": 0.021137842697642146,
+        "log_com_pop": 0.014147614943701314,
+        "dens_3k": 0.011594532923576447,
+        "share_coll_1k": 0.008846208096895514,
+        "d_bike": 0.004893072301322743,
+        "d_citiz": 0.004325585135502297,
+        "multicar_share": 0.0028443407845509063,
+        "carfree_share": 0.0027796383576412418,
+        "share_1ind_1k": 0.0021965369104079238,
+        "pop_r5": 0.001630388808734562,
+        "n_citiz_r5": 0.0014893201768455173,
+        "n_scooter_1k": 0.0013406770810594864,
+        "share_soc_1k": 0.0007334559025599466,
+        "income_pc_1k": 0.0006203264460927042,
+        "d_scooter": 0.0005353442243801373,
+        "d_com_centre": 0.00033048931177737106,
+        "n_scooter_r5": 0.0002955861209575546,
+        "n_citiz_1k": 0.00020958883629425737,
+        "n_bike_1k": 0.00019441237181150317,
+        "n_bike_r5": 0.0001635812989757198,
+        "share_owner_1k": 9.179346191027597e-05,
+        "share_kids_1k": 2.4981997024497993e-05,
+        "n_carsharing_1k": -2.956467787455323e-05,
+        "n_carsharing_r5": -4.008024056197564e-05,
+        "share_65p_1k": -0.000114667082902901,
+        "poverty_rate_1k": -0.0006515350565013215,
+        "d_carsharing": -0.0013706284004600573,
+        "share_18_39_1k": -0.0016336943391484688
+      },
+      "selected_model": "hgb",
+      "p_ref": 0.5865535129956766
+    }
+  },
+  "runtime_s": 1529.0
+}

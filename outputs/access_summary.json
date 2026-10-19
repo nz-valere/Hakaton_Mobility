@@ -1,0 +1,315 @@
+{
+  "radius_m": 282.00789622109414,
+  "score_basis": "n_options",
+  "detour": 1.4184,
+  "offer_file": "/Users/antoine/Documents/EPITECH/Hackaton_Mobilite/data/interim/offer.parquet",
+  "population": 63783568.5,
+  "n_cells": 2324577,
+  "national": {
+    "population": 63783568.5,
+    "share_no_option": 0.36027428443424264,
+    "share_served_by_mode": {
+      "rail": 0.047302801817994865,
+      "transit": 0.6206558433619154,
+      "bike": 0.11562259957280377,
+      "scooter": 0.09914197572686764,
+      "carsharing": 0.004598245392933762,
+      "citiz": 0.03479016700045561
+    },
+    "n_options_mean": 3.406336774650669,
+    "n_modes_mean": 0.922111632872971,
+    "score_mean": 32.306633944602844,
+    "score_2sfca_mean": 32.306156433141545
+  },
+  "by_territory": {
+    "Métropole": {
+      "population": 62592659.0,
+      "share_no_option": 0.3602180888337081,
+      "share_served_by_mode": {
+        "rail": 0.04820280122625882,
+        "transit": 0.6203528835546034,
+        "bike": 0.11739180947721042,
+        "scooter": 0.101028285122062,
+        "carsharing": 0.0046472782055799865,
+        "citiz": 0.03545209670674
+      },
+      "n_options_mean": 3.4340261850834617,
+      "n_modes_mean": 0.9270751542924547,
+      "score_mean": 32.327413167173496,
+      "score_2sfca_mean": 32.14204196821227
+    },
+    "Martinique": {
+      "population": 306745.0,
+      "share_no_option": 0.2431074671143784,
+      "share_served_by_mode": {
+        "rail": 0.0,
+        "transit": 0.7568925328856216,
+        "bike": 0.0,
+        "scooter": 0.0,
+        "carsharing": 0.007846908670067971,
+        "citiz": 0.0
+      },
+      "n_options_mean": 2.4307128070547197,
+      "n_modes_mean": 0.7647394415556896,
+      "score_mean": 37.283451417301016,
+      "score_2sfca_mean": 59.00058941466039
+    },
+    "La Réunion": {
+      "population": 884164.5,
+      "share_no_option": 0.4049014634720123,
+      "share_served_by_mode": {
+        "rail": 0.0,
+        "transit": 0.5948384039395384,
+        "bike": 0.03048810487188753,
+        "scooter": 0.0,
+        "carsharing": 0.0,
+        "citiz": 0.0
+      },
+      "n_options_mean": 1.7845955136176583,
+      "n_modes_mean": 0.6253265088114259,
+      "score_mean": 29.108992930614157,
+      "score_2sfca_mean": 34.663157755146244
+    }
+  },
+  "by_income_decile": {
+    "1": {
+      "population": 6378353.0,
+      "share_no_option": 0.17882508227437396,
+      "share_served_by_mode": {
+        "rail": 0.03171038040697967,
+        "transit": 0.8015538650808446,
+        "bike": 0.12326167899456177,
+        "scooter": 0.11221533207710517,
+        "carsharing": 0.004639834139001087,
+        "citiz": 0.024931592842227453
+      },
+      "n_options_mean": 3.261285867997585,
+      "n_modes_mean": 1.0983126835407198,
+      "score_mean": 45.48171152568697,
+      "score_2sfca_mean": 31.96022558958402,
+      "income_pc_range": [
+        8366.56842105263,
+        18016.222222222223
+      ]
+    },
+    "2": {
+      "population": 6377607.5,
+      "share_no_option": 0.28617996639021764,
+      "share_served_by_mode": {
+        "rail": 0.040862423722375515,
+        "transit": 0.6963119790611134,
+        "bike": 0.10913591029237846,
+        "scooter": 0.08201531687235378,
+        "carsharing": 0.004924338790055675,
+        "citiz": 0.027808076931670693
+      },
+      "n_options_mean": 2.7384943334941827,
+      "n_modes_mean": 0.9610580456699476,
+      "score_mean": 36.185879964391034,
+      "score_2sfca_mean": 32.22567085227493,
+      "income_pc_range": [
+        18016.233333333334,
+        20294.465625
+      ]
+    },
+    "3": {
+      "population": 6379049.0,
+      "share_no_option": 0.37248083530946385,
+      "share_served_by_mode": {
+        "rail": 0.03573518560525244,
+        "transit": 0.6130379308890714,
+        "bike": 0.08369891813027303,
+        "scooter": 0.07088196061826771,
+        "carsharing": 0.005327126347516691,
+        "citiz": 0.03088305168999329
+      },
+      "n_options_mean": 2.35755807801445,
+      "n_modes_mean": 0.8395641732803746,
+      "score_mean": 30.133658650372496,
+      "score_2sfca_mean": 31.234831959277937,
+      "income_pc_range": [
+        20294.483565004088,
+        21861.8
+      ]
+    },
+    "4": {
+      "population": 6378406.5,
+      "share_no_option": 0.42621217383997084,
+      "share_served_by_mode": {
+        "rail": 0.03286643772233708,
+        "transit": 0.5589831096528577,
+        "bike": 0.07320049294443683,
+        "scooter": 0.06629234119838552,
+        "carsharing": 0.004357436296981072,
+        "citiz": 0.028381304954458453
+      },
+      "n_options_mean": 2.2421772585362816,
+      "n_modes_mean": 0.7640811227694566,
+      "score_mean": 26.751797566523866,
+      "score_2sfca_mean": 30.08941625859061,
+      "income_pc_range": [
+        21861.813436692508,
+        23140.312307692308
+      ]
+    },
+    "5": {
+      "population": 6378376.0,
+      "share_no_option": 0.44487358537659116,
+      "share_served_by_mode": {
+        "rail": 0.029301110502109002,
+        "transit": 0.5393941968927514,
+        "bike": 0.07650427005243968,
+        "scooter": 0.06475645211257536,
+        "carsharing": 0.004073685841035398,
+        "citiz": 0.035193205919500516
+      },
+      "n_options_mean": 2.1795711792468806,
+      "n_modes_mean": 0.7492229213204114,
+      "score_mean": 25.61882119210281,
+      "score_2sfca_mean": 29.754937934044655,
+      "income_pc_range": [
+        23140.31428571429,
+        24340.27543859649
+      ]
+    },
+    "6": {
+      "population": 6378326.0,
+      "share_no_option": 0.44903968533436517,
+      "share_served_by_mode": {
+        "rail": 0.025720306550652945,
+        "transit": 0.5331555646418825,
+        "bike": 0.07330990921442397,
+        "scooter": 0.06661442202860124,
+        "carsharing": 0.004320804549657701,
+        "citiz": 0.03678120246597618
+      },
+      "n_options_mean": 2.142006852581696,
+      "n_modes_mean": 0.7399022094511946,
+      "score_mean": 25.188073542336976,
+      "score_2sfca_mean": 29.981541329182612,
+      "income_pc_range": [
+        24340.29,
+        25583.862
+      ]
+    },
+    "7": {
+      "population": 6378542.5,
+      "share_no_option": 0.43552245673678586,
+      "share_served_by_mode": {
+        "rail": 0.028050451964535785,
+        "transit": 0.5449397726831796,
+        "bike": 0.0805509252309599,
+        "scooter": 0.07349790332195795,
+        "carsharing": 0.0030071133021375967,
+        "citiz": 0.039236628116846445
+      },
+      "n_options_mean": 2.351239252540843,
+      "n_modes_mean": 0.7692827946196172,
+      "score_mean": 25.73286545711658,
+      "score_2sfca_mean": 31.22137121450551,
+      "income_pc_range": [
+        25583.868292682928,
+        27038.707093184978
+      ]
+    },
+    "8": {
+      "population": 6378184.5,
+      "share_no_option": 0.40079257663368,
+      "share_served_by_mode": {
+        "rail": 0.029901298715959063,
+        "transit": 0.5780001346778225,
+        "bike": 0.09060705283768446,
+        "scooter": 0.0825804741145384,
+        "carsharing": 0.004753155071008059,
+        "citiz": 0.041305484342762426
+      },
+      "n_options_mean": 2.6419889546939257,
+      "n_modes_mean": 0.8271475997597749,
+      "score_mean": 27.887791692918263,
+      "score_2sfca_mean": 32.72447389770552,
+      "income_pc_range": [
+        27038.75,
+        28999.266666666666
+      ]
+    },
+    "9": {
+      "population": 6378363.0,
+      "share_no_option": 0.3570996978378308,
+      "share_served_by_mode": {
+        "rail": 0.045940627712784614,
+        "transit": 0.6171469074431793,
+        "bike": 0.1292210085879402,
+        "scooter": 0.11326691503760447,
+        "carsharing": 0.00549945181859358,
+        "citiz": 0.05066817300928154
+      },
+      "n_options_mean": 3.754761605759973,
+      "n_modes_mean": 0.9617430836093838,
+      "score_mean": 32.11974519637719,
+      "score_2sfca_mean": 34.65807545760566,
+      "income_pc_range": [
+        28999.274193548386,
+        32477.338461538464
+      ]
+    },
+    "10": {
+      "population": 6378360.5,
+      "share_no_option": 0.2517052775552589,
+      "share_served_by_mode": {
+        "rail": 0.17294036610191602,
+        "transit": 0.7240460930359769,
+        "bike": 0.3167389958595159,
+        "scooter": 0.25930009757209554,
+        "carsharing": 0.005079518475006234,
+        "citiz": 0.03271263830258575
+      },
+      "n_options_mean": 10.394331976061874,
+      "n_modes_mean": 1.5108177093470962,
+      "score_mean": 47.966786201563856,
+      "score_2sfca_mean": 39.211176759294176,
+      "income_pc_range": [
+        32477.339130434786,
+        73663.82333333333
+      ]
+    }
+  },
+  "offer": {
+    "rail": {
+      "n_points": 3392,
+      "n_points_in_territories": 3392,
+      "pop_served_median": 285.25,
+      "share_points_serving_nobody": 0.05601415094339623
+    },
+    "transit": {
+      "n_points": 174047,
+      "n_points_in_territories": 172407,
+      "pop_served_median": 289.0,
+      "share_points_serving_nobody": 0.03430107959344315
+    },
+    "bike": {
+      "n_points": 5711,
+      "n_points_in_territories": 5694,
+      "pop_served_median": 1642.5,
+      "share_points_serving_nobody": 0.019085974435300298
+    },
+    "scooter": {
+      "n_points": 22836,
+      "n_points_in_territories": 22836,
+      "pop_served_median": 2558.5,
+      "share_points_serving_nobody": 0.010641093011035208
+    },
+    "carsharing": {
+      "n_points": 417,
+      "n_points_in_territories": 417,
+      "pop_served_median": 452.5,
+      "share_points_serving_nobody": 0.016786570743405275
+    },
+    "citiz": {
+      "n_points": 1570,
+      "n_points_in_territories": 1570,
+      "pop_served_median": 1750.0,
+      "share_points_serving_nobody": 0.009554140127388535
+    }
+  },
+  "seconds": 15.7
+}

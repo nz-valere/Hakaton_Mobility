@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mobili'Score – soutenance</title>
+<style>
+  :root {
+    --bg: #fbfaf8; --ink: #1f2328; --muted: #6b7280; --line: #e5e7eb;
+    --blue: #2b76d6; --blue-dark: #1b4f99; --orange: #e8743b; --green: #1a9e5c;
+    --card: #ffffff; --navy: #14213d;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: #20242c; overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+  #deck { position: absolute; left: 50%; top: 50%; width: 1280px; height: 720px; transform-origin: center center; }
+  .slide { position: absolute; inset: 0; background: var(--bg); color: var(--ink); padding: 56px 72px 48px;
+    display: none; flex-direction: column; overflow: hidden; }
+  .slide.active { display: flex; }
+  .slide h1 { font-size: 44px; line-height: 1.12; margin: 0 0 18px; letter-spacing: -0.5px; }
+  .slide h2 { font-size: 32px; margin: 0 0 6px; letter-spacing: -0.3px; }
+  .slide .kicker { text-transform: uppercase; letter-spacing: 2px; font-size: 13px; color: var(--blue); font-weight: 700; margin-bottom: 8px; }
+  .slide .sub { color: var(--muted); font-size: 19px; margin: 0 0 22px; }
+  .slide p, .slide li { font-size: 20px; line-height: 1.45; }
+  .slide ul { margin: 6px 0; padding-left: 24px; }
+  .slide li { margin-bottom: 8px; }
+  .row { display: flex; gap: 36px; flex: 1; min-height: 0; align-items: stretch; }
+  .col { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; }
+  .col.w2 { flex: 1.6; }
+  .fig { width: 100%; height: 100%; object-fit: contain; min-height: 0; }
+  .figbox { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; }
+  .big { font-size: 150px; font-weight: 800; color: var(--orange); line-height: 1; letter-spacing: -4px; }
+  .kpis { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .kpi { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px 18px; }
+  .kpi .v { font-size: 34px; font-weight: 800; color: var(--blue-dark); line-height: 1.1; }
+  .kpi .l { font-size: 15px; color: var(--muted); margin-top: 4px; }
+  table { border-collapse: collapse; font-size: 17px; width: 100%; }
+  th, td { padding: 7px 10px; border-bottom: 1px solid var(--line); text-align: left; }
+  th { color: var(--muted); font-weight: 600; font-size: 14px; text-transform: uppercase; letter-spacing: .5px; }
+  td.n { text-align: right; font-variant-numeric: tabular-nums; }
+  tr.hl td { background: #eaf2fd; font-weight: 700; }
+  .tag { display: inline-block; background: #eaf2fd; color: var(--blue-dark); border-radius: 999px; padding: 3px 12px; font-size: 14px; font-weight: 600; margin: 0 6px 6px 0; }
+  .note { font-size: 14px; color: var(--muted); margin-top: 10px; }
+  .src { position: absolute; left: 72px; bottom: 18px; font-size: 12px; color: var(--muted); }
+  .grid4 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; flex: 1; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px 20px; }
+  .card h3 { margin: 0 0 6px; font-size: 20px; color: var(--blue-dark); }
+  .card p { font-size: 16.5px; margin: 0; line-height: 1.4; }
+  .title-slide { background: var(--navy); color: #fff; justify-content: center; }
+  .title-slide h1 { font-size: 72px; margin-bottom: 12px; }
+  .title-slide .sub { color: #c9d4ea; font-size: 26px; }
+  .title-slide .kicker { color: #8fb8f2; }
+  code { background: #eef0f3; border-radius: 5px; padding: 2px 7px; font-size: 0.9em; }
+  .title-slide code { background: rgba(255,255,255,.12); color: #fff; }
+  .formula { font-family: ui-monospace, Menlo, Consolas, monospace; background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px 18px; font-size: 16px; line-height: 1.6; }
+  #hud { position: fixed; right: 16px; bottom: 12px; color: #aab; font-size: 13px; z-index: 5; user-select: none; }
+  #bar { position: fixed; left: 0; bottom: 0; height: 3px; background: var(--blue); z-index: 5; transition: width .2s; }
+  @media print {
+    html, body { overflow: visible; background: #fff; }
+    #deck { position: static; transform: none !important; width: auto; height: auto; }
+    .slide { display: flex !important; position: relative; width: 1280px; height: 720px; page-break-after: always; }
+    #hud, #bar { display: none; }
+    @page { size: 1280px 720px; margin: 0; }
+  }
+</style>
+</head>
+<body>
+<div id="deck">
+
+<!-- 1 -->
+<section class="slide title-slide">
+  <div class="kicker">Hackathon Mobility · Epitech × Citiz × Microsoft</div>
+  <h1>Mobili'Score</h1>
+  <p class="sub">Qui a vraiment une option de transport à 5 minutes de chez soi,<br>et où en ajouter pour toucher le plus de monde au moindre coût ?</p>
+  <p style="color:#c9d4ea;font-size:18px;margin-top:40px">Diagnostic France entière (DROM couverts par l'INSEE inclus) · Recommandation chiffrée pour l'Eurométropole de Strasbourg</p>
+</section>
+
+<!-- 2 -->
+<section class="slide">
+  <div class="kicker">Le problème</div>
+  <h1>Citiz doit choisir où ouvrir ses prochaines stations</h1>
+  <div class="row">
+    <div class="col">
+      <ul>
+        <li>Bus, tram, vélos, trottinettes, autopartage : l'offre se multiplie, mais elle est <b>très inégalement répartie</b>.</li>
+        <li>Une station mal placée immobilise une voiture et ne trouve pas ses usagers. Une station bien placée remplace plusieurs voitures personnelles.</li>
+        <li>Depuis la loi LOM, tout est en <b>open data</b> : arrêts (GTFS), stations (GBFS), population au carreau de 200 m (INSEE).</li>
+      </ul>
+    </div>
+    <div class="col">
+      <div class="card" style="margin-bottom:14px"><h3>1 · Cartographier</h3><p>Nombre d'options de transport à 5 min de marche, du plus froid au plus chaud.</p></div>
+      <div class="card" style="margin-bottom:14px"><h3>2 · Qui est concerné</h3><p>Chaque arrêt et station, et le nombre d'habitants qu'il dessert.</p></div>
+      <div class="card"><h3>3 · Où investir</h3><p>Liste priorisée de stations Citiz, de stations vélo et d'arrêts de bus sous contrainte de budget.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 -->
+<section class="slide">
+  <div class="kicker">Le chiffre</div>
+  <div class="row">
+    <div class="col">
+      <div class="big">36&nbsp;%</div>
+      <p style="font-size:26px;margin-top:14px">des habitants n'ont <b>aucune</b> option de transport à 5 minutes de marche de chez eux.</p>
+      <p class="sub" style="font-size:18px">63,8 M d'habitants analysés. Métropole 36 %, Martinique 24 %, La Réunion 40 %.</p>
+      <p style="font-size:20px">Seuls <b style="color:var(--orange)">3,5 %</b> des habitants ont une station Citiz à 5 min.</p>
+    </div>
+    <div class="col w2"><div class="figbox"><img class="fig" src="../outputs/figures/slides_modes.png" alt="Part de la population desservie à 5 min, par mode"></div></div>
+  </div>
+  <div class="src">Source : outputs/access_summary.json (2 324 577 carreaux habités, 207 973 points d'offre)</div>
+</section>
+
+<!-- 4 -->
+<section class="slide">
+  <div class="kicker">Objectif 1 · La carte</div>
+  <div class="row">
+    <div class="col" style="flex:1.1">
+      <h2>Croiser 4 sources de nature et d'échelle différentes</h2>
+      <ul style="margin-top:16px">
+        <li><b>Population</b> : 2,3 M de carreaux de 200 m (INSEE Filosofi 2021), avec revenus, motorisation (RP 2021) et projections 2040 (Omphale).</li>
+        <li><b>Offre</b> : 207 973 points, après classement en 6 modes et suppression des doublons de l'agrégat national GTFS et des flux GBFS.</li>
+        <li><b>Réseau piéton</b> OpenStreetMap pour calibrer les « 5 minutes ».</li>
+        <li><b>Score 0-100</b> : 0 = aucune option, sinon rang national du nombre d'options à 5 min.</li>
+      </ul>
+      <p class="note">La Guadeloupe, la Guyane et Mayotte ne sont pas couvertes par les carreaux INSEE : on ne peut pas les cartographier à cette maille.</p>
+    </div>
+    <div class="col"><div class="figbox"><img class="fig" src="../outputs/figures/slides_map_france.png" alt="Carte de l'accès à la mobilité en France métropolitaine"></div></div>
+  </div>
+</section>
+
+<!-- 5 -->
+<section class="slide">
+  <div class="kicker">Objectif 2 · Qui est concerné ?</div>
+  <h2>Les plus exposés ne sont pas les plus modestes : une courbe en U</h2>
+  <div class="row">
+    <div class="col w2"><div class="figbox"><img class="fig" src="../outputs/figures/slides_deciles.png" alt="Part sans option par décile de revenu"></div></div>
+    <div class="col">
+      <p><b>18 %</b> sans option dans le 1er décile de revenu, <b>45 %</b> dans le 6e, <b>25 %</b> dans le 10e.</p>
+      <p>Conséquence : le revenu seul ne suffit pas à définir le besoin. On combine <b>pauvreté</b>, <b>ménages sans voiture</b> et <b>faible accès actuel</b>.</p>
+      <p class="note">Chaque arrêt et station affiche aussi sa population desservie dans la démo. Médiane : 289 habitants pour un arrêt de bus, 1 750 pour une station Citiz.</p>
+    </div>
+  </div>
+  <div class="src">Source : outputs/access_summary.json (déciles nationaux de revenu par habitant du carreau)</div>
+</section>
+
+<!-- 6 -->
+<section class="slide">
+  <div class="kicker">Méthode · « 5 minutes à pied »</div>
+  <h2>5 min = 400 m de trottoir = 282 m à vol d'oiseau</h2>
+  <div class="row">
+    <div class="col w2"><div class="figbox"><img class="fig" src="../outputs/figures/walk_detour.png" alt="Calibration du détour piéton"></div></div>
+    <div class="col">
+      <p style="font-size:18px">Graphe piéton OSM de Strasbourg (237 399 nœuds) et 400 origines tirées selon la population. Détour <b>1,42</b> (IC 95 % : 1,40–1,44).</p>
+      <table>
+        <tr><th>Rayon</th><th>Précision</th><th>Rappel</th><th>Biais</th></tr>
+        <tr class="hl"><td>282 m (retenu)</td><td class="n">0,92</td><td class="n">0,99</td><td class="n">+5 %</td></tr>
+        <tr><td>308 m (détour 1,3)</td><td class="n">0,91</td><td class="n">0,99</td><td class="n">+24 %</td></tr>
+        <tr><td>400 m naïf</td><td class="n">0,86</td><td class="n">1,00</td><td class="n">+101 %</td></tr>
+      </table>
+      <p class="note">Validation contre les vraies distances réseau de 1 000 arrêts et stations vers 2 398 carreaux. Un cercle de 400 m doublerait le nombre d'options comptées.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 7 -->
+<section class="slide">
+  <div class="kicker">Objectif 3 · Le modèle prédictif</div>
+  <h2>L'offre existante révèle la demande</h2>
+  <div class="row">
+    <div class="col">
+      <ul style="margin-top:4px">
+        <li style="font-size:17px">Un modèle par équipement estime si un carreau <b>ressemble aux sites existants</b>, à partir de 29 variables : ménages, densité, revenus, offre des <i>autres</i> modes.</li>
+        <li style="font-size:17px">Apprentissage <b>positif-non étiqueté</b>, avec une validation croisée <b>spatiale par département</b>.</li>
+      </ul>
+      <table style="margin-top:6px">
+        <tr><th>Type</th><th>Modèle</th><th>PR-AUC</th><th>Pop. seule</th></tr>
+        <tr class="hl"><td>Citiz</td><td>boosting</td><td class="n">0,46</td><td class="n">0,26</td></tr>
+        <tr><td>Vélo</td><td>logistique</td><td class="n">0,64</td><td class="n">0,53</td></tr>
+        <tr><td>Bus</td><td>boosting</td><td class="n">0,71</td><td class="n">0,67</td></tr>
+      </table>
+      <p class="note">Limite : le modèle ne prédit pas le nombre de voitures par station. Pour la capacité Citiz, il ne fait pas mieux que la baseline (Spearman 0,44 contre 0,46).</p>
+    </div>
+    <div class="col w2"><div class="figbox"><img class="fig" src="../outputs/figures/model_citiz_curves.png" alt="Courbes ROC, précision-rappel et calibration du modèle Citiz"></div></div>
+  </div>
+  <div class="src">Source : outputs/model_metrics.json (Citiz : 107 672 carreaux, 80 départements, 5 plis)</div>
+</section>
+
+<!-- 8 -->
+<section class="slide">
+  <div class="kicker">Objectif 3 · L'optimisation</div>
+  <h2>Toucher le plus d'habitants non desservis, à budget fixé</h2>
+  <div class="row">
+    <div class="col">
+      <div class="formula">
+        max Σ<sub>carreaux</sub> poids<sub>i</sub> × valeur<sub>site</sub> × [i nouvellement couvert]<br>
+        sous coût(sites) ≤ 2 M€ (sur 5 ans)<br><br>
+        poids<sub>i</sub> = habitants 2040 × (1 + 4·λ·besoin<sub>i</sub>)<br>
+        valeur = propension / propension d'un site existant typique
+      </div>
+      <ul style="margin-top:16px">
+        <li style="font-size:18px">Un carreau <b>déjà desservi</b> par un type ne compte pas pour ce type.</li>
+        <li style="font-size:18px">Coût de chaque équipement, et pour le bus, coût d'exploitation du détour de ligne.</li>
+      </ul>
+    </div>
+    <div class="col">
+      <div class="card" style="margin-bottom:14px"><h3>Glouton paresseux + garde-fou</h3><p>Garantie théorique : au moins (1 − 1/e)/2 de l'optimum. <b>Testé contre la force brute</b> : 97,3 % de l'optimum en moyenne, 88,4 % au pire.</p></div>
+      <div class="card"><h3>Des choix normatifs, assumés et réglables</h3><p>Enveloppes par financeur (40 % Citiz, 30 % vélo, 30 % bus) et 15 % du budget réservés aux zones peu denses. Sans elles, l'optimiseur met presque tout sur le vélo en centre-ville.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 9 -->
+<section class="slide">
+  <div class="kicker">La recommandation · Eurométropole de Strasbourg</div>
+  <div class="row">
+    <div class="col">
+      <h2 style="margin-bottom:16px">28 sites pour 1,98 M€ sur 5 ans</h2>
+      <div class="kpis">
+        <div class="kpi"><div class="v">68 465</div><div class="l">habitants nouvellement à 5 min d'une option</div></div>
+        <div class="kpi"><div class="v">29 €</div><div class="l">par nouvel habitant desservi</div></div>
+        <div class="kpi"><div class="v">≈ 106 t</div><div class="l">de CO2 évitées par an (hypothèses ADEME)</div></div>
+        <div class="kpi"><div class="v">50,4 %</div><div class="l">des nouveaux desservis dans les 3 premiers déciles de revenu</div></div>
+      </div>
+      <p style="margin-top:16px;font-size:18px"><span class="tag">14 stations vélo</span><span class="tag">12 stations Citiz</span><span class="tag">2 arrêts de bus</span></p>
+      <p class="note">Premier site : une station vélo dans l'ouest de Strasbourg (3 795 nouveaux desservis, 60 000 €). La liste complète est dans outputs/recommendations.csv.</p>
+    </div>
+    <div class="col"><div class="figbox"><img class="fig" src="../outputs/figures/slides_map_ems.png" alt="Carte des sites recommandés à Strasbourg"></div></div>
+  </div>
+  <div class="src">Source : outputs/recommendations_summary.json (budget 2 M€, λ = 0,5, horizon 2040)</div>
+</section>
+
+<!-- 10 -->
+<section class="slide">
+  <div class="kicker">Impact · Avec ou sans l'outil</div>
+  <h2>À budget égal, 1,75 fois plus d'habitants desservis qu'une approche naïve</h2>
+  <div class="figbox" style="margin-top:6px"><img class="fig" src="../outputs/figures/slides_strategies.png" alt="Comparaison de la stratégie recommandée avec l'efficacité pure et la stratégie naïve"></div>
+  <p class="note" style="font-size:15px">Stratégie naïve : sites placés là où il y a le plus d'habitants, sans modèle et sans regarder l'offre existante. Elle place des stations où les gens sont déjà desservis. Sans enveloppes ni quota, on atteindrait 90 324 habitants, mais avec 31 stations vélo sur 33 sites, 35 t de CO2 par an et 37 % des nouveaux desservis dans les déciles modestes.</p>
+</section>
+
+<!-- 11 -->
+<section class="slide">
+  <div class="kicker">Ce que ça apporte à Citiz</div>
+  <h2>Un outil de décision, pas seulement une carte</h2>
+  <div class="grid4" style="margin-top:14px">
+    <div class="card"><h3>Où ouvrir</h3><p>12 stations Citiz à Strasbourg, Schiltigheim, Hœnheim et Mittelhausbergen. Elles amènent 28 320 nouveaux habitants à 5 min d'une voiture partagée, là où le réseau couvre déjà 46,5 % de la population.</p></div>
+    <div class="card"><h3>Pourquoi là</h3><p>Pour chaque site : habitants gagnés, propension du modèle, coût, CO2 et part de ménages sans voiture. La décision est traçable et discutable.</p></div>
+    <div class="card"><h3>Partout en France</h3><p>Les modèles sont entraînés sur toute la France. Il suffit de lancer <code>--dep 54</code> : la Meurthe-et-Moselle obtient elle aussi 12 stations Citiz, pour 41 497 nouveaux desservis au total.</p></div>
+    <div class="card"><h3>Le climat comme argument</h3><p>Les 12 stations Citiz représentent 90 t sur les 106 t de CO2 évitées par an : c'est l'équipement le plus efficace pour réduire les km en voiture.</p></div>
+  </div>
+  <div class="src">Sources : outputs/recommendations.csv, recommendations_summary.json, recommendations_summary_dep54.json</div>
+</section>
+
+<!-- 12 -->
+<section class="slide">
+  <div class="kicker">Éthique</div>
+  <h2>Quatre risques, quatre réponses</h2>
+  <div class="grid4" style="margin-top:14px">
+    <div class="card"><h3>Empreinte carbone</h3><p>CO2 calculé site par site avec des hypothèses prudentes (ADEME) : 50 % d'adhérents actifs, 1 500 km évités par an. Le détour des bus est retranché : un arrêt peut avoir un bilan négatif, et on l'affiche.</p></div>
+    <div class="card"><h3>Équité dense / peu dense</h3><p>Les zones déjà desservies ne comptent pas, 15 % du budget est réservé au peu dense et le besoin social est pondéré par λ. On publie toujours la comparaison avec l'efficacité pure.</p></div>
+    <div class="card"><h3>Stigmatisation</h3><p>On parle d'« offre à développer », jamais de quartier « mal desservi ». Les rangs de besoin sont relatifs à la zone et il n'y a aucun palmarès de communes.</p></div>
+    <div class="card"><h3>Vie privée</h3><p>Aucune statistique sociale sous 11 ménages (seuil INSEE). Seuls 22,7 % des carreaux l'atteignent seuls : les autres sont lissés au km² ou masqués.</p></div>
+  </div>
+</section>
+
+<!-- 13 -->
+<section class="slide">
+  <div class="kicker">Limites reconnues</div>
+  <h2>Ce que nos chiffres ne disent pas</h2>
+  <div class="row" style="margin-top:10px">
+    <div class="col" style="justify-content:flex-start">
+      <ul>
+        <li style="font-size:18px"><b>Cercle ≠ réseau</b> hors de Strasbourg : le détour est calibré sur un seul territoire.</li>
+        <li style="font-size:18px"><b>Pas de fréquence</b> : un car scolaire compte autant qu'un tram.</li>
+        <li style="font-size:18px"><b>Coûts hypothétiques</b>, à valider avec Citiz et l'Eurométropole.</li>
+        <li style="font-size:18px"><b>Plafond du modèle</b> : 11 des 14 stations vélo ont une valeur plafonnée, donc c'est la population qui les départage.</li>
+      </ul>
+    </div>
+    <div class="col" style="justify-content:flex-start">
+      <ul>
+        <li style="font-size:18px"><b>Capacité Citiz</b> non prédite, et usage plafonné à ≈ 46 adhérents par voiture.</li>
+        <li style="font-size:18px"><b>Le modèle apprend des choix passés</b> des opérateurs, avec leurs biais.</li>
+        <li style="font-size:18px"><b>Pas de free-floating</b> dans les flux publics de Strasbourg. L'emprise est une boîte, pas la liste des communes.</li>
+        <li style="font-size:18px"><b>DROM</b> : Guadeloupe, Guyane et Mayotte sont absentes, faute de carreaux INSEE.</li>
+      </ul>
+    </div>
+  </div>
+  <p class="note">Liste complète et pistes de correction : DEMARCHE.md, section 8.</p>
+</section>
+
+<!-- 14 -->
+<section class="slide">
+  <div class="kicker">Démo live, puis la suite</div>
+  <div class="row">
+    <div class="col">
+      <h2>Démo</h2>
+      <p style="font-size:18px"><code>python -m streamlit run app.py</code></p>
+      <ol style="font-size:18px;line-height:1.5;padding-left:22px">
+        <li>Carte nationale, puis zoom sur un territoire.</li>
+        <li>Arrêts et stations, avec les habitants desservis.</li>
+        <li>Strasbourg : budget et λ réglables, liste priorisée recalculée en direct.</li>
+      </ol>
+    </div>
+    <div class="col">
+      <h2>Prochaines étapes</h2>
+      <ul>
+        <li style="font-size:18px">Confronter le modèle aux <b>réservations Citiz</b> par station.</li>
+        <li style="font-size:18px">Pondérer par la <b>fréquence</b> GTFS et calibrer le détour dans d'autres villes.</li>
+        <li style="font-size:18px">Porter le pipeline sur <b>Microsoft Fabric</b> : lakehouse Parquet/Delta, notebooks, MLflow et Power BI. Python local pendant le hackathon, pour la reproductibilité.</li>
+      </ul>
+    </div>
+  </div>
+  <p class="note">Code, sources (SOURCES.md) et documentation technique (DEMARCHE.md) sont dans le dépôt.</p>
+</section>
+
+</div>
+<div id="bar"></div>
+<div id="hud"></div>
+<script>
+(function () {
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var deck = document.getElementById('deck'), hud = document.getElementById('hud'), bar = document.getElementById('bar');
+  var i = 0;
+  function fit() {
+    var s = Math.min(window.innerWidth / 1280, window.innerHeight / 720);
+    deck.style.transform = 'translate(-50%, -50%) scale(' + s + ')';
+  }
+  function show(n) {
+    i = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach(function (el, k) { el.classList.toggle('active', k === i); });
+    hud.textContent = (i + 1) + ' / ' + slides.length;
+    bar.style.width = ((i + 1) / slides.length * 100) + '%';
+    if (location.hash !== '#' + (i + 1)) history.replaceState(null, '', '#' + (i + 1));
+  }
+  document.addEventListener('keydown', function (e) {
+    if (['ArrowRight', 'PageDown', ' ', 'Enter'].indexOf(e.key) >= 0) { show(i + 1); e.preventDefault(); }
+    else if (['ArrowLeft', 'PageUp', 'Backspace'].indexOf(e.key) >= 0) { show(i - 1); e.preventDefault(); }
+    else if (e.key === 'Home') show(0);
+    else if (e.key === 'End') show(slides.length - 1);
+  });
+  document.addEventListener('click', function (e) {
+    if (e.target.closest('a')) return;
+    show(e.clientX > window.innerWidth / 2 ? i + 1 : i - 1);
+  });
+  window.addEventListener('resize', fit);
+  fit();
+  show((parseInt(location.hash.slice(1), 10) || 1) - 1);
+})();
+</script>
+</body>
+</html>

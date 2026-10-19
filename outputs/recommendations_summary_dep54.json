@@ -1,0 +1,143 @@
+{
+  "area": "dep54",
+  "offer_source": "offer.parquet@1792404814",
+  "budget_eur": 2000000,
+  "equity_lambda": 0.5,
+  "kinds": [
+    "citiz",
+    "bike",
+    "bus"
+  ],
+  "horizon": 2040,
+  "budget_split": {
+    "citiz": 0.4,
+    "bike": 0.3,
+    "bus": 0.3
+  },
+  "low_density_budget_share": 0.15,
+  "zone": {
+    "cells": 13875,
+    "population": 674480.0,
+    "already_served_share": {
+      "citiz": 0.043730725892539436,
+      "bike": 0.11717322974736093,
+      "bus": 0.7998117067963468
+    }
+  },
+  "selected": {
+    "n_sites": 28,
+    "by_type": {
+      "bike": 14,
+      "citiz": 12,
+      "bus": 2
+    },
+    "cost_eur": 1991266.1167144775,
+    "pop_newly_served": 41496.5,
+    "pop_newly_served_horizon": 40079.26980874317,
+    "eur_per_new_resident": 47.986363108080866,
+    "co2_avoided_t_yr": 96.97987446025826,
+    "share_new_in_income_deciles_1_3": 0.5383345583362452,
+    "share_new_in_low_density": 0.10541852927355319
+  },
+  "comparison": {
+    "lambda_0": {
+      "n_sites": 28,
+      "by_type": {
+        "bike": 14,
+        "citiz": 12,
+        "bus": 2
+      },
+      "cost_eur": 1983415.7874298096,
+      "pop_newly_served": 42273.5,
+      "pop_newly_served_horizon": 40829.73292349727,
+      "eur_per_new_resident": 46.918655598183484,
+      "co2_avoided_t_yr": 97.0184748523975,
+      "share_new_in_income_deciles_1_3": 0.4795320945746153,
+      "share_new_in_low_density": 0.10200243651460135
+    },
+    "naive_population_only": {
+      "n_sites": 33,
+      "by_type": {
+        "citiz": 13,
+        "bike": 10,
+        "bus": 10
+      },
+      "cost_eur": 1977378.3830738068,
+      "pop_newly_served": 35314.0,
+      "pop_newly_served_horizon": 34107.920765027324,
+      "eur_per_new_resident": 55.99417746711805,
+      "co2_avoided_t_yr": 79.0980854584418,
+      "share_new_in_income_deciles_1_3": 0.7107804270261087,
+      "share_new_in_low_density": 0.07164297445772215,
+      "definition": "population seule (sans modèle, sans offre existante, λ=0)"
+    },
+    "no_low_density_quota": {
+      "n_sites": 28,
+      "by_type": {
+        "bike": 13,
+        "citiz": 13,
+        "bus": 2
+      },
+      "cost_eur": 1991266.1167144775,
+      "pop_newly_served": 44631.0,
+      "pop_newly_served_horizon": 43106.717213114745,
+      "eur_per_new_resident": 44.61621108006716,
+      "co2_avoided_t_yr": 103.69237469778585,
+      "share_new_in_income_deciles_1_3": 0.5238399318859089,
+      "share_new_in_low_density": 0.05250834621675517
+    },
+    "global_pool_no_split_no_quota": {
+      "n_sites": 33,
+      "by_type": {
+        "bike": 27,
+        "citiz": 6
+      },
+      "cost_eur": 1980000.0,
+      "pop_newly_served": 52021.5,
+      "pop_newly_served_horizon": 50244.809426229505,
+      "eur_per_new_resident": 38.06118624030449,
+      "co2_avoided_t_yr": 62.10556177717883,
+      "share_new_in_income_deciles_1_3": 0.5249656392068663,
+      "share_new_in_low_density": 0.029564699210903184
+    }
+  },
+  "hypotheses": {
+    "walk_radius_m": 282.00789622109414,
+    "weight": "pop_horizon × (1 + 4.0·λ·besoin), besoin = {\"poverty_rate\": 0.4, \"carfree_share\": 0.2, \"low_access\": 0.4}",
+    "value": "clip(p / p_ref, (0.05, 1.5)) ; p_ref = {\"citiz\": 0.5562, \"bike\": 0.4248, \"bus\": 0.5866}",
+    "costs": {
+      "citiz": {
+        "capex": 25000,
+        "opex_per_yr": 7000,
+        "horizon_years": 5
+      },
+      "bike": {
+        "capex": 30000,
+        "opex_per_yr": 6000,
+        "horizon_years": 5
+      },
+      "bus": {
+        "capex": 35000,
+        "opex_per_yr": 2000,
+        "horizon_years": 5
+      }
+    },
+    "bus_detour": {
+      "trips_per_day": 30,
+      "cost_per_km": 5.0,
+      "max_dist_m": 1500,
+      "formula": "2·d/1000 × passages/j × 365 × €/km"
+    },
+    "co2": {
+      "citiz": "min(130000/2800 adhérents/véhicule, pop_new × pénétration 0.0586 × v) × 0.5 actifs × 1500 km × 218 g/km",
+      "bike": "15 trajets/j × v × 365 × 2.5 km × 0.15 report × 218 g/km",
+      "bus": "pop_new × 0.15 montées/j × v × 365 × 4.0 km × 0.2 report × (218-113) g/km − détour km-véhicule × 1.1 kg/km",
+      "source": "impactco2.fr (ADEME Base Empreinte), enquête nationale autopartage ADEME/6t 2022"
+    },
+    "privacy": "parts non publiées si < 11 ménages dans la zone servie"
+  },
+  "runtime_s": {
+    "prepare": 2.06,
+    "total": 7.57
+  }
+}

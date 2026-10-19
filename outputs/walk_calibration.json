@@ -1,0 +1,98 @@
+{
+  "detour": 1.4184,
+  "radius_m": 282.0,
+  "n_pairs": 680492,
+  "n_origins": 400,
+  "method": "égalité des effectifs : rayon euclidien r tel que le cercle contienne autant de nœuds du graphe piéton OSM que l'isochrone réseau de 400 m, cumulé sur des origines tirées ∝ population ; détour = 400 / r",
+  "network_m": 400.0,
+  "ratio_median": 1.3439999999999621,
+  "ratio_mean": 1.4201717494272934,
+  "radius_400_over_median": 297.619047619056,
+  "radius_boundary50": 289.2993572349171,
+  "radius_equal_count": 282.0,
+  "ci95": {
+    "median": [
+      1.3339999999999632,
+      1.3559999999999608
+    ],
+    "mean": [
+      1.405058697559512,
+      1.4379843995203738
+    ],
+    "r_median": [
+      294.98525073747163,
+      299.850074962527
+    ],
+    "r_boundary50": [
+      284.6874338011815,
+      293.43346702524184
+    ],
+    "r_equal_count": [
+      278.0,
+      286.0
+    ]
+  },
+  "detour_ci95": [
+    1.3986013986013985,
+    1.4388489208633093
+  ],
+  "dist_band_m": [
+    200,
+    600
+  ],
+  "graph": {
+    "nodes": 237399,
+    "edges": 264566,
+    "source": "osm_walk_strasbourg.json"
+  },
+  "validation": {
+    "points_source": "offer.parquet",
+    "n_points": 1000,
+    "n_cells": 2398,
+    "population": 435398.0,
+    "pop_share_served_network": 0.8389083091791878,
+    "by_radius": {
+      "retenu": {
+        "radius_m": 282.0,
+        "pop_share_served_circle": 0.8940865598831415,
+        "precision_pop": 0.9244355334865207,
+        "recall_pop": 0.9852392411959733,
+        "accuracy_pop": 0.9200559028750707,
+        "count_ratio_pop": 1.0525719933941493,
+        "count_mae": 0.8243308421260548,
+        "count_spearman": 0.8436370485640735
+      },
+      "defaut_1.30": {
+        "radius_m": 307.6923076923077,
+        "pop_share_served_circle": 0.9202626103013795,
+        "precision_pop": 0.9060984999269992,
+        "recall_pop": 0.9939686633320466,
+        "accuracy_pop": 0.9085262219854019,
+        "count_ratio_pop": 1.2421843632228011,
+        "count_mae": 1.002952471072444,
+        "count_spearman": 0.8323023940491378
+      },
+      "400m_sans_detour": {
+        "radius_m": 400.0,
+        "pop_share_served_circle": 0.9740318053826614,
+        "precision_pop": 0.8612740410972632,
+        "recall_pop": 1.0,
+        "accuracy_pop": 0.8648765037965264,
+        "count_ratio_pop": 2.009544575271941,
+        "count_mae": 3.138665083440898,
+        "count_spearman": 0.7409283017591721
+      },
+      "400_sur_mediane": {
+        "radius_m": 297.619047619056,
+        "pop_share_served_circle": 0.911292656374168,
+        "precision_pop": 0.9125133892004285,
+        "recall_pop": 0.9912486755973159,
+        "accuracy_pop": 0.9129325352895512,
+        "count_ratio_pop": 1.1581669835263733,
+        "count_mae": 0.8737120978966371,
+        "count_spearman": 0.8386037898898397
+      }
+    }
+  },
+  "seconds": 21.7
+}

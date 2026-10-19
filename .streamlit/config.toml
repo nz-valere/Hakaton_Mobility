@@ -1,0 +1,10 @@
+[theme]
+base = "light"
+primaryColor = "#2a78d6"
+
+[server]
+headless = true
+maxMessageSize = 400
+
+[browser]
+gatherUsageStats = false
