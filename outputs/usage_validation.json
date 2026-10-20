@@ -1,0 +1,59 @@
+{
+  "periode": {
+    "debut": "2026-10-19 14:51:59+00:00",
+    "fin": "2026-10-20 10:23:00+00:00",
+    "releves": 65,
+    "releves_attendus_si_continu": 235
+  },
+  "stations_validees": 1512,
+  "stations_sans_carreau_habite_proche": 11,
+  "spearman_modele_occupation": 0.151,
+  "p_value_modele": 3.7107997239702184e-09,
+  "spearman_population_occupation": 0.181,
+  "p_value_population": 1.4262418860995714e-12,
+  "occupation_par_quintile_de_propension": [
+    {
+      "quintile": "Q1",
+      "stations": 303,
+      "occupation_moyenne": 0.266,
+      "propension_mediane": 0.046
+    },
+    {
+      "quintile": "Q2",
+      "stations": 302,
+      "occupation_moyenne": 0.329,
+      "propension_mediane": 0.181
+    },
+    {
+      "quintile": "Q3",
+      "stations": 302,
+      "occupation_moyenne": 0.304,
+      "propension_mediane": 0.381
+    },
+    {
+      "quintile": "Q4",
+      "stations": 302,
+      "occupation_moyenne": 0.338,
+      "propension_mediane": 0.632
+    },
+    {
+      "quintile": "Q5",
+      "stations": 303,
+      "occupation_moyenne": 0.411,
+      "propension_mediane": 0.874
+    }
+  ],
+  "lecture": "Corrélation de rang entre la propension hors pli du modèle Citiz et la part du temps où les voitures de la station sont réservées. > 0 : le modèle, appris seulement sur la PRÉSENCE des stations, classe aussi correctement leur USAGE ; à comparer à la population seule.",
+  "saturation": {
+    "seuil_occupation": 0.6,
+    "stations_saturees": 303,
+    "part": 0.2
+  },
+  "occupation_mediane": 0.27,
+  "limites": [
+    "fenêtre courte, en partie pendant les vacances de la Toussaint (17 oct.-2 nov. 2026)",
+    "sens exact de is_reserved à confirmer avec Citiz (réservation en cours ou à venir)",
+    "collecte interrompue quand le PC est en veille : voir releves vs releves_attendus_si_continu",
+    "validation, pas apprentissage : le modèle n'utilise pas ces données"
+  ]
+}

@@ -11,3 +11,5 @@ outputs/cache/
 # documents internes au groupe
 EXPLICATIONS.md
 EXPLICATIONS.pdf
+data/gbfs/
+.claude/

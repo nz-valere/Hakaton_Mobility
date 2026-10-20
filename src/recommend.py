@@ -80,7 +80,15 @@ STRATEGY_LABELS = {
     "no_low_density_quota": "Sans quota peu dense",
     "global_pool_no_split_no_quota": "Sans enveloppes ni quota",
     "naive_population_only": "Naïve : population seule (sans modèle, sans offre existante, λ = 0)",
+    "no_frequency": "Sans la fréquence des lignes (arrêts comptés comme dans la méthode nationale)",
 }
+FREQ_COLS = ("freq_nearest", "tc_freq_options", "n_options_freq")
+EQUITY_LAMBDAS = (0.0, 0.25, 0.5, 0.75, 1.0)
+
+
+def _without_frequency(ctx):
+    """Copie du contexte sans les colonnes de src/frequency.py (variante « arrêts comptés »)."""
+    return dict(ctx, F=ctx["F"].drop(columns=[c for c in FREQ_COLS if c in ctx["F"]]))
 
 
 # --------------------------------------------------------------------------- préparation de la zone
@@ -200,13 +208,13 @@ def prepare(area="ems", force=False):
     cache = model.CACHE / f"area_{name}.parquet"
     meta = model.CACHE / f"area_{name}.json"
     if cache.exists() and meta.exists() and not force \
-            and json.loads(meta.read_text()) == {"offer_source": src, "n": len(cells),
+            and json.loads(meta.read_text(encoding="utf-8")) == {"offer_source": src, "n": len(cells),
                                               "radius": geo.walk_radius_m()}:
         F = pd.read_parquet(cache)
     else:
         F = model.build_features(cells, ob)
         F.to_parquet(cache, index=False)
-        meta.write_text(json.dumps({"offer_source": src, "n": len(cells), "radius": geo.walk_radius_m()}))
+        meta.write_text(json.dumps({"offer_source": src, "n": len(cells), "radius": geo.walk_radius_m()}), encoding="utf-8")
     keep = np.flatnonzero(in_area)
     cells, F = cells.iloc[keep].reset_index(drop=True), F.iloc[keep].reset_index(drop=True)
     # score d'accessibilité 0-100 de l'étape 4 (si disponible) pour le volet « besoin »
@@ -215,6 +223,16 @@ def prepare(area="ems", force=False):
         acc = pd.read_parquet(fa, columns=["key", "score"], filters=[("lon", ">=", w), ("lon", "<=", e),
                                                                   ("lat", ">=", s), ("lat", "<=", n)])
         F["access_score"] = cells["key"].map(acc.set_index("key")["score"]).values
+    # fréquence des lignes (src/frequency.py), si les GTFS de la zone ont été lus
+    freq_summary = None
+    ff = C.OUT / f"frequency_cells_{name}.parquet"
+    if ff.exists():
+        fq = pd.read_parquet(ff).set_index("key")
+        for col in ("freq_nearest", "tc_freq_options", "n_options_freq"):
+            if col in fq:
+                F[col] = cells["key"].map(fq[col]).values
+        fs = C.OUT / f"frequency_{name}.json"
+        freq_summary = json.loads(fs.read_text(encoding="utf-8")) if fs.exists() else None
     pred, p_ref, extra, pred_kind = {}, {}, {}, set()
     for k in C.MODEL_KINDS:
         pred[k], p_ref[k], how = _predict(F, k, cells["dep"].values)
@@ -226,7 +244,7 @@ def prepare(area="ems", force=False):
     ctx = {"name": name, "cells": cells, "F": F, "pred": pred, "p_ref": p_ref,
            "pred_source": "+".join(sorted(pred_kind)),
            "com_name": cells["com"].map(names).fillna(cells["com"]).values,
-           "offer_source": src, "penetration": extra.get("penetration", 0.002),
+           "offer_source": src, "penetration": extra.get("penetration", 0.002), "frequency": freq_summary,
            "bike_ref_pop": _bike_ref_pop(),
            "sub": _subpoints(cells, F, ob[ob["crs_id"] >= 0]),
            "prep_s": time.time() - t0}
@@ -245,12 +263,19 @@ def _rank(v):
 
 
 def need_index(cells, F):
-    """Besoin ∈ [0,1] : rangs-percentiles pondérés (pauvreté, sans voiture, faible accessibilité)."""
+    """Besoin ∈ [0,1] : rangs-percentiles pondérés (pauvreté, sans voiture, faible accessibilité).
+    Faible accessibilité : options pondérées par la fréquence (src/frequency.py) si la zone a ses
+    GTFS, sinon score de l'étape 4, sinon nombre d'options."""
     wts = C.NEED_WEIGHTS
+    if "n_options_freq" in F and F["n_options_freq"].notna().any():
+        access = F["n_options_freq"].fillna(0).values
+    elif "access_score" in F:
+        access = F["access_score"].fillna(0).values
+    else:
+        access = F["n_options_r5"].values
     parts = {"poverty_rate": _rank(cells["poverty_rate"].values),
              "carfree_share": _rank(cells["carfree_share"].values),
-             "low_access": _rank(-(F["access_score"].fillna(0).values if "access_score" in F
-                                   else F["n_options_r5"].values))}
+             "low_access": _rank(-access)}
     return sum(wts[k] * parts[k] for k in wts) / sum(wts.values())
 
 
@@ -264,6 +289,19 @@ def bus_extra_annual(d):
     """Surcoût annuel d'exploitation du détour (aller-retour 2·d) pour un arrêt à d m de la ligne."""
     b = C.BUS_DETOUR
     return 2 * d / 1000 * b["trips_per_day"] * 365 * b["cost_per_km"]
+
+
+def bus_service_factor(F, idx):
+    """
+    Multiplicateur de valeur d'un nouvel arrêt de bus : min(1, départs/h ÷ C.FULL_OPTION_DEP_H) de la
+    meilleure ligne de l'arrêt existant le plus proche (le nouvel arrêt est posé sur cette ligne),
+    borné en bas par C.FREQ_MIN_FACTOR. 1 si la zone n'a pas de GTFS lu (src/frequency.py).
+    """
+    if "freq_nearest" not in F:
+        return np.ones(len(idx))
+    f = F["freq_nearest"].values[idx].astype(float)
+    q = np.clip(f / C.FULL_OPTION_DEP_H, C.FREQ_MIN_FACTOR, 1.0)
+    return np.where(np.isfinite(q), q, 1.0)
 
 
 def _coverage(ctx, cand_idx):
@@ -326,6 +364,9 @@ def solve(ctx, budget=C.DEFAULT_BUDGET, equity_lambda=C.EQUITY_LAMBDA, kinds=C.M
             ok = d_bus[idx] <= C.BUS_DETOUR["max_dist_m"]
             idx, v_rel, v = idx[ok], v_rel[ok], v[ok]
             ext = bus_extra_annual(d_bus[idx])
+            if use_existing:   # qualité de service de la ligne rattachée (fréquence GTFS de la zone)
+                q = bus_service_factor(F, idx)
+                v, v_rel = v * q, v_rel * q
         if len(idx) == 0:
             continue
         cov = _coverage(ctx, idx)
@@ -588,6 +629,11 @@ def recommend(area="ems", budget=C.DEFAULT_BUDGET, equity_lambda=C.EQUITY_LAMBDA
             pk = solve_split(ctx, budget, kinds=kinds, horizon=horizon, **kw)
             summary["comparison"][label] = dict(_totals(evaluate(ctx, pk, horizon), pk),
                                                 label=STRATEGY_LABELS[label])
+        if "freq_nearest" in ctx["F"]:   # effet de la fréquence des lignes, à données identiques
+            nf = _without_frequency(ctx)
+            pk = solve_split(nf, budget, equity_lambda, kinds, horizon, split, rural_share)
+            summary["comparison"]["no_frequency"] = dict(_totals(evaluate(nf, pk, horizon), pk),
+                                                         label=STRATEGY_LABELS["no_frequency"])
         summary["comparison"]["naive_population_only"]["definition"] = C.NAIVE_LABEL
         sel, comp = summary["selected"], summary["comparison"]
         notes = [
@@ -625,12 +671,18 @@ def recommend(area="ems", budget=C.DEFAULT_BUDGET, equity_lambda=C.EQUITY_LAMBDA
             "source": "impactco2.fr (ADEME Base Empreinte), enquête nationale autopartage ADEME/6t 2022",
         },
         "privacy": f"parts non publiées si < {C.PRIVACY_MIN_HOUSEHOLDS} ménages dans la zone servie",
+        "bus_frequency": (f"valeur d'un arrêt × clip(départs/h de la ligne la plus proche ÷ {C.FULL_OPTION_DEP_H:g}, "
+                          f"{C.FREQ_MIN_FACTOR}, 1) ; besoin « faible accessibilité » = options pondérées par la "
+                          "fréquence (GTFS de la zone, src/frequency.py)")
+                         if "freq_nearest" in ctx["F"] else "GTFS de la zone non lus : arrêts comptés sans fréquence",
     }
+    if ctx.get("frequency"):
+        summary["frequency"] = ctx["frequency"].get("comparaison")
     summary["runtime_s"] = {"prepare": round(ctx["prep_s"], 2), "total": round(time.time() - t0, 2)}
     if write:
         df.to_csv(C.OUT / "recommendations.csv", index=False)
         (C.OUT / "recommendations_summary.json").write_text(json.dumps(summary, indent=2, ensure_ascii=False,
-                                                                       default=float))
+                                                                       default=float), encoding="utf-8")
     return df, summary
 
 
@@ -677,6 +729,25 @@ def recommend_by_funder(area="ems", citiz_budget=C.CITIZ_BUDGET, public_budget=C
     return df, {"area": any_s.get("area"), "territoire": area_label(area), "funders": summ}
 
 
+def equity_curve(area, citiz_budget=C.CITIZ_BUDGET, public_budget=C.PUBLIC_BUDGET, lambdas=EQUITY_LAMBDAS,
+                 horizon=C.GROWTH_HORIZON):
+    """
+    « Le prix de l'équité » : pour chaque λ, habitants nouvellement desservis et part de ces nouveaux
+    desservis dans les 3 premiers déciles de revenu de la zone, par financeur (même budget).
+    """
+    rows = []
+    for lam in lambdas:
+        _, s = recommend_by_funder(area, citiz_budget, public_budget, lam, horizon, compare=False)
+        for key, fs in s["funders"].items():
+            sel = fs.get("selected") or {}
+            if sel.get("n_sites"):
+                rows.append({"lambda": lam, "financeur": key, "n_sites": sel["n_sites"],
+                             "pop_newly_served": sel["pop_newly_served"],
+                             "share_new_in_income_deciles_1_3": sel["share_new_in_income_deciles_1_3"],
+                             "co2_avoided_t_yr": sel["co2_avoided_t_yr"]})
+    return rows
+
+
 def _area_files(area):
     """Suffixe des fichiers de sortie : '' pour le territoire prioritaire, '_<zone>' sinon."""
     from src import territories
@@ -702,7 +773,7 @@ def main():
     suffix = _area_files(area)
     df.to_csv(C.OUT / f"recommendations{suffix}.csv", index=False)
     (C.OUT / f"recommendations_summary{suffix}.json").write_text(
-        json.dumps(s, indent=2, ensure_ascii=False, default=float))
+        json.dumps(s, indent=2, ensure_ascii=False, default=float), encoding="utf-8")
     pd.set_option("display.width", 200)
     cols = ["financeur", "rank", "type", "stage", "commune", "pop_newly_served", "usage_pred", "usage_unit",
             "cost_eur", "cost_cum_eur", "co2_avoided_t_yr"]
@@ -713,6 +784,13 @@ def main():
         print(json.dumps({k: fs[k] for k in ("zone", "selected") if k in fs}, indent=1, ensure_ascii=False,
                          default=float))
     print(f"temps total (premier appel, chargement compris) : {time.time() - t0:.1f} s")
+    t1 = time.time()
+    curve = equity_curve(area, a.citiz_budget, a.public_budget, horizon=a.horizon)
+    (C.OUT / f"equity_curve{suffix}.json").write_text(
+        json.dumps({"territoire": s["territoire"], "citiz_budget": a.citiz_budget, "public_budget": a.public_budget,
+                    "points": curve}, indent=2, ensure_ascii=False, default=float), encoding="utf-8")
+    print(f"prix de l'équité ({len(EQUITY_LAMBDAS)} valeurs de λ) -> equity_curve{suffix}.json "
+          f"({time.time() - t1:.1f} s)")
 
 
 if __name__ == "__main__":

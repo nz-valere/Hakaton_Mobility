@@ -8,7 +8,7 @@ Hackathon Mobility, Epitech x Citiz x Microsoft. Sources : [SOURCES.md](SOURCES.
 
 ## Résultats clés
 
-Tous les chiffres viennent des fichiers de `outputs/`.
+Tous les chiffres viennent des fichiers de `outputs/` (pipeline relancé le 20/10/2026 avec les flux GBFS du jour).
 
 **Diagnostic national** (`outputs/access_summary.json`, 63,8 M d'habitants, 2 324 577 carreaux habités, Métropole + Martinique + La Réunion)
 
@@ -21,28 +21,43 @@ Tous les chiffres viennent des fichiers de `outputs/`.
 
 | Type | Modèle retenu | ROC-AUC | PR-AUC | PR-AUC « population seule » |
 |---|---|---|---|---|
-| Citiz | gradient boosting | 0,90 | 0,46 | 0,26 |
+| Citiz | gradient boosting | 0,90 | 0,47 | 0,26 |
 | Vélo | régression logistique | 0,87 | 0,64 | 0,53 |
-| Bus | gradient boosting | 0,85 | 0,71 | 0,67 |
+| Bus | gradient boosting | 0,86 | 0,71 | 0,68 |
+
+**Validation par l'usage réel** (`outputs/usage_validation.json`, `outputs/citiz_usage.csv`)
+
+- Collecte des flux GBFS des 17 réseaux Citiz toutes les 5 min (`src/collect_gbfs.py`) : 1 512 stations suivies, 65 relevés du 19/10 (16 h 50) au 20/10 (12 h 25), avec des trous quand le PC était en veille.
+- Occupation moyenne (part du temps-voiture réservé) par quintile de propension du modèle Citiz (hors pli) : **26,6 % dans le 1er quintile, 41,1 % dans le 5e**. Le modèle, appris seulement sur la présence des stations, sépare bien les stations peu et très utilisées.
+- Mais pour classer l'usage station par station, il fait un peu moins bien que la population seule (Spearman 0,15 contre 0,18). Limite assumée : le modèle dit **où** Citiz réussit à s'implanter, pas encore **combien** une station roulera. Les données d'usage de Citiz permettraient de le recalibrer.
+- **303 stations saturées** (voitures réservées plus de 60 % du temps relevé, 20 % du réseau) : une 2e voiture y coûte moins cher qu'une nouvelle station.
+- Fenêtre courte, en partie pendant les vacances de la Toussaint ; sens exact de `is_reserved` à confirmer avec Citiz.
+
+**Fréquence des lignes dans les zones d'étude** (`outputs/frequency_<zone>.json`, GTFS Lignes d'Azur, CTS et Fluo 67, mardi 17/11/2026, 7 h-20 h)
+
+- Une ligne compte une fois même si elle passe à plusieurs arrêts proches ; une ligne toutes les 15 min ou mieux vaut 1 option pleine.
+- **Nice Côte d'Azur** : 93 % des habitants ont un arrêt à 5 min, mais 80 % seulement ont au moins une option pleine. **13,5 % (≈ 74 000 habitants) ont un arrêt mais un service faible** : le comptage d'arrêts les classait comme desservis.
+- **Strasbourg** : 85 % avec un arrêt, 82 % avec au moins une option pleine, 4,2 % en service faible.
 
 **Où Citiz doit-il s'implanter ?** (`outputs/territories_summary.json`, `outputs/territories_citiz.csv`)
 
 - Criblage des 99 intercommunalités de plus de 100 000 habitants (Île-de-France exclue : son autopartage est presque absent des flux GBFS publics), puis simulation de l'optimiseur avec le même budget Citiz (1 M€ sur 5 ans) sur les 10 premières.
-- **Territoire prioritaire : Métropole Nice Côte d'Azur** (549 000 habitants, aucune station d'autopartage publiée ; Mobilize Share y a fermé fin juin 2026). 16 stations y desservent **85 573 habitants** et 7 324 adhérents potentiels. Suivent Lyon (3 925) et Montpellier (3 874).
-- **Strasbourg, territoire témoin** : Citiz y couvre déjà 45 % des habitants, et le même budget n'y dessert que 33 740 habitants (1 391 adhérents potentiels).
-- **Modèle** : gradient boosting appris sur les 80 départements où l'autopartage existe. Test sur Strasbourg, avec le Bas-Rhin tenu hors de l'apprentissage : PR-AUC 0,66 contre 0,59 pour la population seule.
+- **Territoire prioritaire : Métropole Nice Côte d'Azur** (549 000 habitants, aucune station d'autopartage publiée ; Mobilize Share y a fermé fin juin 2026). 16 stations y desservent **86 117 habitants** et 7 513 adhérents potentiels. Suivent Toulon (4 101) et Montpellier (4 031) ; Lyon est 7e (3 027).
+- **Strasbourg, territoire témoin** : Citiz y couvre déjà 45 % des habitants, et le même budget n'y dessert que 37 949 habitants (1 328 adhérents potentiels).
+- **Modèle** : gradient boosting appris sur les 80 départements où l'autopartage existe. Test sur Strasbourg, avec le Bas-Rhin tenu hors de l'apprentissage : PR-AUC 0,68 contre 0,59 pour la population seule.
 
 **Recommandation pour la Métropole Nice Côte d'Azur** (`outputs/recommendations_summary.json`, `outputs/recommendations.csv` : λ = 0,5, horizon 2040)
 
 | Financeur | Budget | Sites | Habitants nouvellement desservis | € / habitant | CO2 évité |
 |---|---|---|---|---|---|
-| **Citiz** | 1 M€ | 16 stations Citiz (14 à Nice, Beaulieu-sur-Mer, Saint-Martin-du-Var) | **85 573** | 11 € | 121 t/an |
-| Collectivité / AOM | 1 M€ | 9 stations vélo, 2 arrêts de bus | 48 494 | 20 € | 2 t/an |
+| **Citiz** | 1 M€ | 16 stations Citiz (14 à Nice, Beaulieu-sur-Mer, Cap-d'Ail) | **86 117** | 11 € | 121 t/an |
+| Collectivité / AOM | 1 M€ | 12 stations vélo, 1 arrêt de bus | 63 810 | 15 € | 4 t/an |
 
-- 48 % des nouveaux desservis par Citiz vivent dans les 3 premiers déciles de revenu de la métropole.
+- **Effet de la fréquence des lignes**, à données identiques : sans elle, la collectivité obtenait 9 stations vélo et 2 arrêts de bus pour 48 494 habitants. Avec elle, un arrêt posé sur une ligne peu fréquente vaut moins, et le budget part vers des stations vélo : **63 810 habitants (+32 %)**, dont 40 % dans les 3 premiers déciles de revenu (contre 35 %).
+- 43 % des nouveaux desservis par Citiz vivent dans les 3 premiers déciles de revenu de la métropole (48 % sans la fréquence : le besoin « faible accessibilité » repère maintenant les quartiers à service faible, qui ne sont pas toujours les plus modestes).
 - Vélo Bleu (Nice) ne publie pas de flux GBFS : les stations vélo recommandées sont à confronter au réseau réel.
 
-Mêmes sorties pour le témoin Strasbourg (`outputs/recommendations_ems.csv`, `recommendations_summary_ems.json`) et pour la Meurthe-et-Moselle (`--dep 54`, `recommendations_dep54.csv`). À Strasbourg, ignorer l'offre existante divise par 2,4 le nombre d'habitants gagnés par Citiz (13 800 contre 33 740).
+Mêmes sorties pour le témoin Strasbourg (`outputs/recommendations_ems.csv`, `recommendations_summary_ems.json`) et pour la Meurthe-et-Moselle (`--dep 54`, `recommendations_dep54.csv`). À Strasbourg, la stratégie naïve (population seule, sans regarder l'offre existante) dessert 2,7 fois moins d'habitants avec Citiz (13 800 contre 37 949). Le prix de l'équité de chaque territoire est dans `outputs/equity_curve*.json` (λ de 0 à 1, même budget).
 
 ## Installation
 
@@ -65,9 +80,11 @@ Chaque étape est un module : `python -m src.<module>`. Tous les paramètres chi
 | 3 | `python -m src.offer` | arrêts GTFS et stations GBFS classés par mode puis dédoublonnés | `data/interim/offer.parquet` |
 | 3b | `python -m src.walk_calibration` | calibre le rayon 5 min sur le réseau piéton OSM | `outputs/walk_calibration.json`, `outputs/figures/walk_detour.png` |
 | 4 | `python -m src.accessibility` | options à 5 min par carreau, population servie par point d'offre | `outputs/cells_access.parquet`, `stations_served.parquet`, `commune_access.parquet`, `access_summary.json` |
+| 4b | `python -m src.frequency` | fréquence des lignes bus/tram/métro dans les zones d'étude (GTFS CTS, Fluo 67, Lignes d'Azur) | `outputs/frequency_cells_<zone>.parquet`, `outputs/frequency_<zone>.json` |
 | 5 | `python -m src.model` | modèles de valeur d'un site (Citiz, vélo, bus) | `outputs/model_metrics.json`, `outputs/model_*.joblib`, `outputs/figures/model_*.png` |
+| 5c | `python -m src.collect_gbfs` (en continu, PC allumé) puis `python -m src.usage` | usage réel des stations Citiz, validation du modèle par l'occupation | `data/gbfs/*`, `outputs/citiz_usage.csv`, `outputs/usage_validation.json` |
 | 5b | `python -m src.territories` | classement national des intercommunalités pour Citiz (criblage + simulation) | `outputs/territories_citiz.csv`, `outputs/territories_summary.json` |
-| 6 | `python -m src.recommend` | deux listes priorisées (Citiz ; collectivité vélo + bus), par défaut sur le territoire prioritaire | `outputs/recommendations.csv`, `outputs/recommendations_summary.json` |
+| 6 | `python -m src.recommend` | deux listes priorisées (Citiz ; collectivité vélo + bus), par défaut sur le territoire prioritaire ; variante « sans fréquence » et prix de l'équité (λ de 0 à 1) | `outputs/recommendations.csv`, `outputs/recommendations_summary.json`, `outputs/equity_curve.json` |
 | 7 | `python -m src.figures` | figures de la présentation | `outputs/figures/slides_*.png` |
 
 Options de `src.recommend` : `--area ems` (Strasbourg, témoin), `--area epci:<siren>` (toute intercommunalité), `--dep 54` (département), `--citiz-budget 1000000`, `--public-budget 1000000`, `--lambda 0.5` (poids de l'équité), `--no-split` (vélo et bus sans enveloppes). Une zone autre que le territoire prioritaire écrit des fichiers suffixés (`recommendations_ems.csv`…).
@@ -80,7 +97,9 @@ Options de `src.recommend` : `--area ems` (Strasbourg, témoin), `--area epci:<s
 python -m streamlit run app.py
 ```
 
-N'utilisez pas `.venv/bin/streamlit` : son shebang est cassé.
+N'utilisez pas `.venv/bin/streamlit` : son shebang est cassé. Sous Windows : `.venv\Scripts\python -m streamlit run app.py`.
+
+Dans l'onglet « Où investir », la liste est recalculée en direct quand un curseur bouge : le territoire est préparé une seule fois, puis seul le glouton est relancé. Les stratégies de comparaison ne sont calculées que si l'on active « Comparer avec les autres stratégies ». La courbe « Le prix de l'équité » relance l'optimisation pour λ = 0 ; 0,25 ; 0,5 ; 0,75 ; 1 avec le même budget.
 
 ## Tests
 
@@ -88,7 +107,10 @@ N'utilisez pas `.venv/bin/streamlit` : son shebang est cassé.
 python -m pytest
 ```
 
-24 tests passent en environ 6 s :
+30 tests passent en environ 6 s (Windows compris : tous les fichiers texte sont lus et écrits en UTF-8) :
+
+- `tests/test_frequency.py` : départs/h depuis un GTFS synthétique, une ligne comptée une fois même si elle passe à plusieurs arrêts proches, jour de référence de repli, facteur de service des arrêts de bus.
+- `tests/test_usage.py` : occupation et disponibilité des stations depuis des relevés synthétiques, collecteur qui ne garde que des totaux par station.
 
 - `tests/test_accessibility.py` : comptage des options, population servie et score 0 des carreaux sans option.
 - `tests/test_optimize.py` : comparaison du glouton à la force brute sur 40 petites instances. Il atteint en moyenne 97,3 % de l'optimum, et 88,4 % au minimum.

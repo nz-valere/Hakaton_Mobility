@@ -56,7 +56,7 @@ D_NET = C.WALK_NETWORK_M  # 400 m
 # --------------------------------------------------------------------------- graphe
 def load_graph(path=C.RAW / "osm_walk_strasbourg.json"):
     """Graphe piéton non orienté : (xy des nœuds [n,2], matrice CSR des longueurs)."""
-    el = json.loads(Path(path).read_text())["elements"]
+    el = json.loads(Path(path).read_text(encoding="utf-8"))["elements"]
     nodes = [(e["id"], e["lon"], e["lat"]) for e in el if e["type"] == "node"]
     ids = np.array([n[0] for n in nodes], dtype=np.int64)
     lon = np.array([n[1] for n in nodes])
@@ -346,7 +346,7 @@ def build():
         "seconds": round(time.time() - t0, 1),
     }
     out = C.OUT / "walk_calibration.json"
-    out.write_text(json.dumps(res, indent=2, ensure_ascii=False))
+    out.write_text(json.dumps(res, indent=2, ensure_ascii=False), encoding="utf-8")
     figure(est, r_keep, C.FIG / "walk_detour.png")
     print(f"  -> {out} ({res['seconds']} s)")
     return res

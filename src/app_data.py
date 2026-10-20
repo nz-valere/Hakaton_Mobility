@@ -41,6 +41,9 @@ F_RECO = C.OUT / "recommendations.csv"
 F_RECO_SUM = C.OUT / "recommendations_summary.json"
 F_TERR = C.OUT / "territories_citiz.csv"
 F_TERR_SUM = C.OUT / "territories_summary.json"
+F_USAGE = C.OUT / "usage_validation.json"
+F_USAGE_CSV = C.OUT / "citiz_usage.csv"
+EQUITY_LAMBDAS = (0.0, 0.25, 0.5, 0.75, 1.0)
 
 CELL_COLS = ["key", "crs_id", "x", "y", "lon", "lat", "com", "dep", "ind", "men",
              "income_pc", "poverty_rate", "carfree_share"]
@@ -105,7 +108,7 @@ def exists(path):
 
 def read_json(path):
     try:
-        return json.loads(Path(path).read_text())
+        return json.loads(Path(path).read_text(encoding="utf-8"))
     except Exception:
         return None
 
@@ -113,7 +116,9 @@ def read_json(path):
 def versions():
     """Signature des fichiers de sortie : invalide les caches quand un module les régénère."""
     models = [C.OUT / f"model_{k}.joblib" for k in C.MODEL_KINDS]
-    return tuple(mtime(f) for f in [F_CELLS, F_OFFER, F_ACCESS, F_STATIONS, F_METRICS, F_TERR_SUM] + models)
+    freq = sorted(C.OUT.glob("frequency_cells_*.parquet"))
+    return tuple(mtime(f) for f in [F_CELLS, F_OFFER, F_ACCESS, F_STATIONS, F_METRICS, F_TERR_SUM, F_USAGE_CSV]
+                 + models + freq)
 
 
 def mtime(path):
@@ -533,6 +538,97 @@ def run_recommend_funders(area, citiz_budget, public_budget, equity_lambda, v=No
     return df, json.loads(json.dumps(summary, default=float))
 
 
+@st.cache_data(show_spinner=False, max_entries=64)
+def run_recommend_fast(area, citiz_budget, public_budget, equity_lambda, v=None):
+    """
+    Recalcul instantané quand un curseur bouge : seule la stratégie recommandée est optimisée
+    (compare=False). Le contexte de la zone (variables, propensions, couverture) est préparé une
+    seule fois par recommend.prepare() et gardé en mémoire : chaque appel ne relance que le glouton.
+    Renvoie (DataFrame, résumé, secondes de calcul).
+    """
+    import time
+    rec = _recommend_module()
+    t0 = time.time()
+    df, summary = rec.recommend_by_funder(area=area, citiz_budget=float(citiz_budget),
+                                          public_budget=float(public_budget),
+                                          equity_lambda=float(equity_lambda), compare=False)
+    return df, json.loads(json.dumps(summary, default=float)), time.time() - t0
+
+
+@st.cache_data(show_spinner=False, max_entries=32)
+def equity_curve(area, citiz_budget, public_budget, v=None):
+    """
+    « Le prix de l'équité » : pour λ ∈ EQUITY_LAMBDAS, habitants nouvellement desservis et part de
+    ces nouveaux desservis dans les 3 premiers déciles de revenu de la zone, par financeur.
+    """
+    rows = []
+    for lam in EQUITY_LAMBDAS:
+        _, s, _ = run_recommend_fast(area, citiz_budget, public_budget, lam, v)
+        for key, fs in (s.get("funders") or {}).items():
+            sel = fs.get("selected") or {}
+            if sel.get("n_sites"):
+                rows.append({"λ": lam, "financeur": key, "habitants": sel.get("pop_newly_served", 0.0),
+                             "part_modestes": 100 * sel.get("share_new_in_income_deciles_1_3", 0.0),
+                             "co2": sel.get("co2_avoided_t_yr", 0.0), "sites": sel.get("n_sites", 0)})
+    return pd.DataFrame(rows)
+
+
+def area_name(area):
+    """Nom interne d'une zone de recommandation (suffixe des fichiers de src/frequency.py)."""
+    if area in (None, "ems", "strasbourg"):
+        return "ems"
+    if str(area).startswith("epci:"):
+        return "epci" + str(area).split(":", 1)[1]
+    return f"dep{str(area).zfill(2)}"
+
+
+@st.cache_data(show_spinner=False, max_entries=16)
+def zone_frequency(zone, v=None):
+    """
+    Carreaux de la zone avec l'offre pondérée par la fréquence (src/frequency.py) : couleurs (rang
+    percentile pondéré population parmi les carreaux desservis, 0 = aucune option), infobulles.
+    Renvoie (DataFrame, résumé json) ou (None, None) si la zone n'a pas de GTFS lu.
+    """
+    area = reco_area(zone)
+    if area is None:
+        return None, None
+    name = area_name(area)
+    f = C.OUT / f"frequency_cells_{name}.parquet"
+    if not f.exists():
+        return None, None
+    fq = pd.read_parquet(f)
+    cells = pd.read_parquet(F_CELLS, columns=["key", "lon", "lat", "ind", "men"],
+                            filters=[("key", "in", fq["key"].tolist())])
+    df = cells.merge(fq, on="key")
+    col = "n_options_freq" if "n_options_freq" in df else "tc_freq_options"
+    val = df[col].fillna(0).values
+    score = np.zeros(len(df))
+    served = val > 0
+    if served.any():
+        o = np.argsort(val[served], kind="stable")
+        w = df["ind"].values[served][o]
+        rk = np.empty(served.sum())
+        rk[o] = (np.cumsum(w) - w / 2) / w.sum()
+        score[served] = C.SCORE_MIN_SERVED + (100 - C.SCORE_MIN_SERVED) * rk
+    rgb = score_rgb(score)
+    df["r"], df["g"], df["b"] = rgb[:, 0], rgb[:, 1], rgb[:, 2]
+    df["radius"] = C.CELL / 2 * np.sqrt(2)
+    cnt = df["n_transit_count"].fillna(0).astype(int).astype(str) if "n_transit_count" in df else "?"
+    df["tip"] = ("<b>" + df["tc_freq_options"].round(1).astype(str) + " option(s) bus/tram/métro pleines</b>"
+                 + "<br/>" + df["tc_lines"].astype(str) + " ligne(s), " + df["tc_dep_h"].round(0).astype(int).astype(str)
+                 + " départs/h à 5 min<br/>(comptage par arrêts : " + cnt + " arrêt(s))")
+    return df, read_json(C.OUT / f"frequency_{name}.json")
+
+
+def usage_validation():
+    return read_json(F_USAGE)
+
+
+@st.cache_data(show_spinner=False)
+def citiz_usage(v=None):
+    return pd.read_csv(F_USAGE_CSV, dtype={"station_id": str}) if exists(F_USAGE_CSV) else None
+
+
 @st.cache_data(show_spinner=False)
 def territories_ranking(v=None):
     """Classement national des intercommunalités pour Citiz (src/territories.py) ou None."""
@@ -588,6 +684,7 @@ STRATEGY_KEYS = {
                   "offer_no_model", "no_model"],
                  [("no_model",), ("sans_modele",), ("value_1",)]),
     "naive": (["naive_population_only", "naive"], [("naive",)]),
+    "no_frequency": (["no_frequency"], [("frequency",)]),
 }
 FIELD_KEYS = {
     "distinct": (["pop_newly_served_distinct", "persons_newly_served", "pop_distinct_newly_served",

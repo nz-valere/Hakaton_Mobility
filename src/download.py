@@ -126,14 +126,14 @@ def dl_gbfs():
     ok = sum(r["ok"] for r in results)
     n = sum(len(r.get("stations", [])) for r in results)
     print(f"  GBFS : {ok}/{len(results)} flux lus, {n} stations")
-    dest.write_text(json.dumps(results, ensure_ascii=False))
+    dest.write_text(json.dumps(results, ensure_ascii=False), encoding="utf-8")
 
 
 # --------------------------------------------------------------------------- étude de cas Strasbourg
 def dl_strasbourg():
     fetch(C.URLS["gtfs_cts"], C.RAW / "gtfs_cts.zip")
     # Fluo 67 : URL du GTFS résolue via le catalogue du PAN déjà téléchargé
-    pan = json.loads((C.RAW / "pan_datasets.json").read_text())
+    pan = json.loads((C.RAW / "pan_datasets.json").read_text(encoding="utf-8"))
     ds = next((d for d in pan if d["slug"] == C.FLUO67_SLUG), None)
     gtfs = [r for r in (ds or {}).get("resources", []) if r.get("format") == "GTFS"]
     if gtfs:
@@ -143,7 +143,14 @@ def dl_strasbourg():
         if dest.exists():
             continue
         feeds = _feeds(_get_json(C.URLS[key]))
-        dest.write_text(json.dumps(_get_json(feeds["station_information"]), ensure_ascii=False))
+        dest.write_text(json.dumps(_get_json(feeds["station_information"]), ensure_ascii=False), encoding="utf-8")
+
+
+def dl_frequency():
+    """GTFS des réseaux des zones d'étude (C.FREQ_FEEDS) pour pondérer l'offre par la fréquence."""
+    fetch(C.URLS["gtfs_lignes_azur"], C.RAW / "gtfs_lignes_azur.zip")
+    if not (C.RAW / "gtfs_cts.zip").exists():
+        dl_strasbourg()
 
 
 def dl_osm():
@@ -162,7 +169,7 @@ def dl_osm():
     """
     # curl plutôt que requests : la pile SSL système (LibreSSL) échoue sur overpass-api.de
     qfile = C.RAW / "overpass_query.txt"
-    qfile.write_text(q)
+    qfile.write_text(q, encoding="utf-8")
     for attempt in range(3):
         rc = subprocess.call(["curl", "-sS", "--max-time", "900", "-A", UA["User-Agent"],
                               "--data-urlencode", f"data@{qfile}",
@@ -176,7 +183,7 @@ def dl_osm():
 
 
 STEPS = {"static": dl_static, "stops": dl_stops, "gbfs": dl_gbfs,
-         "strasbourg": dl_strasbourg, "osm": dl_osm}
+         "strasbourg": dl_strasbourg, "frequency": dl_frequency, "osm": dl_osm}
 
 if __name__ == "__main__":
     for name in sys.argv[1:] or STEPS:

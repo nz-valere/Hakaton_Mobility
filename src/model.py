@@ -91,7 +91,7 @@ def build_offer_stub():
     nationaux (location_type 0, tous classés `transit`, dédoublonnés à ~20 m).
     """
     rows = []
-    for s in json.loads((C.RAW / "gbfs_france.json").read_text()):
+    for s in json.loads((C.RAW / "gbfs_france.json").read_text(encoding="utf-8")):
         if not s.get("ok") or not s.get("stations"):
             continue
         ff = set(s.get("form_factors") or [])
@@ -141,7 +141,7 @@ def load_offer():
 
 def load_communes():
     """Communes (geo.api.gouv.fr) : nom, population, centre (lon/lat) indexés par code INSEE."""
-    js = json.loads((C.RAW / "communes.json").read_text())
+    js = json.loads((C.RAW / "communes.json").read_text(encoding="utf-8"))
     df = pd.DataFrame({
         "com": [c["code"] for c in js], "com_name": [c["nom"] for c in js],
         "com_lon": [c["centre"]["coordinates"][0] if c.get("centre") else np.nan for c in js],
@@ -612,13 +612,13 @@ def cached_features(force=False):
     cells = load_cells()
     offer, src = load_offer()
     if FEAT_CACHE.exists() and not force:
-        meta = json.loads((CACHE / "features_meta.json").read_text())
+        meta = json.loads((CACHE / "features_meta.json").read_text(encoding="utf-8"))
         if meta == {"offer_source": src, "n": len(cells), "radius": geo.walk_radius_m()}:
             return cells, pd.read_parquet(FEAT_CACHE), src
     F = build_features(cells, offer)
     F.to_parquet(FEAT_CACHE, index=False)
     (CACHE / "features_meta.json").write_text(json.dumps({"offer_source": src, "n": len(cells),
-                                                             "radius": geo.walk_radius_m()}))
+                                                             "radius": geo.walk_radius_m()}), encoding="utf-8")
     return cells, F, src
 
 
@@ -670,7 +670,7 @@ def main(force=False):
             res["pop_served_citiz_fr"] = b["pop_served_citiz_fr"]
         metrics["kinds"][kind] = res
     metrics["runtime_s"] = round(time.time() - t0, 1)
-    (C.OUT / "model_metrics.json").write_text(json.dumps(metrics, indent=2, ensure_ascii=False))
+    (C.OUT / "model_metrics.json").write_text(json.dumps(metrics, indent=2, ensure_ascii=False), encoding="utf-8")
     print(f"-> {C.OUT / 'model_metrics.json'} ({metrics['runtime_s']} s)")
     return metrics
 

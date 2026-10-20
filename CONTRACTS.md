@@ -14,7 +14,9 @@ Géométrie commune : `src/geo.py` (projection, `walk_radius_m()`, `pairs_within
 | 3 | `src/offer.py` | raw GTFS/GBFS | `data/interim/offer.parquet` |
 | 3b | `src/walk_calibration.py` | raw OSM + offer | `outputs/walk_calibration.json` |
 | 4 | `src/accessibility.py` | cells, offer, calibration | `outputs/cells_access.parquet`, `outputs/stations_served.parquet` |
+| 4b | `src/frequency.py` | cells, cells_access, GTFS des zones (`C.FREQ_FEEDS`) | `outputs/frequency_cells_<zone>.parquet`, `outputs/frequency_<zone>.json` |
 | 5 | `src/model.py` | cells_access, offer | `outputs/model_metrics.json`, `outputs/model_*.joblib`/pkl, fonction `predict_value()` |
+| 5c | `src/collect_gbfs.py` (en continu) puis `src/usage.py` | flux GBFS Citiz ; cache des variables, modèle Citiz | `data/gbfs/citiz_status_*.csv` ; `outputs/citiz_usage.csv`, `outputs/usage_validation.json` |
 | 5b | `src/territories.py` | features, modèle Citiz, EPCI | `outputs/territories_citiz.csv`, `outputs/territories_summary.json` (territoire prioritaire `top`) |
 | 6 | `src/optimize.py` (algo) + `src/recommend.py` (orchestration) | tout | `outputs/recommendations.csv` (colonne `financeur` : `citiz` / `collectivite`) |
 | 7 | `app.py` (Streamlit) | outputs | démo live |
@@ -47,6 +49,19 @@ Géométrie commune : `src/geo.py` (projection, `walk_radius_m()`, `pairs_within
 ## outputs/stations_served.parquet
 Colonnes d'offer + `pop_served` (habitants à ≤ 5 min), `pop_served_exclusive` (habitants dont c'est le seul point du mode),
 `households_served`.
+
+## outputs/frequency_cells_<zone>.parquet (une ligne par carreau habité de la zone)
+`key`, `tc_freq_options` (Σ lignes-sens à ≤ 5 min de min(1, départs/h ÷ `C.FULL_OPTION_DEP_H`), chaque
+ligne-sens comptée une fois), `tc_lines` (lignes distinctes), `tc_dep_h` (départs/h cumulés), `freq_nearest`
+(départs/h de la meilleure ligne de l'arrêt le plus proche), `n_options_count` / `n_transit_count` (méthode
+nationale), `n_options_freq` (= `tc_freq_options` + points des autres modes). `<zone>` = `ems`, `epci<siren>`.
+Lu par `src/recommend.py` (valeur des arrêts de bus, besoin) et l'app.
+
+## data/gbfs/citiz_status_<jour>.csv (collecteur) et outputs/citiz_usage.csv
+Collecte : `ts_utc`, `provider_id`, `station_id`, `n_vehicles`, `n_reserved`, `n_disabled` (totaux par station,
+aucune donnée de véhicule). Usage : `provider_id`, `station_id`, `name`, `lon`, `lat`, `releves`, `vehicules`,
+`occupation` (Σ réservées / Σ voitures), `disponibilite` (part des relevés avec ≥ 1 voiture libre), `saturee`,
+`propension_oof`, `pop_5min`.
 
 ## Confidentialité
 Ne jamais exporter/afficher une agrégation de moins de `C.PRIVACY_MIN_HOUSEHOLDS` ménages

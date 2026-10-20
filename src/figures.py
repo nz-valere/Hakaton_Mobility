@@ -5,6 +5,9 @@ Lit uniquement des sorties existantes (aucun recalcul) :
     outputs/access_summary.json            -> part sans option par décile de revenu, part desservie par mode
     outputs/recommendations_summary.json   -> stratégie recommandée vs alternatives (même budget Citiz)
     outputs/territories_citiz.csv          -> classement national des territoires pour Citiz
+    outputs/frequency_<zone>.json          -> comptage d'arrêts vs fréquence des lignes (slides_frequency.png)
+    outputs/usage_validation.json          -> occupation réelle par quintile de propension (slides_usage.png)
+    outputs/equity_curve.json              -> prix de l'équité, territoire prioritaire (slides_equity.png)
 
 Sorties : outputs/figures/slides_deciles.png, slides_modes.png, slides_strategies.png,
           slides_territories.png, slides_map_france.png, slides_map_top.png (territoire prioritaire),
@@ -273,23 +276,130 @@ def map_area(csv, summary, out_name, communes):
     plt.close(fig)
 
 
+ZONE_LABEL = {"ems": "Eurométropole de Strasbourg", "epci200030195": "Métropole Nice Côte d'Azur"}
+
+
+def frequency():
+    """Comptage d'arrêts vs fréquence des lignes dans les zones d'étude (outputs/frequency_<zone>.json)."""
+    zones = [(n, json.loads((C.OUT / f"frequency_{n}.json").read_text(encoding="utf-8")))
+             for n in C.FREQ_FEEDS if (C.OUT / f"frequency_{n}.json").exists()]
+    zones = [(n, s) for n, s in zones if s.get("comparaison")]
+    if not zones:
+        return None
+    bars = [("part_pop_arret_tc_5min", "Un arrêt à 5 min\n(comptage, méthode nationale)", GREY),
+            ("part_pop_au_moins_1_option_tc_pleine", "Au moins une ligne toutes les 15 min\n(fréquence GTFS)", BLUE),
+            ("part_pop_arret_mais_service_faible", "Un arrêt, mais service faible", ORANGE)]
+    fig, ax = _fig(10, 4.6)
+    w = 0.26
+    for k, (key, lab, col) in enumerate(bars):
+        vals = [100 * s["comparaison"][key] for _, s in zones]
+        xs = np.arange(len(zones)) + (k - 1) * w
+        b = ax.bar(xs, vals, width=w * 0.92, color=col, label=lab.replace("\n", " "))
+        for r, v in zip(b, vals):
+            ax.text(r.get_x() + r.get_width() / 2, v + 1, f"{_num(v, 1)} %", ha="center", color=INK, fontsize=9)
+    ax.set_xticks(np.arange(len(zones)))
+    ax.set_xticklabels([ZONE_LABEL.get(n, n) for n, _ in zones], color=INK)
+    ax.set_ylim(0, 110)
+    ax.set_ylabel("% des habitants (bus, tram, métro à 5 min)", color=MUTED)
+    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.1), ncol=3, frameon=False, fontsize=8.5)
+    ax.set_title("Compter les arrêts surestime l'offre : un arrêt à 2 bus par jour y vaut une station de tram",
+                 loc="left", color=INK, fontsize=12)
+    fig.tight_layout()
+    fig.savefig(C.FIG / "slides_frequency.png", facecolor=BG)
+    plt.close(fig)
+    return "slides_frequency"
+
+
+def usage():
+    """Occupation réelle des stations Citiz par quintile de propension du modèle (outputs/usage_validation.json)."""
+    f = C.OUT / "usage_validation.json"
+    if not f.exists():
+        return None
+    u = json.loads(f.read_text(encoding="utf-8"))
+    q = u["occupation_par_quintile_de_propension"]
+    vals = [100 * r["occupation_moyenne"] for r in q]
+    fig, ax = _fig(10, 4.6)
+    colors = [ORANGE if v == max(vals) else BLUE for v in vals]
+    b = ax.bar(range(len(q)), vals, color=colors, width=0.6)
+    for r, v, row in zip(b, vals, q):
+        ax.text(r.get_x() + r.get_width() / 2, v + 0.8, f"{_num(v, 1)} %", ha="center", color=INK, fontsize=10)
+    ax.set_xticks(range(len(q)))
+    ax.set_xticklabels([f"{r['quintile']}\n({r['stations']} stations)" for r in q], color=INK, fontsize=9)
+    ax.set_xlabel("quintile de propension du modèle Citiz, hors pli (Q1 = sites jugés les moins favorables)",
+                  color=MUTED)
+    ax.set_ylabel("occupation moyenne (% du temps-voiture réservé)", color=MUTED)
+    ax.set_ylim(0, max(vals) * 1.25)
+    per = u.get("periode", {})
+    ax.set_title(f"Usage réel de {u['stations_validees']:,} stations Citiz (collecte GBFS, {per.get('releves')} relevés) : "
+                 f"Spearman modèle {_num(u['spearman_modele_occupation'], 2)} · population seule "
+                 f"{_num(u['spearman_population_occupation'], 2)}".replace(",", " ", 1),
+                 loc="left", color=INK, fontsize=10.5)
+    fig.tight_layout()
+    fig.savefig(C.FIG / "slides_usage.png", facecolor=BG)
+    plt.close(fig)
+    return "slides_usage"
+
+
+def equity():
+    """Le prix de l'équité sur le territoire prioritaire (outputs/equity_curve.json, src/recommend.py)."""
+    f = C.OUT / "equity_curve.json"
+    if not f.exists():
+        return None
+    e = json.loads(f.read_text(encoding="utf-8"))
+    from matplotlib.ticker import FuncFormatter
+    panels = [(k, col, lab) for k, col, lab in (("citiz", ORANGE, "Citiz (stations d'autopartage)"),
+                                                 ("collectivite", BLUE, "Collectivité (vélo, bus)"))
+              if any(p["financeur"] == k for p in e["points"])]
+    fig, axes = plt.subplots(1, len(panels), figsize=(11, 4.6), dpi=150, squeeze=False)
+    fig.patch.set_facecolor(BG)
+    for ax, (key, col, lab) in zip(axes[0], panels):
+        _style(ax)
+        ax.grid(axis="x", color=GRID, linewidth=0.8)
+        pts = sorted((p for p in e["points"] if p["financeur"] == key), key=lambda p: p["lambda"])
+        x = [100 * p["share_new_in_income_deciles_1_3"] for p in pts]
+        y = [p["pop_newly_served"] for p in pts]
+        ax.plot(x, y, color=col, linewidth=2, marker="o")
+        # une étiquette par point distinct : « λ = 0,5 · 0,75 · 1 » si plusieurs λ donnent la même liste
+        groups = {}
+        for p, xi, yi in zip(pts, x, y):
+            groups.setdefault((round(xi, 2), round(yi)), []).append(_num(p["lambda"], 2))
+        for (xi, yi), lams in groups.items():
+            ax.annotate("λ = " + " · ".join(lams), (xi, yi), textcoords="offset points", xytext=(6, 8),
+                        color=col, fontsize=9)
+        pad_x = max(1.0, (max(x) - min(x)) * 0.25)
+        pad_y = max(500, (max(y) - min(y)) * 0.6)
+        ax.set_xlim(min(x) - pad_x, max(x) + pad_x * 1.6)
+        ax.set_ylim(min(y) - pad_y, max(y) + pad_y)
+        ax.yaxis.set_major_formatter(FuncFormatter(lambda v, _: f"{v:,.0f}".replace(",", " ")))
+        ax.set_xlabel("% des nouveaux desservis dans les déciles de revenu 1-3", color=MUTED)
+        ax.set_ylabel("habitants nouvellement desservis", color=MUTED)
+        ax.set_title(lab, loc="left", color=col, fontsize=11)
+    fig.suptitle(f"{e.get('territoire', '')} : le prix de l'équité (même budget, λ de 0 à 1)",
+                 x=0.01, ha="left", color=INK, fontsize=12)
+    fig.tight_layout()
+    fig.savefig(C.FIG / "slides_equity.png", facecolor=BG)
+    plt.close(fig)
+    return "slides_equity"
+
+
 def main():
-    acc = json.loads((C.OUT / "access_summary.json").read_text())
-    rec = json.loads((C.OUT / "recommendations_summary.json").read_text())
+    acc = json.loads((C.OUT / "access_summary.json").read_text(encoding="utf-8"))
+    rec = json.loads((C.OUT / "recommendations_summary.json").read_text(encoding="utf-8"))
     deciles(acc)
     modes(acc)
     ems_f = C.OUT / "recommendations_summary_ems.json"
     # comparaison des stratégies sur le témoin : là où l'offre existe, l'ignorer coûte cher
-    strategies(json.loads(ems_f.read_text()) if ems_f.exists() else rec)
+    strategies(json.loads(ems_f.read_text(encoding="utf-8")) if ems_f.exists() else rec)
     territories()
     map_france()
     from src import territories as T
     top = T.load_summary()["top"]["epci"]
     map_area("recommendations.csv", rec, "slides_map_top.png", T.epci_communes(top))
     if ems_f.exists():
-        map_area("recommendations_ems.csv", json.loads(ems_f.read_text()), "slides_map_ems.png", C.EMS_COMMUNES)
+        map_area("recommendations_ems.csv", json.loads(ems_f.read_text(encoding="utf-8")), "slides_map_ems.png", C.EMS_COMMUNES)
+    extra = [n for n in (frequency(), usage(), equity()) if n]
     for n in ("slides_deciles", "slides_modes", "slides_strategies", "slides_territories", "slides_map_france",
-              "slides_map_top", "slides_map_ems"):
+              "slides_map_top", "slides_map_ems", *extra):
         print("->", C.FIG / f"{n}.png")
 
 

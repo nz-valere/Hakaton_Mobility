@@ -5,7 +5,16 @@ Tous les paramètres méthodologiques (vitesse de marche, coûts, facteurs CO2, 
 sont regroupés ici pour être discutables et modifiables sans toucher au code.
 Chaque hypothèse chiffrée est accompagnée de sa source ou signalée comme hypothèse.
 """
+import sys
 from pathlib import Path
+
+# Console Windows (cp1252) : sans cela, afficher « λ », « ≥ » ou « → » fait planter les scripts.
+# Tous les fichiers texte du projet sont par ailleurs lus et écrits en UTF-8 explicitement.
+for _stream in (sys.stdout, sys.stderr):
+    try:
+        _stream.reconfigure(encoding="utf-8", errors="replace")
+    except (AttributeError, ValueError):
+        pass
 
 # --------------------------------------------------------------------------- chemins
 ROOT = Path(__file__).resolve().parent
@@ -41,6 +50,8 @@ URLS = {
     "gbfs_citiz_grandest": "https://backend.citiz.fr/public/provider/1/gbfs/v3.0/gbfs.json",
     "gbfs_velhop": "https://gbfs.nextbike.net/maps/gbfs/v2/nextbike_ae/gbfs.json",
     "overpass": "https://overpass-api.de/api/interpreter",
+    # Nice Côte d'Azur (territoire prioritaire) – GTFS du réseau urbain Lignes d'Azur (PAN)
+    "gtfs_lignes_azur": "https://chouette.enroute.mobi/api/v1/datas/OpendataRLA/gtfs.zip",
 }
 # Le GTFS Fluo 67 est résolu dynamiquement via l'API transport.data.gouv.fr
 FLUO67_SLUG = "offre-de-transport-du-reseau-fluo-grand-est-bas-rhin-67"
@@ -283,6 +294,30 @@ MODEL_VALUE_MIN = 0.0
 # Citiz n'exploite que des stations d'autopartage : son budget est distinct de celui de la
 # collectivité (AOM), qui finance stations vélo et arrêts de bus. Montants sur HORIZON_YEARS.
 CITIZ_BUDGET = 1_000_000      # ≈ 16 stations d'1 véhicule (60 k€ / 5 ans chacune)
+
+# ---- frequency.py : fréquence des lignes de bus / tram / métro dans les zones d'étude (GTFS)
+# L'agrégat national d'arrêts n'a pas d'horaires : un arrêt à 2 bus/jour y vaut une station de
+# métro. Dans les zones où l'on recommande, on lit les GTFS des réseaux pour pondérer par le service.
+# Zone (nom de recommend._area_bounds) -> fichiers GTFS de data/raw/ (téléchargés par src.download).
+FREQ_FEEDS = {
+    "ems": ("gtfs_cts.zip", "gtfs_fluo67.zip"),            # CTS (bus, tram) + cars Fluo 67
+    "epci200030195": ("gtfs_lignes_azur.zip",),             # Métropole Nice Côte d'Azur : Lignes d'Azur
+}
+FREQ_REF_DATE = "20261117"     # mardi hors vacances scolaires ; à défaut, le mardi le plus chargé du GTFS
+FREQ_HOURS = (7, 20)           # fréquence moyenne entre 7 h et 20 h
+# Une ligne (dans un sens) passant toutes les 15 min ou mieux = 1 option pleine ; moins = fraction.
+FULL_OPTION_DEP_H = 4.0
+# Arrêt de bus recommandé : sa valeur est multipliée par la qualité de service de la ligne
+# rattachée (min(1, départs/h / FULL_OPTION_DEP_H)), bornée en bas pour ne pas annuler un site.
+FREQ_MIN_FACTOR = 0.1
+
+# ---- collect_gbfs.py / usage.py : usage réel des stations Citiz (collecte GBFS toutes les 5 min)
+# Sortie du collecteur (totaux par station, aucune position de véhicule). Variable d'environnement
+# GBFS_COLLECT_DIR pour lire une collecte faite ailleurs (autre PC, autre dossier).
+GBFS_COLLECT = Path(__import__("os").environ.get("GBFS_COLLECT_DIR", DATA / "gbfs"))
+GBFS_COLLECT_INTERVAL_S = 300  # = TTL des flux Citiz
+USAGE_MIN_SNAPSHOTS = 12       # station retenue pour la validation si au moins 12 relevés (1 h)
+SATURATION_OCCUPANCY = 0.6     # « station saturée » : véhicules réservés plus de 60 % du temps relevé
 PUBLIC_BUDGET = 1_000_000     # vélo + bus, réparti selon BUDGET_SPLIT (50/50 entre ces deux types)
 # Classement national des intercommunalités (src/territories.py)
 TERRITORY_MIN_POP = 100_000   # masse critique d'un réseau local d'autopartage (hypothèse)

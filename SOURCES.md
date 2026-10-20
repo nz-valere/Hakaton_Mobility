@@ -19,6 +19,8 @@ Toutes les données sont ouvertes et téléchargées automatiquement par `python
 | Communes (nom, code, centre, population, surface) | geo.api.gouv.fr (IGN Admin Express / INSEE) | JSON | Licence Ouverte 2.0 | Noms de communes, agrégations | `communes.json` |
 | Intercommunalités (EPCI) et rattachement des communes | geo.api.gouv.fr (IGN Admin Express / BANATIC) | JSON | Licence Ouverte 2.0 | Classement national des territoires pour Citiz (`src/territories.py`) | `epcis.json`, `communes_epci.json` |
 | Réseau piéton OpenStreetMap (Eurométropole de Strasbourg) | contributeurs OpenStreetMap via Overpass API | JSON | ODbL 1.0 | Calibration du coefficient de détour marche | `osm_walk_strasbourg.json` |
+| GTFS Lignes d'Azur (réseau urbain de la Métropole Nice Côte d'Azur) | Métropole Nice Côte d'Azur, via transport.data.gouv.fr | GTFS (valide du 19/10 au 31/12/2026) | Licence Ouverte / ODbL | Fréquence des lignes dans le territoire prioritaire (`src/frequency.py`) | `gtfs_lignes_azur.zip` |
+| Usage des stations Citiz : relevés `vehicle_status` toutes les 5 min | Citiz (GBFS 3.0, backend.citiz.fr, 17 réseaux), collecte de l'équipe | CSV, totaux par station | open data LOM | Taux d'occupation, validation du modèle par l'usage (`src/collect_gbfs.py`, `src/usage.py`) | `data/gbfs/citiz_status_*.csv` |
 
 ## Hypothèses chiffrées (non issues de jeux de données)
 
@@ -30,6 +32,8 @@ Toutes les données sont ouvertes et téléchargées automatiquement par `python
 | Taille du réseau Citiz | ~2 800 véhicules, ~280 villes, ~130 000 conducteurs | Énoncé du hackathon |
 | Coûts d'investissement / exploitation | voir `Config.COSTS` | Ordres de grandeur publics, **hypothèses paramétrables** |
 | Seuil de secret statistique | 11 ménages | INSEE (règles de diffusion Filosofi) |
+| Option TC « pleine » | une ligne (dans un sens) toutes les 15 min ou mieux, 7 h-20 h, mardi 17/11/2026 | `Config.FULL_OPTION_DEP_H`, `Config.FREQ_REF_DATE`, seuil courant d'un « réseau fréquent » ; jour hors vacances de la Toussaint (17 oct.-2 nov. 2026, [Onisep](https://www.onisep.fr/vacances-scolaires-2026-2027)) |
+| Station Citiz saturée | voitures réservées plus de 60 % du temps relevé | `Config.SATURATION_OCCUPANCY`, **hypothèse** |
 | Budgets par financeur | Citiz 1 M€, collectivité 1 M€ sur 5 ans | `Config.CITIZ_BUDGET`, `Config.PUBLIC_BUDGET`, **hypothèses paramétrables** |
 | Seuil de taille des territoires classés | 100 000 habitants par intercommunalité | `Config.TERRITORY_MIN_POP`, hypothèse de masse critique |
 

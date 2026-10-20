@@ -168,7 +168,7 @@ def gbfs_operator(name):
 
 
 def load_gbfs():
-    systems = json.loads((C.RAW / "gbfs_france.json").read_text())
+    systems = json.loads((C.RAW / "gbfs_france.json").read_text(encoding="utf-8"))
     rows, per_mode = [], {}
     for s in systems:
         stations = s.get("stations") or []
@@ -371,7 +371,7 @@ def check_strasbourg(df):
         f = C.RAW / f"{key}_station_information.json"
         if not f.exists():
             continue
-        st = pd.DataFrame(json.loads(f.read_text())["data"]["stations"])
+        st = pd.DataFrame(json.loads(f.read_text(encoding="utf-8"))["data"]["stations"])
         n_in = in_strasbourg(st["lon"], st["lat"]).sum()
         n_off = (stra["mode"] == mode).sum()
         print(f"    {label} : flux direct {len(st)} stations ({n_in} dans la bbox) ; "

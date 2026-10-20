@@ -51,8 +51,8 @@ PLM = (("751", "75056"), ("132", "13055"), ("6938", "69123"))
 # --------------------------------------------------------------------------- référentiel EPCI
 @lru_cache(maxsize=1)
 def _epci_tables():
-    com_epci = {c["code"]: c.get("codeEpci") for c in json.loads((C.RAW / "communes_epci.json").read_text())}
-    names = {e["code"]: e["nom"] for e in json.loads((C.RAW / "epcis.json").read_text())}
+    com_epci = {c["code"]: c.get("codeEpci") for c in json.loads((C.RAW / "communes_epci.json").read_text(encoding="utf-8"))}
+    names = {e["code"]: e["nom"] for e in json.loads((C.RAW / "epcis.json").read_text(encoding="utf-8"))}
     return com_epci, names
 
 
@@ -86,7 +86,7 @@ def area_of(code):
 
 def load_summary():
     try:
-        return json.loads(F_SUMMARY.read_text())
+        return json.loads(F_SUMMARY.read_text(encoding="utf-8"))
     except Exception:
         return None
 
@@ -212,7 +212,7 @@ def main():
         "ranking": [rec(r) for _, r in out[out["rank"].notna()].iterrows()],
         "runtime_s": round(time.time() - t0, 1),
     }
-    F_SUMMARY.write_text(json.dumps(summary, indent=2, ensure_ascii=False, default=float))
+    F_SUMMARY.write_text(json.dumps(summary, indent=2, ensure_ascii=False, default=float), encoding="utf-8")
     pd.set_option("display.width", 220)
     show = ["rank", "territoire", "statut", "population", "share_carsharing_served", "potential", "sim_sites",
             "sim_pop_newly_served", "sim_members_potential"]

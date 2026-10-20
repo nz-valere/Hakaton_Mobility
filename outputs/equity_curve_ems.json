@@ -1,0 +1,87 @@
+{
+  "territoire": "Eurométropole de Strasbourg",
+  "citiz_budget": 1000000,
+  "public_budget": 1000000,
+  "points": [
+    {
+      "lambda": 0.0,
+      "financeur": "citiz",
+      "n_sites": 16,
+      "pop_newly_served": 38812.8125,
+      "share_new_in_income_deciles_1_3": 0.8245142953760437,
+      "co2_avoided_t_yr": 119.47818346349351
+    },
+    {
+      "lambda": 0.0,
+      "financeur": "collectivite",
+      "n_sites": 11,
+      "pop_newly_served": 31672.625,
+      "share_new_in_income_deciles_1_3": 0.2748824892158449,
+      "co2_avoided_t_yr": 22.75327843261742
+    },
+    {
+      "lambda": 0.25,
+      "financeur": "citiz",
+      "n_sites": 16,
+      "pop_newly_served": 38812.8125,
+      "share_new_in_income_deciles_1_3": 0.8245142953760437,
+      "co2_avoided_t_yr": 119.47818346349351
+    },
+    {
+      "lambda": 0.25,
+      "financeur": "collectivite",
+      "n_sites": 11,
+      "pop_newly_served": 31679.03125,
+      "share_new_in_income_deciles_1_3": 0.29721454155893734,
+      "co2_avoided_t_yr": 22.039884589742435
+    },
+    {
+      "lambda": 0.5,
+      "financeur": "citiz",
+      "n_sites": 16,
+      "pop_newly_served": 37949.0625,
+      "share_new_in_income_deciles_1_3": 0.8138977412156098,
+      "co2_avoided_t_yr": 121.45714285714287
+    },
+    {
+      "lambda": 0.5,
+      "financeur": "collectivite",
+      "n_sites": 11,
+      "pop_newly_served": 31679.03125,
+      "share_new_in_income_deciles_1_3": 0.29721454155893734,
+      "co2_avoided_t_yr": 22.039884589742435
+    },
+    {
+      "lambda": 0.75,
+      "financeur": "citiz",
+      "n_sites": 16,
+      "pop_newly_served": 37949.0625,
+      "share_new_in_income_deciles_1_3": 0.8138977412156098,
+      "co2_avoided_t_yr": 121.45714285714287
+    },
+    {
+      "lambda": 0.75,
+      "financeur": "collectivite",
+      "n_sites": 11,
+      "pop_newly_served": 31396.8125,
+      "share_new_in_income_deciles_1_3": 0.334738399001491,
+      "co2_avoided_t_yr": 22.039884589742435
+    },
+    {
+      "lambda": 1.0,
+      "financeur": "citiz",
+      "n_sites": 16,
+      "pop_newly_served": 37872.8125,
+      "share_new_in_income_deciles_1_3": 0.8181404866617709,
+      "co2_avoided_t_yr": 121.45714285714287
+    },
+    {
+      "lambda": 1.0,
+      "financeur": "collectivite",
+      "n_sites": 11,
+      "pop_newly_served": 31478.0625,
+      "share_new_in_income_deciles_1_3": 0.3470313650975183,
+      "co2_avoided_t_yr": 21.884759597582274
+    }
+  ]
+}

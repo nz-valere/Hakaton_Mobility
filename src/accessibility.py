@@ -252,7 +252,7 @@ def commune_table(ca):
         res[f"share_served_{m}"] = (ca["ind"] * ca[f"served_{m}"]).groupby(ca["com"]).sum() / res["population"]
     res["privacy_ok"] = res["households"] >= C.PRIVACY_MIN_HOUSEHOLDS
     try:
-        names = pd.DataFrame(json.loads((C.RAW / "communes.json").read_text()))[["code", "nom"]]
+        names = pd.DataFrame(json.loads((C.RAW / "communes.json").read_text(encoding="utf-8")))[["code", "nom"]]
         res = res.join(names.set_index("code")["nom"])
     except Exception:  # noqa: BLE001 – nom de commune facultatif
         res["nom"] = None
@@ -410,11 +410,11 @@ def build(offer_path=C.INTERIM / "offer.parquet"):
     sens = None
     f_cal = C.OUT / "walk_calibration.json"
     if f_cal.exists():
-        lo, hi = json.loads(f_cal.read_text())["ci95"]["r_equal_count"]
+        lo, hi = json.loads(f_cal.read_text(encoding="utf-8"))["ci95"]["r_equal_count"]
         print(f"  sensibilité au rayon : {lo:.0f} / {hi:.0f} m", flush=True)
         sens = radius_sensitivity(cells, offer, [lo, radius, hi])
     s = summary(ca, st, radius, offer_path, time.time() - t0, sens)
-    (C.OUT / "access_summary.json").write_text(json.dumps(s, indent=2, ensure_ascii=False))
+    (C.OUT / "access_summary.json").write_text(json.dumps(s, indent=2, ensure_ascii=False), encoding="utf-8")
     nat = s["national"]
     print(f"  population sans option à 5 min : {nat['share_no_option']:.1%}")
     for m, v in nat["share_served_by_mode"].items():

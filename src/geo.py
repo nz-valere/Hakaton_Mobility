@@ -68,7 +68,7 @@ def detour_factor():
     """Coefficient réseau / vol d'oiseau calibré sur OSM (outputs/walk_calibration.json), sinon défaut."""
     f = C.OUT / "walk_calibration.json"
     if f.exists():
-        return float(json.loads(f.read_text())["detour"])
+        return float(json.loads(f.read_text(encoding="utf-8"))["detour"])
     return C.DEFAULT_DETOUR
 
 

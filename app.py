@@ -137,6 +137,22 @@ def funder_block(key, rec, summ, off, bbox, lam, area):
                    f"taux d'adhésion national Citiz observé autour des stations existantes × valeur du site ; "
                    f"conducteurs plafonnés à {C.CITIZ_DRIVERS_FR / C.CITIZ_CARS_FR:.0f} par véhicule "
                    f"({C.CITIZ_DRIVERS_FR:,} conducteurs / {C.CITIZ_CARS_FR:,} voitures).".replace(",", " "))
+        u = ad.citiz_usage(V)
+        if u is not None:
+            uz = u[u["lon"].between(w, e_) & u["lat"].between(s_, n_)]
+            sat = uz[uz["saturee"]].sort_values("occupation", ascending=False)
+            if len(uz):
+                st.markdown(f"**Usage réel des stations Citiz existantes** (collecte GBFS) : {len(uz)} stations, "
+                            f"occupation médiane {100 * uz['occupation'].median():.0f} % ; **{len(sat)} saturées** "
+                            f"(voitures réservées plus de {100 * C.SATURATION_OCCUPANCY:.0f} % du temps relevé).")
+                if len(sat):
+                    st.dataframe(pd.DataFrame({
+                        "Station": sat["name"], "Voitures": sat["vehicules"],
+                        "Occupation (%)": (100 * sat["occupation"]).round(0),
+                        "Au moins une voiture libre (% du temps)": (100 * sat["disponibilite"]).round(0),
+                        "Relevés": sat["releves"]}), hide_index=True, height=min(300, 38 + 35 * len(sat)))
+                    st.caption("Ajouter une voiture dans une station saturée coûte moins cher qu'ouvrir une station et "
+                               "la demande y est déjà démontrée : à arbitrer avec les nouvelles stations ci-dessous.")
     lines = []
     if zero1 is not None and key != "citiz":
         lines.append(f"Dont **{fmt(zero1)} personnes** qui passent de 0 à au moins 1 option à 5 min.")
@@ -170,6 +186,7 @@ def funder_block(key, rec, summ, off, bbox, lam, area):
     with st.expander("Comparaison des stratégies (même budget)"):
         strat = [("Mobili'Score (λ = %.1f)" % lam, sel), (NO_MODEL, ad.strategy(summ, "no_model")),
                  (EQUITY_OFF, ad.strategy(summ, "no_equity")),
+                 ("Sans la fréquence des lignes", ad.strategy(summ, "no_frequency")),
                  ("Naïve : population seule", ad.strategy(summ, "naive"))]
 
         def _pct(d, k):
@@ -252,10 +269,42 @@ tab1, tab2, tab_fr, tab3, tab4 = st.tabs(["Carte d'accessibilité", "Qui est con
                                           "Où s'implanter (France)", "Où investir", "Méthode & limites"])
 
 # =========================================================================== 1. carte
+FREQ_LABELS = {"freq": "la fréquence des lignes (GTFS du réseau)", "count": "le nombre d'arrêts (méthode nationale)"}
 with tab1:
-    with st.spinner("Calcul de la carte…"):
-        mc, masked_pop, prov = ad.map_cells(zone, size_m, V)
-    if mc is None:
+    fq_df, fq_sum = ad.zone_frequency(zone, V)
+    measure = "count"
+    if fq_df is not None:
+        measure = st.radio("Bus, tram et métro mesurés par", ["freq", "count"], format_func=FREQ_LABELS.get,
+                           horizontal=True,
+                           help="Fréquence : une ligne compte une fois même si elle passe à plusieurs arrêts proches, "
+                                f"et une ligne toutes les 15 min ou mieux vaut 1 option pleine ({C.FULL_OPTION_DEP_H:g} "
+                                "départs/h, entre 7 h et 20 h un mardi hors vacances). Nombre d'arrêts : méthode "
+                                "nationale, sans horaires.")
+    if measure == "freq":
+        cmp_ = (fq_sum or {}).get("comparaison") or {}
+        pop_z = float(fq_df["ind"].sum())
+        c1, c2, c3, c4 = st.columns(4)
+        c1.metric("Habitants", fmt(pop_z))
+        c2.metric("Un arrêt à 5 min (comptage)", f"{100 * cmp_.get('part_pop_arret_tc_5min', 0):.0f} %")
+        c3.metric("Au moins 1 option pleine (fréquence)",
+                  f"{100 * cmp_.get('part_pop_au_moins_1_option_tc_pleine', 0):.0f} %")
+        weak = cmp_.get("part_pop_arret_mais_service_faible", 0)
+        c4.metric("Un arrêt, mais service faible", f"{100 * weak:.1f} %", f"≈ {fmt(weak * pop_z)} habitants",
+                  delta_color="off", help=cmp_.get("lecture"))
+        deck([square_layer(fq_df)], view_for(fq_df), height=620)
+        legend_score()
+        days = ", ".join(f"{k} : {d['jour']}" for k, d in ((fq_sum or {}).get("jour_reference") or {}).items())
+        st.caption(f"Score = rang des options à 5 min, bus/tram/métro pondérés par la fréquence (autres modes comptés "
+                   f"comme dans la méthode nationale). Jour de référence {days}. « Service faible » : un arrêt existe à "
+                   f"5 min mais il passe moins d'un bus toutes les 15 min en cumulé ; le comptage d'arrêts classe ces "
+                   f"habitants comme desservis.")
+        mc = None
+    else:
+        with st.spinner("Calcul de la carte…"):
+            mc, masked_pop, prov = ad.map_cells(zone, size_m, V)
+    if measure == "freq":
+        pass
+    elif mc is None:
         missing("La carte nationale d'accessibilité", "python -m src.accessibility")
         st.caption("En attendant, choisissez un territoire (Strasbourg, un département, un DROM) : "
                    "l'accessibilité y est recalculée à la volée.")
@@ -450,12 +499,45 @@ with tab3:
             st.caption("Dernière liste calculée (territoire prioritaire, paramètres par défaut) :")
             st.dataframe(pd.read_csv(ad.F_RECO), hide_index=True)
     else:
+        compare = st.toggle("Comparer avec les autres stratégies (plus lent)", value=False,
+                            help="Désactivé : seule la stratégie recommandée est recalculée, en direct à chaque "
+                                 "mouvement de curseur. Activé : sans modèle, sans équité, naïve… (même budget).")
+        secs = None
         try:
             with st.spinner("Optimisation en cours (premier calcul d'un territoire : ~5-30 s)…"):
-                rec, full = ad.run_recommend_funders(area, b_citiz, b_public, lam, V)
+                if compare:
+                    rec, full = ad.run_recommend_funders(area, b_citiz, b_public, lam, V)
+                else:
+                    rec, full, secs = ad.run_recommend_fast(area, b_citiz, b_public, lam, V)
         except Exception as e:  # message clair plutôt qu'une trace
             st.error(f"Le calcul de recommandation a échoué : {e}")
             rec, full = pd.DataFrame(), None
+        if secs is not None:
+            st.caption(f"Liste recalculée en {secs:.1f} s (contexte du territoire gardé en mémoire : seul "
+                       "l'algorithme glouton est relancé).")
+        if full is not None and len(rec) and st.toggle("Afficher le prix de l'équité", value=True):
+            with st.spinner(f"Prix de l'équité : {len(ad.EQUITY_LAMBDAS)} optimisations…"):
+                eqc = ad.equity_curve(area, b_citiz, b_public, V)
+            if len(eqc):
+                eqc["Financeur"] = eqc["financeur"].map(FUNDER_SHORT)
+                eqc["actuel"] = np.isclose(eqc["λ"], lam)
+                base = alt.Chart(eqc).encode(
+                    x=alt.X("part_modestes:Q", title="% des nouveaux desservis dans les 3 premiers déciles de revenu",
+                            scale=alt.Scale(zero=False)),
+                    y=alt.Y("habitants:Q", title="Habitants nouvellement desservis", scale=alt.Scale(zero=False)),
+                    color=alt.Color("Financeur:N", scale=alt.Scale(domain=["Citiz", "collectivité"],
+                                                                     range=["#eb6834", "#2a78d6"])),
+                    tooltip=[alt.Tooltip("Financeur:N"), alt.Tooltip("λ:Q", format=".2f"),
+                             alt.Tooltip("habitants:Q", format=",.0f"), alt.Tooltip("part_modestes:Q", format=".1f"),
+                             alt.Tooltip("co2:Q", format=".0f", title="CO₂ évité (t/an)"), alt.Tooltip("sites:Q")])
+                chart = (base.mark_line(strokeWidth=2)
+                         + base.mark_circle().encode(size=alt.condition(alt.datum.actuel, alt.value(220), alt.value(60)))
+                         + base.mark_text(dy=-12, fontSize=11).encode(text=alt.Text("λ:Q", format=".2f")))
+                st.altair_chart(chart.properties(height=260, title="Le prix de l'équité (λ de 0 à 1, même budget)"),
+                                use_container_width=True)
+                st.caption("Chaque point est une optimisation complète avec la priorité d'équité λ indiquée (gros point "
+                           "= λ choisi). Vers la droite : plus de ménages modestes parmi les nouveaux desservis ; vers le "
+                           "bas : moins d'habitants au total. La pente est le prix de l'équité, que le décideur choisit.")
         if full is not None and len(rec) == 0:
             st.warning("Aucun site retenu (budget trop faible ou territoire déjà entièrement desservi).")
         if full is not None and len(rec):
@@ -586,6 +668,44 @@ with tab4:
                 for f in figs:
                     st.image(str(f), width="stretch")
 
+    st.markdown("#### Validation par l'usage réel (collecte GBFS Citiz)")
+    uv = ad.usage_validation()
+    if not uv:
+        missing("La validation par l'usage réel", "python -m src.collect_gbfs puis python -m src.usage")
+    else:
+        per = uv.get("periode", {})
+        c1, c2, c3 = st.columns(3)
+        c1.metric("Stations Citiz suivies", fmt(uv.get("stations_validees")),
+                  f"{fmt(per.get('releves'))} relevés toutes les 5 min", delta_color="off")
+        c2.metric("Lien modèle ↔ occupation (Spearman)", f"{uv.get('spearman_modele_occupation', 0):+.2f}",
+                  f"population seule : {uv.get('spearman_population_occupation', 0):+.2f}", delta_color="off")
+        sat = uv.get("saturation", {})
+        c3.metric("Stations saturées", fmt(sat.get("stations_saturees")),
+                  f"occupation ≥ {100 * sat.get('seuil_occupation', 0):.0f} %", delta_color="off")
+        q = pd.DataFrame(uv.get("occupation_par_quintile_de_propension", []))
+        if len(q):
+            q["occupation_moyenne"] = 100 * q["occupation_moyenne"]
+            st.altair_chart(alt.Chart(q).mark_bar(color="#eb6834", cornerRadiusTopLeft=4, cornerRadiusTopRight=4)
+                            .encode(x=alt.X("quintile:N", title="Quintile de propension du modèle (hors pli)"),
+                                    y=alt.Y("occupation_moyenne:Q", title="Occupation moyenne (%)"),
+                                    tooltip=["quintile", alt.Tooltip("occupation_moyenne:Q", format=".1f"), "stations"])
+                            .properties(height=220), use_container_width=True)
+        st.caption(uv.get("lecture", "") + " Période : " + str(per.get("debut", ""))[:16] + " → "
+                   + str(per.get("fin", ""))[:16] + ". Limites : " + " ; ".join(uv.get("limites", [])) + ".")
+
+    st.markdown("#### Fréquence des lignes dans les zones d'étude")
+    for name in C.FREQ_FEEDS:
+        fs = ad.read_json(C.OUT / f"frequency_{name}.json")
+        if fs and fs.get("comparaison"):
+            cp = fs["comparaison"]
+            st.markdown(f"- **{name}** : arrêt à 5 min pour {100 * cp['part_pop_arret_tc_5min']:.0f} % des habitants, "
+                        f"mais au moins une option pleine (une ligne toutes les 15 min) pour "
+                        f"{100 * cp['part_pop_au_moins_1_option_tc_pleine']:.0f} % ; **service faible** pour "
+                        f"{100 * cp['part_pop_arret_mais_service_faible']:.1f} %.")
+    st.caption("Calculé par src/frequency.py à partir des GTFS des réseaux (CTS + Fluo 67 à Strasbourg, Lignes d'Azur "
+               "à Nice). La valeur d'un nouvel arrêt de bus est multipliée par la qualité de service de sa ligne, et le "
+               "besoin « faible accessibilité » utilise ces options pondérées.")
+
     st.markdown("#### Hypothèses de coûts et d'impact (Config.py)")
     cost_df = pd.DataFrame([{"Équipement": v["label"], "Investissement (€)": v["capex"],
                              "Exploitation (€/an)": v["opex"],
@@ -607,7 +727,8 @@ with tab4:
         f"garantie (1 − 1/e)/2 de l'optimum.")
     st.markdown("#### Limites reconnues")
     st.markdown(
-        "- **Offre ≠ service** : un arrêt compte même si la fréquence est faible (GTFS non pondéré par les horaires).\n"
+        "- **Offre ≠ service** : à l'échelle nationale, un arrêt compte même si la fréquence est faible (agrégat sans "
+        "horaires). Corrigé dans les zones d'étude (Strasbourg, Nice) par les GTFS des réseaux (src/frequency.py).\n"
         "- **Distance de marche** : rayon euclidien corrigé par un détour calibré sur Strasbourg, "
         "appliqué partout (plus fort en zone peu maillée).\n"
         "- **Modèle positive-unlabeled** : il apprend où les opérateurs se sont déjà implantés ; il reproduit "
