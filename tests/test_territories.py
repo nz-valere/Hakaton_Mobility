@@ -4,12 +4,27 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import Config as C  # noqa: E402
 from src import recommend as R, territories as T  # noqa: E402
 
+# Les référentiels EPCI (data/raw) et les carreaux (data/interim) ne sont pas versionnés :
+# sur un clone neuf, les tests qui les lisent sont sautés au lieu d'échouer.
+HAS_RAW = (C.RAW / "communes_epci.json").exists() and (C.RAW / "epcis.json").exists()
+needs_raw = pytest.mark.skipif(not HAS_RAW, reason="data/raw absent : python -m src.download static")
+needs_cells = pytest.mark.skipif(not (C.INTERIM / "cells.parquet").exists(),
+                                 reason="data/interim/cells.parquet absent : python -m src.population")
 
+
+@pytest.fixture
+def fake_epci(monkeypatch):
+    T._epci_tables.cache_clear()
+    monkeypatch.setattr(T, "_epci_tables", lambda: ({"67482": C.EMS_EPCI}, {C.EMS_EPCI: "Eurométropole"}))
+
+
+@needs_raw
 def test_plm_arrondissements_mapped_to_their_epci():
     e = T.com_to_epci(["75112", "13205", "69381", "67482"])
     assert e[0] == "200054781"          # Métropole du Grand Paris
@@ -18,13 +33,15 @@ def test_plm_arrondissements_mapped_to_their_epci():
     assert e[3] == C.EMS_EPCI
 
 
+@needs_raw
+@needs_cells
 def test_ems_epci_matches_config_communes():
     assert set(T.epci_communes(C.EMS_EPCI)) == set(C.EMS_COMMUNES)
     assert T.area_of(C.EMS_EPCI) == "ems"
     assert T.area_of("200030195") == "epci:200030195"
 
 
-def test_screen_counts_only_dense_unserved_population():
+def test_screen_counts_only_dense_unserved_population(fake_epci):
     n = 4
     cells = pd.DataFrame({"com": ["67482"] * n, "dep": "67", "ind": [100.0, 200.0, 300.0, 400.0],
                           "carfree_share": 0.3})

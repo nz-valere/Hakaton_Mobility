@@ -283,6 +283,13 @@ EQUITY_SCALE = 4.0
 # habitant desservi) ; les financeurs étant distincts (Citiz, réseau de bus, vélo), on
 # réserve par défaut une part à chacun. Les parts non utilisables sont réallouées.
 BUDGET_SPLIT = {"citiz": 0.4, "bike": 0.3, "bus": 0.3}
+# Élagage des enveloppes (src/recommend.solve_split) : un site retenu dans une enveloppe ou le quota
+# dont le rendement (gain/coût) est < ENVELOPE_MIN_YIELD × le meilleur rendement retenu est retiré,
+# son budget repart au passage global. Évite qu'une enveloppe achète un site très peu rentable
+# (ex. arrêt de bus à 200 k€ pour 350 habitants) et que la couverture baisse quand le budget monte.
+ENVELOPE_MIN_YIELD = 0.2
+# Grille de λ de la courbe « prix de l'équité » (app, src/recommend.equity_curve) et des scénarios Power BI
+EQUITY_LAMBDAS = tuple(round(0.1 * i, 1) for i in range(11))
 # Quota de budget réservé aux candidats en zone peu dense (< LOW_DENSITY_HAB_KM2) : sans
 # lui, la couverture maximale ne sert que les zones denses (cf. recommendations_summary.json).
 LOW_DENSITY_BUDGET_SHARE = 0.15
@@ -320,7 +327,12 @@ FREQ_FEEDS = {
 }
 FREQ_REF_DATE = "20261117"     # mardi hors vacances scolaires ; à défaut, le mardi le plus chargé du GTFS
 FREQ_HOURS = (7, 20)           # fréquence moyenne entre 7 h et 20 h
-# Une ligne (dans un sens) passant toutes les 15 min ou mieux = 1 option pleine ; moins = fraction.
+# Écartés du calcul de fréquence, comme dans l'offre nationale : transport à la demande (route_type
+# GTFS étendu 715) et lignes scolaires (agence « Junior Direct » du GTFS TCL, 477 lignes).
+FREQ_EXCLUDE_ROUTE_TYPES = ("715",)
+FREQ_EXCLUDE_AGENCIES = ("TCL_JD",)
+# Une ligne passant toutes les 15 min ou mieux (dans son meilleur sens) = 1 option pleine ; moins = fraction.
+# Les deux sens d'une même ligne ne font qu'une option.
 FULL_OPTION_DEP_H = 4.0
 # Arrêt de bus recommandé : sa valeur est multipliée par la qualité de service de la ligne
 # rattachée (min(1, départs/h / FULL_OPTION_DEP_H)), bornée en bas pour ne pas annuler un site.
@@ -333,7 +345,7 @@ GBFS_COLLECT = Path(__import__("os").environ.get("GBFS_COLLECT_DIR", DATA / "gbf
 GBFS_COLLECT_INTERVAL_S = 300  # = TTL des flux Citiz
 USAGE_MIN_SNAPSHOTS = 12       # station retenue pour la validation si au moins 12 relevés (1 h)
 SATURATION_OCCUPANCY = 0.6     # « station saturée » : véhicules réservés plus de 60 % du temps relevé
-PUBLIC_BUDGET = 1_000_000     # vélo + bus, réparti selon BUDGET_SPLIT (50/50 entre ces deux types)
+PUBLIC_BUDGET = 1_000_000     # vélo + bus : quota peu dense, puis enveloppes BUDGET_SPLIT (50/50 vélo/bus), puis reliquat
 # Classement national des intercommunalités (src/territories.py)
 TERRITORY_MIN_POP = 100_000   # masse critique d'un réseau local d'autopartage (hypothèse)
 # Île-de-France exclue : son autopartage (Getaround, Zity, Communauto, Free2Move) est presque

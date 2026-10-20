@@ -51,9 +51,9 @@ def test_departures_per_hour(tmp_path):
     lf, day = frequency.line_frequencies(_gtfs(tmp_path), "20261117")
     assert day == "20261117"
     h = C.FREQ_HOURS[1] - C.FREQ_HOURS[0]
-    r1 = lf[(lf["stop_id"].str.endswith("S1")) & (lf["line"].str.contains(":R1:0"))]
+    r1 = lf[(lf["stop_id"].str.endswith("S1")) & (lf["line"].str.endswith(":R1")) & (lf["direction_id"] == "0")]
     assert np.isclose(r1["dep_h"].iloc[0], 8 / h)
-    assert set(lf["line"].str.rsplit(":", n=2).str[1]) == {"R1", "R2"}
+    assert set(lf["line"].str.rsplit(":", n=1).str[1]) == {"R1", "R2"}
 
 
 def test_line_counted_once_and_weighted(tmp_path):
@@ -61,8 +61,8 @@ def test_line_counted_once_and_weighted(tmp_path):
     cells = _cells([LON, LON + 0.05], [LAT, LAT + 0.05])
     fq = frequency.cell_frequency(cells, lf, radius=300, full=4.0)
     h = C.FREQ_HOURS[1] - C.FREQ_HOURS[0]
-    # R1 passe à S1 et S2 (tous deux à < 300 m) : chaque sens compte une fois ; R2 : un sens
-    expected = 2 * min(1, (8 / h) / 4) + min(1, (2 / h) / 4)
+    # R1 passe à S1 et S2 (tous deux à < 300 m), dans les deux sens : UNE option (meilleur sens) ; R2 : une
+    expected = min(1, (8 / h) / 4) + min(1, (2 / h) / 4)
     assert np.isclose(fq["tc_freq_options"].iloc[0], expected)
     assert fq["tc_lines"].iloc[0] == 2
     # le carreau lointain n'a aucune ligne à 5 min (S3 n'est desservi par aucune course)

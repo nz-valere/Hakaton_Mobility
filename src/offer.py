@@ -186,7 +186,7 @@ def stops_to_points(df):
         "capacity": np.nan,
         "src_key": ("gtfs" + df["dataset_id"].astype(str)).values,
         "raw_id": df["stop_id"].astype(str).values,
-        "prio": df["dataset_custom_title"].str.contains(AGGREGATE).astype(int).values,
+        "prio": df["dataset_custom_title"].fillna("").str.contains(AGGREGATE).astype(int).values,
     })
 
 

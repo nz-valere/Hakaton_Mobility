@@ -4,7 +4,6 @@ Onglets : carte d'accessibilité · qui est concerné · où s'implanter (France
 par financeur : Citiz / collectivité) · méthode & limites.
 Toutes les données lourdes passent par src/app_data.py (cache, agrégation, confidentialité).
 """
-import json
 import sys
 from pathlib import Path
 

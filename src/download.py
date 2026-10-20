@@ -210,6 +210,7 @@ def dl_osm():
         dest.unlink(missing_ok=True)
         print("  Overpass, nouvel essai")
         time.sleep(30)
+    raise RuntimeError("Overpass indisponible après 3 essais : relancer `python -m src.download osm`")
 
 
 STEPS = {"static": dl_static, "stops": dl_stops, "gtfs_extra": dl_gtfs_extra, "gbfs": dl_gbfs,

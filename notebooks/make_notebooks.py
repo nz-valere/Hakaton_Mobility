@@ -2,7 +2,7 @@
 Régénère les notebooks Fabric (notebooks/*.ipynb) depuis le code de src/ : même code, découpé en cellules.
 
 Chaque notebook « lecture de src/<module>.py » contient : le titre, la docstring du module, la cellule
-Fabric (si le notebook l'a déjà, ou pour les notebooks de NEW), la préparation (__file__, sys.argv),
+Fabric (toujours, réécrite à chaque génération), la préparation (__file__, sys.argv),
 puis « Imports et constantes », une cellule par fonction (titre + premier paragraphe de sa docstring)
 et le bloc __main__. Le titre de chaque notebook existant est conservé. Les notebooks sans cellule
 « # Préparation » (ex. 08_export_fabric) ne sont pas touchés.
@@ -26,8 +26,9 @@ FABRIC_CELL = (
     "\n"
     "FABRIC_PROJECT = \"/lakehouse/default/Files/mobiliscore\"  # dossier du projet uploadé dans le Lakehouse\n"
     "if os.path.isdir(\"/lakehouse/default\"):\n"
-    "    os.chdir(os.path.join(FABRIC_PROJECT, \"notebooks\"))\n"
-    "    subprocess.run([sys.executable, \"-m\", \"pip\", \"install\", \"-q\", \"pyproj\", \"openpyxl\"], check=True)"
+    "    os.chdir(FABRIC_PROJECT)  # la préparation trouve Config.py dans le dossier courant\n"
+    "    # inutile si un Environment Fabric fournit déjà ces paquets (recommandé : voir FABRIC.md)\n"
+    "    subprocess.run([sys.executable, \"-m\", \"pip\", \"install\", \"-q\", \"pyproj>=3.6\", \"openpyxl>=3.1\"], check=True)"
 )
 # notebooks ajoutés après l'import dans Fabric : module, titre, options, texte d'introduction
 NEW = {
@@ -49,6 +50,12 @@ NEW = {
         intro="À lancer après `05_model` (propension hors pli du modèle Citiz) et une fois des relevés collectés "
               "par `05c_collect_gbfs` (une station n'est retenue qu'avec au moins `C.USAGE_MIN_SNAPSHOTS` relevés, "
               "soit 1 h de collecte)."),
+    "06c_scenarios": dict(
+        module="scenarios.py", title="# Étape 6c – Scénarios des curseurs (Power BI)",
+        intro="À lancer après `06b_recommend`. Précalcule les recommandations pour toute la grille des curseurs "
+              "de l'app (budget Citiz, budget collectivité, λ) sur les 10 premiers territoires du classement Citiz et "
+              "l'Eurométropole de Strasbourg (témoin) : le rapport Power BI filtre ensuite le scénario choisi par "
+              "des paramètres « what-if ». Long (de l'ordre d'une heure sur 4 processus) ; reprise possible."),
 }
 
 
@@ -172,9 +179,11 @@ def targets():
     for name, p in NEW.items():
         if name not in out:
             out[name] = dict(p, fabric_cell=None)
-    for name, p in out.items():
-        if name in NEW and p["fabric_cell"] is None:
+    for name, p in out.items():                    # tous les notebooks ont la cellule Fabric, à jour
+        if p["fabric_cell"] is None:
             p["fabric_cell"] = dict(code(FABRIC_CELL), _new=True)
+        else:
+            p["fabric_cell"]["source"] = code(FABRIC_CELL)["source"]
     return out
 
 
@@ -189,7 +198,8 @@ def main():
             continue
         stale.append(name)
         if not check:
-            path.write_text(text, encoding="utf-8", newline=NL)
+            with open(path, "w", encoding="utf-8", newline=NL) as f:
+                f.write(text)
         print(f"{'périmé' if check else ('créé' if old is None else 'mis à jour'):10s} notebooks/{name}.ipynb")
     print(f"{len(stale)} notebook(s) {'périmé(s)' if check else 'écrit(s)'}")
     if check and stale:

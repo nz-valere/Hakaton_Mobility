@@ -55,7 +55,7 @@ def station_usage(collect_dir=None, min_snapshots=None):
     if not files:
         return None, {}
     s = pd.concat([pd.read_csv(f, dtype={"station_id": str}) for f in files], ignore_index=True)
-    s = s[s["n_vehicles"] > 0]
+    s = s[s["n_vehicles"] > 0].copy()
     s["libre"] = (s["n_vehicles"] - s["n_reserved"]) >= 1
     g = s.groupby(["provider_id", "station_id"]).agg(
         releves=("ts_utc", "nunique"), vehicules=("n_vehicles", "median"),

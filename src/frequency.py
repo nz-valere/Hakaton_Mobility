@@ -11,12 +11,15 @@ Méthode
 1. Jour de référence : C.FREQ_REF_DATE (mardi hors vacances scolaires) s'il est couvert par le
    GTFS, sinon le mardi qui a le plus de services actifs (calendar + calendar_dates).
 2. Départs entre C.FREQ_HOURS[0] et [1] par (arrêt, ligne, sens) -> départs/heure.
-3. Pour chaque carreau habité de la zone, lignes-sens ayant au moins un arrêt à
+   Les lignes scolaires (C.FREQ_EXCLUDE_AGENCIES) et le transport à la demande
+   (C.FREQ_EXCLUDE_ROUTE_TYPES) sont écartés, comme dans l'offre nationale (src/offer.py).
+3. Pour chaque carreau habité de la zone, lignes ayant au moins un arrêt à
    ≤ geo.walk_radius_m() (même rayon que src/accessibility.py) :
-     - une ligne-sens compte UNE fois, avec sa meilleure fréquence parmi les arrêts proches
-       (la même ligne qui passe à 3 arrêts autour de chez soi n'est pas 3 options) ;
-     - tc_freq_options = Σ_lignes-sens min(1, départs/h / C.FULL_OPTION_DEP_H)
-       (une ligne toutes les 15 min ou mieux = 1 option pleine) ;
+     - une ligne compte UNE fois, avec la meilleure fréquence (départs/h dans un sens) parmi
+       ses arrêts proches : la même ligne qui passe à 3 arrêts autour de chez soi, ou dont on
+       atteint les deux quais (aller et retour), n'est pas 3 ou 2 options ;
+     - tc_freq_options = Σ_lignes min(1, départs/h / C.FULL_OPTION_DEP_H)
+       (une ligne toutes les 15 min ou mieux dans un sens = 1 option pleine) ;
      - tc_lines = nombre de lignes distinctes ; tc_dep_h = départs/h cumulés ;
      - freq_nearest = départs/h de la meilleure ligne de l'arrêt le plus proche (sert à la
        qualité de service d'un nouvel arrêt de bus posé sur cette ligne, src/recommend.py).
@@ -44,6 +47,7 @@ import Config as C  # noqa: E402
 from src import geo  # noqa: E402
 
 OTHER_MODES = ("rail", "bike", "scooter", "carsharing", "citiz")
+WEEKDAYS = ("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday")
 
 
 # --------------------------------------------------------------------------- GTFS
@@ -53,7 +57,7 @@ def _read(z, name, **kw):
 
 def active_services(z, date):
     """service_id actifs à la date AAAAMMJJ (calendar + exceptions de calendar_dates)."""
-    wd = datetime.strptime(date, "%Y%m%d").strftime("%A").lower()
+    wd = WEEKDAYS[datetime.strptime(date, "%Y%m%d").weekday()]   # indépendant de la locale
     on = set()
     cal = _read(z, "calendar.txt")
     if cal is not None:
@@ -76,6 +80,9 @@ def reference_date(z, wanted=None):
         t = _read(z, name)
         if t is not None and len(t):
             dates |= {t[cols[0]].min(), t[cols[1]].max()}
+    dates.discard(np.nan)
+    if not dates:
+        raise ValueError(f"{getattr(z, 'filename', z)} : GTFS sans calendrier exploitable")
     lo, hi = min(dates), max(dates)
     d = datetime.strptime(lo, "%Y%m%d")
     best, n_best = None, -1
@@ -86,13 +93,16 @@ def reference_date(z, wanted=None):
             if n > n_best:
                 best, n_best = s, n
         d += timedelta(days=1)
+    if best is None:
+        raise ValueError(f"{getattr(z, 'filename', z)} : aucun mardi dans la période du GTFS")
     return best
 
 
 def line_frequencies(path, date=None):
     """
     Départs/heure par (arrêt, ligne, sens) sur la plage C.FREQ_HOURS du jour de référence.
-    Renvoie (DataFrame [stop_id, lon, lat, line, route_name, route_type, dep_h], jour retenu).
+    Renvoie (DataFrame [stop_id, lon, lat, line, direction_id, route_name, route_type, dep_h], jour retenu) ;
+    `line` = <feed>:<route_id> (sans le sens : une ligne est une option, cf. cell_frequency).
     """
     z = zipfile.ZipFile(path)
     day = reference_date(z, date)
@@ -111,14 +121,19 @@ def line_frequencies(path, date=None):
     stops = _read(z, "stops.txt")[["stop_id", "stop_lat", "stop_lon"]]
     routes = _read(z, "routes.txt")
     routes["route_name"] = routes.get("route_short_name", routes["route_id"]).fillna(routes["route_id"])
+    drop = routes["route_type"].isin(C.FREQ_EXCLUDE_ROUTE_TYPES)
+    if "agency_id" in routes:
+        drop |= routes["agency_id"].isin(C.FREQ_EXCLUDE_AGENCIES)
+    routes = routes[~drop]
     out = dep.merge(stops, on="stop_id").merge(routes[["route_id", "route_name", "route_type"]], on="route_id")
     feed = Path(path).stem
-    out["line"] = feed + ":" + out["route_id"] + ":" + out["direction_id"].fillna("0")
+    out["line"] = feed + ":" + out["route_id"]
+    out["direction_id"] = out["direction_id"].fillna("0")
     out["lon"] = pd.to_numeric(out["stop_lon"], errors="coerce")
     out["lat"] = pd.to_numeric(out["stop_lat"], errors="coerce")
     out["stop_id"] = feed + ":" + out["stop_id"]
     out = out.dropna(subset=["lon", "lat"])
-    return out[["stop_id", "lon", "lat", "line", "route_name", "route_type", "dep_h"]], day
+    return out[["stop_id", "lon", "lat", "line", "direction_id", "route_name", "route_type", "dep_h"]], day
 
 
 # --------------------------------------------------------------------------- indicateurs par carreau
@@ -136,19 +151,18 @@ def cell_frequency(cells, lines, radius=None, full=None):
     n = len(cells)
     opts, nl, deph = np.zeros(n), np.zeros(n, int), np.zeros(n)
     I, J = geo.pairs_within(cells["crs_id"].values, cells["x"].values, cells["y"].values, crs, x, y, radius)
-    best = defaultdict(dict)      # carreau -> {ligne-sens : meilleure fréquence}
+    best = defaultdict(dict)      # carreau -> {ligne : meilleure fréquence dans un sens}
     line_arr, f_arr = lines["line"].values, lines["dep_h"].values
     for i, j in zip(I, J):
         d = best[i]
         if f_arr[j] > d.get(line_arr[j], 0.0):
             d[line_arr[j]] = f_arr[j]
-    route_of = {ln: ln.rsplit(":", 1)[0] for ln in np.unique(line_arr)}
     for i, d in best.items():
         f = np.fromiter(d.values(), float)
         opts[i] = np.minimum(1.0, f / full).sum()
-        nl[i] = len({route_of[ln] for ln in d})
+        nl[i] = len(d)
         deph[i] = f.sum()
-    # arrêt le plus proche (toutes distances) et sa meilleure ligne-sens
+    # arrêt le plus proche (toutes distances) et sa meilleure ligne (meilleur sens)
     stop_best = lines.groupby("stop_id")["dep_h"].max()
     sp = lines.drop_duplicates("stop_id").set_index("stop_id")
     s_crs, s_x, s_y = geo.project(sp["lon"].values, sp["lat"].values)

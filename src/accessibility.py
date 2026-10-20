@@ -11,8 +11,10 @@ Rayon « 5 minutes »
 étant calibré sur le graphe piéton OSM de Strasbourg (src/walk_calibration.py : r ≈ 282 m,
 détour ≈ 1,42, critère d'égalité des effectifs ; précision 0,92 / rappel 0,98 sur la population
 desservie, biais de comptage +5 %). Distances mesurées depuis le *centre* du carreau.
-Sensibilité à l'IC 95 % du rayon (278-286 m) : part sans option 36,5 % / 35,6 % (vs 36,0 %),
-n_options moyen −2,5 % / +2,6 % (access_summary.json -> radius_sensitivity).
+Sensibilité à l'IC 95 % du rayon : access_summary.json -> radius_sensitivity. Le critère d'égalité
+des effectifs convient aux comptages mais surestime la part desservie (cercle 89 % contre réseau
+84 % à Strasbourg, walk_calibration.json -> validation) : la part « sans option » publiée est une
+borne basse (≈ +5 points sur le vrai réseau piéton).
 
 Indicateurs par carreau i (voisinage V(i) = points / carreaux à ≤ r du centre de i)
 -----------------------------------------------------------------------------------
@@ -277,13 +279,11 @@ def summary(ca, st, radius, offer_path, seconds, sensitivity=None):
             "score_2sfca_mean": float(np.average(sub["score_2sfca"], weights=p)),
         }
 
-    out = {"radius_m": radius, "score_basis": C.SCORE_BASIS, "detour": geo.detour_factor(), "offer_file": str(offer_path),
+    out = {"radius_m": radius, "score_basis": C.SCORE_BASIS, "detour": geo.detour_factor(), "offer_file": Path(offer_path).name,
            "freefloat_count_by_operator": bool(C.FREEFLOAT_COUNT_BY_OPERATOR),
            "population": float(tot), "n_cells": int(len(ca)), "national": block(np.ones(len(ca), bool)),
            "by_territory": {t: block((ca["territory"] == t).to_numpy()) for t in ca["territory"].unique()}}
-    lon, lat = ca["lon"].to_numpy(), ca["lat"].to_numpy()
-    w_, s_, e_, n_ = C.STRASBOURG_BBOX
-    ems = ((ca["dep"] == C.STRASBOURG_DEPT).to_numpy() & (lon >= w_) & (lon <= e_) & (lat >= s_) & (lat <= n_))
+    ems = ca["com"].isin(C.EMS_COMMUNES).to_numpy()     # mêmes 33 communes que src/recommend.py
     out["ems"] = block(ems)
 
     # déciles de revenu : niveau de vie moyen du carreau, déciles pondérés population (national).

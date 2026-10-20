@@ -83,7 +83,7 @@ STRATEGY_LABELS = {
     "no_frequency": "Sans la fréquence des lignes (arrêts comptés comme dans la méthode nationale)",
 }
 FREQ_COLS = ("freq_nearest", "tc_freq_options", "n_options_freq")
-EQUITY_LAMBDAS = (0.0, 0.25, 0.5, 0.75, 1.0)
+EQUITY_LAMBDAS = C.EQUITY_LAMBDAS
 
 
 def _without_frequency(ctx):
@@ -543,7 +543,7 @@ def _totals(ev, picks):
 # --------------------------------------------------------------------------- point d'entrée
 def _mark_served(ctx, picks):
     """Copie du contexte où les sous-points couverts par `picks` comptent comme desservis."""
-    sub = ctx["sub"] if "sub" in ctx else _sub(ctx)
+    sub = _sub(ctx)
     served = {k: v.copy() for k, v in sub["served"].items()}
     for k in picks["kind"].unique():
         cov = np.concatenate([np.asarray(c, int) for c in picks.loc[picks["kind"] == k, "covered"]])
@@ -562,7 +562,13 @@ def solve_split(ctx, budget=C.DEFAULT_BUDGET, equity_lambda=C.EQUITY_LAMBDA, kin
          Raison : maximiser la couverture favorise mécaniquement les zones denses (un site
          y couvre 10× plus d'habitants), ce que λ seul ne compense pas ;
       2. enveloppes par type (parts `split`) sur le reste ;
-      3. réallocation du reliquat en passage global.
+      3. élagage : un site d'étape dont le rendement (gain/coût) est inférieur à
+         C.ENVELOPE_MIN_YIELD × le meilleur rendement retenu est retiré (une enveloppe est un
+         plafond, pas un montant à dépenser à tout prix : sans cela, dès qu'une enveloppe bus
+         atteint le coût d'un arrêt, elle l'achète même s'il dessert 300 habitants, et la
+         couverture peut baisser quand le budget augmente) ;
+      4. réallocation du reliquat (parts non dépensées ou élaguées) en passage global, même si
+         aucune étape n'a pu acheter de site (petit budget découpé en parts trop petites).
     naive=True : enveloppes par type seulement (pas de quota, pas de prise en compte de l'offre).
     use_model / use_existing : cf. solve() (variantes d'ablation du résumé).
     Colonne `stage` : étape d'origine du site (quota_peu_dense, enveloppe_<type>, reliquat).
@@ -592,10 +598,17 @@ def solve_split(ctx, budget=C.DEFAULT_BUDGET, equity_lambda=C.EQUITY_LAMBDA, kin
             if use_existing:
                 cur = _mark_served(cur, p)
     picks = pd.concat(parts, ignore_index=True) if parts else pd.DataFrame()
+    if len(picks) and C.ENVELOPE_MIN_YIELD and len(stages) > 1:
+        r = picks["objective_gain"] / picks["cost"]
+        keep = (r >= C.ENVELOPE_MIN_YIELD * r.max()).values
+        if not keep.all():
+            picks = picks[keep].reset_index(drop=True)
+            if use_existing:
+                cur = _mark_served(ctx, picks) if len(picks) else ctx
     left = budget - (picks["cost"].sum() if len(picks) else 0.0)
-    # reliquat (parts non dépensées des étapes) : passage global ; nécessite que les sites déjà
+    # reliquat (parts non dépensées ou élaguées) : passage global ; nécessite que les sites déjà
     # retenus soient marqués desservis, donc pas pour les variantes qui ignorent l'existant
-    if left > 0 and len(picks) and use_existing and len(stages) > 1:
+    if left > 0 and use_existing and len(stages) > 1:
         extra = solve(cur, left, equity_lambda, kinds, horizon, **kw)
         if len(extra):
             picks = pd.concat([picks, extra.assign(stage="reliquat")], ignore_index=True)

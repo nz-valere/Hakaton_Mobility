@@ -43,7 +43,7 @@ F_TERR = C.OUT / "territories_citiz.csv"
 F_TERR_SUM = C.OUT / "territories_summary.json"
 F_USAGE = C.OUT / "usage_validation.json"
 F_USAGE_CSV = C.OUT / "citiz_usage.csv"
-EQUITY_LAMBDAS = (0.0, 0.25, 0.5, 0.75, 1.0)
+EQUITY_LAMBDAS = C.EQUITY_LAMBDAS
 
 CELL_COLS = ["key", "crs_id", "x", "y", "lon", "lat", "com", "dep", "ind", "men",
              "income_pc", "poverty_rate", "carfree_share"]
@@ -128,7 +128,7 @@ def mtime(path):
 
 def score_rgb(score):
     """score 0-100 -> tableau (n, 3) uint8 sur la rampe froid -> chaud ; 0 = gris neutre."""
-    s = np.clip(np.asarray(score, float), 0, 100) / 100 * (len(RAMP) - 1)
+    s = np.nan_to_num(np.clip(np.asarray(score, float), 0, 100), nan=0.0) / 100 * (len(RAMP) - 1)
     i = np.clip(np.floor(s).astype(int), 0, len(RAMP) - 2)
     t = (s - i)[:, None]
     rgb = RAMP[i] * (1 - t) + RAMP[i + 1] * t
@@ -202,10 +202,8 @@ def zone_filters(zone):
             return zone_filters("ems")
         from src import territories
         return [("com", "in", list(territories.epci_communes(t[0])))]
-    if zone == "ems":
-        w, s, e, n = C.STRASBOURG_BBOX
-        return [("dep", "==", C.STRASBOURG_DEPT), ("lon", ">=", w), ("lon", "<=", e),
-                ("lat", ">=", s), ("lat", "<=", n)]
+    if zone == "ems":      # mêmes 33 communes que l'optimisation (src/recommend.py)
+        return [("com", "in", list(C.EMS_COMMUNES))]
     if zone == "fr":
         return [("crs_id", "==", 0)]
     return [("dep", "==", zone)]

@@ -240,7 +240,7 @@ def validate(xy, g, radii):
         r, c = np.nonzero(tot <= D_NET)
         rows.append(r + k)
         cols.append(c)
-    pi, ci = np.concatenate(rows), np.concatenate(cols)
+    ci = np.concatenate(cols)
     n_net = np.bincount(ci, minlength=len(cells))
     pop = cells.ind.values
     ctree = cKDTree(np.c_[cells.x, cells.y])

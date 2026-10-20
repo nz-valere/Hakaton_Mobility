@@ -6,7 +6,6 @@ Sortie : data/interim/cells.parquet, une ligne par carreau habité, avec
 coordonnées projetées (centre du carreau), lon/lat, variables socio-démographiques,
 taux de ménages sans voiture de la commune et facteur de croissance démographique.
 """
-import io
 import sys
 import zipfile
 from pathlib import Path

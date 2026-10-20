@@ -398,7 +398,8 @@ def evaluate_kind(F, cells, kind, rng):
     k = min(C.MODEL_CV_FOLDS, n_groups)
     print(f"[{kind}] {len(idx):,} carreaux d'apprentissage ({elig.sum():,} éligibles, "
           f"{y.mean():.1%} positifs), {n_groups} départements, {k} plis")
-    oof = {"hgb": np.zeros(len(idx)), "logit": np.zeros(len(idx)), "pop_only": np.zeros(len(idx))}
+    # NaN tant qu'un pli n'a pas prédit (pli mono-classe sauté) : exclu des métriques agrégées
+    oof = {m: np.full(len(idx), np.nan) for m in ("hgb", "logit", "pop_only")}
     folds = {m: [] for m in oof}
     pop = F.iloc[idx]["pop_r5"].values
     fold_models = []
@@ -422,9 +423,11 @@ def evaluate_kind(F, cells, kind, rng):
 
     res = {"n_train": int(len(idx)), "n_eligible": int(elig.sum()), "positive_rate": float(y.mean()),
            "n_departements": int(n_groups), "folds": k, "features": cols, "models": {}}
+    done = np.isfinite(oof["hgb"])
+    res["n_oof"] = int(done.sum())
     for m in oof:
         df = pd.DataFrame(folds[m])
-        res["models"][m] = {"pooled": _clf_metrics(y, oof[m]),
+        res["models"][m] = {"pooled": _clf_metrics(y[done], oof[m][done]),
                             "fold_mean": df.mean().to_dict(), "fold_std": df.std().to_dict()}
 
     # sélection du modèle sur ces mêmes plis : 2 candidats seulement, hyperparamètres fixés a
