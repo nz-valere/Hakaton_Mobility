@@ -85,12 +85,14 @@ Chaque étape est un module : `python -m src.<module>`. Tous les paramètres chi
 | 4 | `python -m src.accessibility` | options à 5 min par carreau, population servie par point d'offre | `outputs/cells_access.parquet`, `stations_served.parquet`, `commune_access.parquet`, `access_summary.json` |
 | 4b | `python -m src.frequency` | fréquence des lignes bus/tram/métro dans les zones d'étude (GTFS TCL, Lignes d'Azur, CTS, Fluo 67) | `outputs/frequency_cells_<zone>.parquet`, `outputs/frequency_<zone>.json` |
 | 5 | `python -m src.model` | modèles de valeur d'un site (Citiz, vélo, bus) | `outputs/model_metrics.json`, `outputs/model_*.joblib`, `outputs/figures/model_*.png` |
-| 5c | `python -m src.collect_gbfs` (en continu, PC allumé) puis `python -m src.usage` | usage réel des stations Citiz, validation du modèle par l'occupation | `data/gbfs/*`, `outputs/citiz_usage.csv`, `outputs/usage_validation.json` |
 | 5b | `python -m src.territories` | classement national des intercommunalités pour Citiz (criblage + simulation) | `outputs/territories_citiz.csv`, `outputs/territories_summary.json` |
+| 5c | `python -m src.collect_gbfs` (en continu, PC allumé ; ou notebook `05c_collect_gbfs` planifié toutes les 5 min dans Fabric) puis `python -m src.usage` | usage réel des stations Citiz, validation du modèle par l'occupation | `data/gbfs/*`, `outputs/citiz_usage.csv`, `outputs/usage_validation.json` |
 | 6 | `python -m src.recommend` | deux listes priorisées (Citiz ; collectivité vélo + bus), par défaut sur le territoire prioritaire ; variante « sans fréquence » et prix de l'équité (λ de 0 à 1) | `outputs/recommendations.csv`, `outputs/recommendations_summary.json`, `outputs/equity_curve.json` |
 | 7 | `python -m src.figures` | figures de la présentation | `outputs/figures/slides_*.png` |
 
 Options de `src.recommend` : `--area ems` (Strasbourg, témoin), `--area epci:<siren>` (toute intercommunalité), `--dep 54` (département), `--citiz-budget 1000000`, `--public-budget 1000000`, `--lambda 0.5` (poids de l'équité), `--no-split` (vélo et bus sans enveloppes). Une zone autre que le territoire prioritaire écrit des fichiers suffixés (`recommendations_ems.csv`…).
+
+**Microsoft Fabric** : `notebooks/` reprend chaque module cellule par cellule, une étape par notebook (`00_geo` … `07_figures`, plus `04b_frequency`, `05c_collect_gbfs` et `05c_usage`). Le code est le même que dans `src/` : après une modification de `src/`, lancer `python notebooks/make_notebooks.py` pour les régénérer (`--check` signale un notebook périmé sans rien écrire). Dans Fabric, `05c_collect_gbfs` fait un seul relevé par exécution : planifié toutes les 5 minutes, il remplace la collecte sur un PC allumé.
 
 ## Démo
 
@@ -160,6 +162,7 @@ Les durées de `download`, `population` et `offer` n'ont pas été mesurées dan
 │   ├── figures.py         # figures de la présentation
 │   ├── geo.py             # projections, rayon, voisinages
 │   └── app_data.py        # préparation des données pour app.py
+├── notebooks/             # le pipeline en notebooks pour Microsoft Fabric (même code que src/)
 ├── tests/                 # pytest
 ├── data/raw, data/interim # données (non versionnées)
 ├── outputs/               # résultats (json, csv, parquet, modèles, figures/)
