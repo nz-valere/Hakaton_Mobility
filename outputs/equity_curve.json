@@ -1,5 +1,5 @@
 {
-  "territoire": "Métropole Nice Côte d'Azur",
+  "territoire": "Métropole de Lyon",
   "citiz_budget": 1000000,
   "public_budget": 1000000,
   "points": [
@@ -7,81 +7,81 @@
       "lambda": 0.0,
       "financeur": "citiz",
       "n_sites": 16,
-      "pop_newly_served": 86274.4375,
-      "share_new_in_income_deciles_1_3": 0.4310528683539664,
+      "pop_newly_served": 51084.75,
+      "share_new_in_income_deciles_1_3": 0.41054571080410496,
       "co2_avoided_t_yr": 121.45714285714287
     },
     {
       "lambda": 0.0,
       "financeur": "collectivite",
       "n_sites": 13,
-      "pop_newly_served": 64243.3125,
-      "share_new_in_income_deciles_1_3": 0.3636560420199379,
-      "co2_avoided_t_yr": 4.321739800431226
+      "pop_newly_served": 36844.28125,
+      "share_new_in_income_deciles_1_3": 0.8068993067954067,
+      "co2_avoided_t_yr": 30.380618213963196
     },
     {
       "lambda": 0.25,
       "financeur": "citiz",
       "n_sites": 16,
-      "pop_newly_served": 86117.46875,
-      "share_new_in_income_deciles_1_3": 0.42581299743555223,
+      "pop_newly_served": 50050.625,
+      "share_new_in_income_deciles_1_3": 0.4128569823054158,
       "co2_avoided_t_yr": 121.45714285714287
     },
     {
       "lambda": 0.25,
       "financeur": "collectivite",
       "n_sites": 13,
-      "pop_newly_served": 64695.09375,
-      "share_new_in_income_deciles_1_3": 0.3559364770222626,
-      "co2_avoided_t_yr": 4.14912060152221
+      "pop_newly_served": 38072.6875,
+      "share_new_in_income_deciles_1_3": 0.8284022503008226,
+      "co2_avoided_t_yr": 30.14213973728931
     },
     {
       "lambda": 0.5,
       "financeur": "citiz",
       "n_sites": 16,
-      "pop_newly_served": 86117.46875,
-      "share_new_in_income_deciles_1_3": 0.42581299743555223,
+      "pop_newly_served": 50050.625,
+      "share_new_in_income_deciles_1_3": 0.4128569823054158,
       "co2_avoided_t_yr": 121.45714285714287
     },
     {
       "lambda": 0.5,
       "financeur": "collectivite",
       "n_sites": 13,
-      "pop_newly_served": 63810.3125,
-      "share_new_in_income_deciles_1_3": 0.40048924302008393,
-      "co2_avoided_t_yr": 4.255253400739687
+      "pop_newly_served": 38089.125,
+      "share_new_in_income_deciles_1_3": 0.8363558496027409,
+      "co2_avoided_t_yr": 30.030074365582138
     },
     {
       "lambda": 0.75,
       "financeur": "citiz",
       "n_sites": 16,
-      "pop_newly_served": 86117.46875,
-      "share_new_in_income_deciles_1_3": 0.42581299743555223,
+      "pop_newly_served": 49749.8125,
+      "share_new_in_income_deciles_1_3": 0.4227107639852914,
       "co2_avoided_t_yr": 121.45714285714287
     },
     {
       "lambda": 0.75,
       "financeur": "collectivite",
       "n_sites": 13,
-      "pop_newly_served": 63810.3125,
-      "share_new_in_income_deciles_1_3": 0.40048924302008393,
-      "co2_avoided_t_yr": 4.255253400739687
+      "pop_newly_served": 38089.125,
+      "share_new_in_income_deciles_1_3": 0.8363558496027409,
+      "co2_avoided_t_yr": 30.030074365582138
     },
     {
       "lambda": 1.0,
       "financeur": "citiz",
       "n_sites": 16,
-      "pop_newly_served": 86117.46875,
-      "share_new_in_income_deciles_1_3": 0.42581299743555223,
+      "pop_newly_served": 49749.8125,
+      "share_new_in_income_deciles_1_3": 0.4227107639852914,
       "co2_avoided_t_yr": 121.45714285714287
     },
     {
       "lambda": 1.0,
       "financeur": "collectivite",
       "n_sites": 13,
-      "pop_newly_served": 63810.3125,
-      "share_new_in_income_deciles_1_3": 0.40048924302008393,
-      "co2_avoided_t_yr": 4.255253400739687
+      "pop_newly_served": 38056.0,
+      "share_new_in_income_deciles_1_3": 0.8781737768026067,
+      "co2_avoided_t_yr": 29.80364000242124
     }
   ]
 }

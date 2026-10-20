@@ -1,28 +1,28 @@
 financeur,rank,type,equipement,stage,lon,lat,commune,code_commune,pop_newly_served,pop_2040,pop_new_distinct,pop_from_zero_option,propensity,value_rel,usage_pred,usage_unit,cost_eur,cost_cum_eur,eur_per_new_resident,co2_avoided_t_yr,share_poor_households,share_carfree_households,demand_potential,vehicles_suggested,dist_existing_same_type_m
-citiz,1,citiz,Station Citiz (1 véhicule),global,7.69855,48.56405,Lingolsheim,67267,2475.0,2588.0,2475.0,0.0,0.4507,1.5,46.4,adhérents,60000.0,60000.0,24.0,7.59,0.33,0.267,217.5,5.0,453.0
-citiz,2,citiz,Station Citiz (1 véhicule),global,7.71307,48.60215,Strasbourg,67482,3080.0,3220.0,3080.0,76.0,0.1401,0.517,46.4,adhérents,60000.0,120000.0,19.0,7.59,0.329,0.386,93.3,3.0,556.0
-citiz,3,citiz,Station Citiz (1 véhicule),global,7.76638,48.62303,Hœnheim,67204,2915.0,3047.0,2915.0,635.0,0.1692,0.625,46.4,adhérents,60000.0,180000.0,21.0,7.59,0.165,0.17,106.6,3.0,766.0
-citiz,4,citiz,Station Citiz (1 véhicule),global,7.7722,48.61415,Strasbourg,67482,3242.0,3389.0,3242.0,668.0,0.102,0.377,46.4,adhérents,60000.0,240000.0,19.0,7.59,0.419,0.386,71.5,2.0,798.0
-citiz,5,citiz,Station Citiz (1 véhicule),global,7.73697,48.61344,Bischheim,67043,2664.0,2785.0,2664.0,0.0,0.142,0.524,46.4,adhérents,60000.0,300000.0,23.0,7.59,0.417,0.27,81.8,2.0,448.0
-citiz,6,citiz,Station Citiz (1 véhicule),global,7.70264,48.59294,Strasbourg,67482,3090.0,3230.0,3090.0,0.0,0.0874,0.323,46.4,adhérents,60000.0,360000.0,19.0,7.59,0.417,0.386,58.4,2.0,690.0
-citiz,7,citiz,Station Citiz (1 véhicule),global,7.74252,48.55056,Strasbourg,67482,2475.0,2588.0,2475.0,136.0,0.1441,0.532,46.4,adhérents,60000.0,420000.0,24.0,7.59,0.266,0.386,77.1,2.0,540.0
-citiz,8,citiz,Station Citiz (1 véhicule),global,7.72283,48.56635,Strasbourg,67482,2688.0,2810.0,2688.0,0.0,0.0989,0.365,46.4,adhérents,60000.0,480000.0,22.0,7.59,0.48,0.386,57.5,2.0,419.0
-citiz,9,citiz,Station Citiz (1 véhicule),global,7.75342,48.54898,Strasbourg,67482,2255.0,2357.0,2255.0,0.0,0.1462,0.54,46.4,adhérents,60000.0,540000.0,27.0,7.59,0.424,0.386,71.3,2.0,389.0
-citiz,10,citiz,Station Citiz (1 véhicule),global,7.71668,48.58243,Strasbourg,67482,2602.0,2720.0,2602.0,278.0,0.0912,0.337,46.4,adhérents,60000.0,600000.0,23.0,7.59,0.311,0.386,51.3,2.0,392.0
-citiz,11,citiz,Station Citiz (1 véhicule),global,7.7616,48.60854,Schiltigheim,67447,2276.0,2379.0,2276.0,313.0,0.1286,0.475,46.4,adhérents,60000.0,660000.0,26.0,7.59,0.254,0.284,63.3,2.0,461.0
-citiz,12,citiz,Station Citiz (1 véhicule),global,7.69501,48.58198,Strasbourg,67482,1697.0,1774.0,1697.0,0.0,0.2361,0.871,46.4,adhérents,60000.0,720000.0,35.0,7.59,0.298,0.314,86.6,2.0,306.0
-citiz,13,citiz,Station Citiz (1 véhicule),global,7.69879,48.55866,Lingolsheim,67267,2446.0,2558.0,2446.0,6.0,0.0898,0.332,46.4,adhérents,60000.0,780000.0,25.0,7.59,0.213,0.148,47.5,2.0,449.0
-citiz,14,citiz,Station Citiz (1 véhicule),global,7.70543,48.59119,Strasbourg,67482,1880.0,1965.0,1880.0,0.0,0.1333,0.492,46.4,adhérents,60000.0,840000.0,32.0,7.59,0.479,0.386,54.2,2.0,690.0
-citiz,15,citiz,Station Citiz (1 véhicule),quota_peu_dense,7.6966,48.48841,Fegersheim,67137,1122.0,1173.0,1122.0,314.0,0.4316,1.5,46.4,adhérents,60000.0,900000.0,53.0,7.59,0.103,0.06,98.6,3.0,1759.0
-citiz,16,citiz,Station Citiz (1 véhicule),quota_peu_dense,7.64194,48.55747,Holtzheim,67212,1043.0,1090.0,1043.0,0.0,0.4196,1.5,46.4,adhérents,60000.0,960000.0,58.0,7.59,0.075,0.066,91.6,2.0,3000.0
-collectivite,1,bike,Station vélo libre-service (10 vélos),enveloppe_bike,7.71405,48.58057,Strasbourg,67482,4126.0,4313.0,4126.0,34.0,0.7883,1.5,22.5,trajets/jour,60000.0,60000.0,15.0,0.67,0.345,0.386,,,697.0
-collectivite,2,bike,Station vélo libre-service (10 vélos),enveloppe_bike,7.74615,48.59023,Strasbourg,67482,4272.0,4466.0,4272.0,0.0,0.9955,1.5,22.5,trajets/jour,60000.0,120000.0,14.0,0.67,0.209,0.386,,,493.0
-collectivite,3,bike,Station vélo libre-service (10 vélos),enveloppe_bike,7.75747,48.57966,Strasbourg,67482,3737.0,3907.0,3737.0,0.0,0.9959,1.5,22.5,trajets/jour,60000.0,180000.0,16.0,0.67,0.242,0.386,,,443.0
-collectivite,4,bike,Station vélo libre-service (10 vélos),enveloppe_bike,7.73047,48.57731,Strasbourg,67482,3642.0,3808.0,3642.0,121.0,0.9851,1.5,22.5,trajets/jour,60000.0,240000.0,16.0,0.67,0.275,0.386,,,527.0
-collectivite,5,bike,Station vélo libre-service (10 vélos),enveloppe_bike,7.75525,48.56881,Strasbourg,67482,3850.0,4025.0,3850.0,0.0,0.9897,1.5,22.5,trajets/jour,60000.0,300000.0,16.0,0.67,0.16,0.386,,,411.0
-collectivite,6,bike,Station vélo libre-service (10 vélos),enveloppe_bike,7.76608,48.56903,Strasbourg,67482,3644.0,3809.0,3644.0,0.0,0.9819,1.5,22.5,trajets/jour,60000.0,360000.0,16.0,0.67,0.171,0.386,,,544.0
-collectivite,7,bike,Station vélo libre-service (10 vélos),enveloppe_bike,7.77619,48.58543,Strasbourg,67482,3619.0,3783.0,3619.0,0.0,0.9734,1.5,22.5,trajets/jour,60000.0,420000.0,17.0,0.67,0.205,0.386,,,561.0
-collectivite,8,bike,Station vélo libre-service (10 vélos),quota_peu_dense,7.79571,48.57322,Strasbourg,67482,1587.0,1659.0,1587.0,64.0,0.7971,1.5,21.7,trajets/jour,60000.0,480000.0,38.0,0.65,0.485,0.386,,,1201.0
-collectivite,9,bike,Station vélo libre-service (10 vélos),quota_peu_dense,7.66496,48.58675,Wolfisheim,67551,1028.0,1075.0,1028.0,0.0,0.4175,1.014,9.5,trajets/jour,60000.0,540000.0,58.0,0.28,0.071,0.08,,,774.0
-collectivite,10,bus,Arrêt de bus (quai PMR + abri),enveloppe_bus,7.73745,48.60265,Schiltigheim,67447,1358.0,1420.0,1358.0,99.0,0.8967,1.5,305.6,montées/jour,207412.0,747412.0,153.0,12.31,0.161,0.29,,,297.0
-collectivite,11,bus,Arrêt de bus (quai PMR + abri),enveloppe_bus,7.77212,48.61595,Strasbourg,67482,816.0,853.0,816.0,816.0,0.9455,1.5,183.6,montées/jour,217422.0,964834.0,266.0,4.1,0.358,0.386,,,315.0
+citiz,1,citiz,Station Citiz (1 véhicule),global,7.69855,48.56405,Lingolsheim,67267,2475.0,2588.0,2475.0,0.0,0.3581,1.203,46.4,adhérents,60000.0,60000.0,24.0,7.59,0.33,0.267,174.4,4.0,453.0
+citiz,2,citiz,Station Citiz (1 véhicule),global,7.7722,48.61415,Strasbourg,67482,3242.0,3389.0,3242.0,668.0,0.1503,0.505,46.4,adhérents,60000.0,120000.0,19.0,7.59,0.419,0.386,95.9,3.0,798.0
+citiz,3,citiz,Station Citiz (1 véhicule),global,7.71307,48.60215,Strasbourg,67482,3080.0,3220.0,3080.0,76.0,0.1505,0.505,46.4,adhérents,60000.0,180000.0,19.0,7.59,0.329,0.386,91.2,2.0,556.0
+citiz,4,citiz,Station Citiz (1 véhicule),global,7.76638,48.62303,Hœnheim,67204,2915.0,3047.0,2915.0,635.0,0.1317,0.442,46.4,adhérents,60000.0,240000.0,21.0,7.59,0.165,0.17,75.5,2.0,766.0
+citiz,5,citiz,Station Citiz (1 véhicule),global,7.74514,48.55241,Strasbourg,67482,2410.0,2520.0,2410.0,195.0,0.1354,0.455,46.4,adhérents,60000.0,300000.0,25.0,7.59,0.246,0.386,64.2,2.0,296.0
+citiz,6,citiz,Station Citiz (1 véhicule),global,7.76431,48.60859,Schiltigheim,67447,2551.0,2667.0,2551.0,466.0,0.1122,0.377,46.4,adhérents,60000.0,360000.0,24.0,7.59,0.265,0.284,56.3,2.0,530.0
+citiz,7,citiz,Station Citiz (1 véhicule),global,7.70264,48.59294,Strasbourg,67482,3090.0,3230.0,3090.0,0.0,0.0708,0.238,43.0,adhérents,60000.0,420000.0,19.0,7.04,0.417,0.386,43.0,1.0,690.0
+citiz,8,citiz,Station Citiz (1 véhicule),global,7.73697,48.61344,Bischheim,67043,2664.0,2785.0,2664.0,0.0,0.1045,0.351,46.4,adhérents,60000.0,480000.0,23.0,7.59,0.417,0.27,54.8,2.0,448.0
+citiz,9,citiz,Station Citiz (1 véhicule),global,7.72275,48.56815,Strasbourg,67482,2353.0,2460.0,2353.0,102.0,0.0935,0.314,43.3,adhérents,60000.0,540000.0,25.0,7.08,0.468,0.386,43.3,1.0,534.0
+citiz,10,citiz,Station Citiz (1 véhicule),global,7.71939,48.58248,Strasbourg,67482,1157.0,1210.0,1157.0,580.0,0.3148,1.057,46.4,adhérents,60000.0,600000.0,52.0,7.59,0.229,0.386,71.7,2.0,344.0
+citiz,11,citiz,Station Citiz (1 véhicule),global,7.69509,48.58018,Eckbolsheim,67118,1682.0,1759.0,1682.0,177.0,0.2082,0.699,46.4,adhérents,60000.0,660000.0,36.0,7.59,0.211,0.242,68.9,2.0,428.0
+citiz,12,citiz,Station Citiz (1 véhicule),global,7.69305,48.56574,Lingolsheim,67267,1683.0,1759.0,1683.0,54.0,0.2258,0.758,46.4,adhérents,60000.0,720000.0,36.0,7.59,0.127,0.148,74.8,2.0,507.0
+citiz,13,citiz,Station Citiz (1 véhicule),global,7.69879,48.55866,Lingolsheim,67267,2446.0,2558.0,2446.0,6.0,0.0749,0.252,36.1,adhérents,60000.0,780000.0,25.0,5.9,0.213,0.148,36.1,1.0,449.0
+citiz,14,citiz,Station Citiz (1 véhicule),global,7.77707,48.56565,Strasbourg,67482,1054.0,1102.0,1054.0,0.0,0.4071,1.367,46.4,adhérents,60000.0,840000.0,57.0,7.59,0.329,0.386,84.5,2.0,310.0
+citiz,15,citiz,Station Citiz (1 véhicule),quota_peu_dense,7.64194,48.55747,Holtzheim,67212,1043.0,1090.0,1043.0,0.0,0.434,1.458,46.4,adhérents,60000.0,900000.0,58.0,7.59,0.075,0.066,89.1,2.0,3000.0
+citiz,16,citiz,Station Citiz (1 véhicule),quota_peu_dense,7.75177,48.64614,Reichstett,67389,967.0,1011.0,967.0,80.0,0.5116,1.5,46.4,adhérents,60000.0,960000.0,62.0,7.59,0.102,0.105,84.9,2.0,667.0
+collectivite,1,bike,Station vélo libre-service (10 vélos),enveloppe_bike,7.71405,48.58057,Strasbourg,67482,4126.0,4313.0,4126.0,34.0,0.7959,1.5,22.5,trajets/jour,60000.0,60000.0,15.0,0.67,0.345,0.386,,,697.0
+collectivite,2,bike,Station vélo libre-service (10 vélos),enveloppe_bike,7.74615,48.59023,Strasbourg,67482,4272.0,4466.0,4272.0,0.0,0.9953,1.5,22.5,trajets/jour,60000.0,120000.0,14.0,0.67,0.209,0.386,,,493.0
+collectivite,3,bike,Station vélo libre-service (10 vélos),enveloppe_bike,7.75747,48.57966,Strasbourg,67482,3737.0,3907.0,3737.0,0.0,0.9955,1.5,22.5,trajets/jour,60000.0,180000.0,16.0,0.67,0.242,0.386,,,443.0
+collectivite,4,bike,Station vélo libre-service (10 vélos),enveloppe_bike,7.73047,48.57731,Strasbourg,67482,3642.0,3808.0,3642.0,121.0,0.9841,1.5,22.5,trajets/jour,60000.0,240000.0,16.0,0.67,0.275,0.386,,,527.0
+collectivite,5,bike,Station vélo libre-service (10 vélos),enveloppe_bike,7.75525,48.56881,Strasbourg,67482,3850.0,4025.0,3850.0,0.0,0.9888,1.5,22.5,trajets/jour,60000.0,300000.0,16.0,0.67,0.16,0.386,,,411.0
+collectivite,6,bike,Station vélo libre-service (10 vélos),enveloppe_bike,7.76608,48.56903,Strasbourg,67482,3644.0,3809.0,3644.0,0.0,0.9804,1.5,22.5,trajets/jour,60000.0,360000.0,16.0,0.67,0.171,0.386,,,544.0
+collectivite,7,bike,Station vélo libre-service (10 vélos),enveloppe_bike,7.77619,48.58543,Strasbourg,67482,3619.0,3783.0,3619.0,0.0,0.9719,1.5,22.5,trajets/jour,60000.0,420000.0,17.0,0.67,0.205,0.386,,,561.0
+collectivite,8,bike,Station vélo libre-service (10 vélos),quota_peu_dense,7.79571,48.57322,Strasbourg,67482,1587.0,1659.0,1587.0,64.0,0.775,1.5,21.7,trajets/jour,60000.0,480000.0,38.0,0.65,0.485,0.386,,,1201.0
+collectivite,9,bike,Station vélo libre-service (10 vélos),quota_peu_dense,7.66496,48.58675,Wolfisheim,67551,1028.0,1075.0,1028.0,0.0,0.3997,0.949,8.9,trajets/jour,60000.0,540000.0,58.0,0.27,0.071,0.08,,,774.0
+collectivite,10,bus,Arrêt de bus (quai PMR + abri),enveloppe_bus,7.73745,48.60265,Schiltigheim,67447,1358.0,1420.0,1358.0,99.0,0.9603,1.5,305.6,montées/jour,207412.0,747412.0,153.0,12.31,0.161,0.29,,,297.0
+collectivite,11,bus,Arrêt de bus (quai PMR + abri),enveloppe_bus,7.77212,48.61595,Strasbourg,67482,816.0,853.0,816.0,816.0,0.9647,1.5,183.6,montées/jour,217422.0,964834.0,266.0,4.1,0.358,0.386,,,315.0

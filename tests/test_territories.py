@@ -43,3 +43,13 @@ def test_screen_counts_only_dense_unserved_population():
 def test_funders_have_separate_kinds():
     assert R.FUNDERS["citiz"][1] == ("citiz",)
     assert set(R.FUNDERS["collectivite"][1]) == {"bike", "bus"}
+
+
+def test_field_risk_discounts_failed_and_occupied_territories():
+    r_nice, f_nice, _ = T.risk("200030195")          # Auto Bleue puis Mobilize Share : échecs répétés
+    assert "echec_station" in f_nice and r_nice >= 0.5
+    assert T.risk("243400017")[0] >= 0.4               # Montpellier : Modulauto hors GBFS
+    assert T.risk(C.EMS_EPCI) == (0.0, "", "")         # territoire témoin, aucun signal
+    assert T.risk("243100518")[0] < 0                  # Toulouse : réseau Citiz retenu par la Métropole
+    for factors, _ in C.TERRITORY_RISK.values():
+        assert set(factors) <= set(C.TERRITORY_RISK_WEIGHTS)

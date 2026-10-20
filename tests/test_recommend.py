@@ -126,7 +126,14 @@ def test_ems_communes():
     assert "67482" in C.EMS_COMMUNES and "67363" in C.EMS_COMMUNES   # Strasbourg, Osthoffen
 
 
+def test_plm_label():
+    assert R.plm_label("69388") == "Lyon 8e" and R.plm_label("75101") == "Paris 1er"
+    assert R.plm_label("13216") == "Marseille 16e"
+    assert R.plm_label("69123") is None and R.plm_label("67482") is None   # communes ordinaires
+
+
 if __name__ == "__main__":
+    test_plm_label()
     test_coverage_continuous_in_radius()
     test_zero_option_and_distinct()
     test_ems_communes()

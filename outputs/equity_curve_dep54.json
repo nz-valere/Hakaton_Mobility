@@ -7,8 +7,8 @@
       "lambda": 0.0,
       "financeur": "citiz",
       "n_sites": 16,
-      "pop_newly_served": 31348.1875,
-      "share_new_in_income_deciles_1_3": 0.4829136852010982,
+      "pop_newly_served": 30637.46875,
+      "share_new_in_income_deciles_1_3": 0.45027279709587625,
       "co2_avoided_t_yr": 121.45714285714287
     },
     {
@@ -17,14 +17,14 @@
       "n_sites": 11,
       "pop_newly_served": 20266.25,
       "share_new_in_income_deciles_1_3": 0.641425090976377,
-      "co2_avoided_t_yr": 8.812115588249156
+      "co2_avoided_t_yr": 8.834274932346474
     },
     {
       "lambda": 0.25,
       "financeur": "citiz",
       "n_sites": 16,
-      "pop_newly_served": 31363.90625,
-      "share_new_in_income_deciles_1_3": 0.5211753159732774,
+      "pop_newly_served": 30945.71875,
+      "share_new_in_income_deciles_1_3": 0.5126587583298579,
       "co2_avoided_t_yr": 121.45714285714287
     },
     {
@@ -33,15 +33,15 @@
       "n_sites": 11,
       "pop_newly_served": 20274.9375,
       "share_new_in_income_deciles_1_3": 0.7206064137065774,
-      "co2_avoided_t_yr": 8.774912562453135
+      "co2_avoided_t_yr": 8.803991342018442
     },
     {
       "lambda": 0.5,
       "financeur": "citiz",
       "n_sites": 16,
-      "pop_newly_served": 31279.4375,
-      "share_new_in_income_deciles_1_3": 0.5272273518345718,
-      "co2_avoided_t_yr": 121.45714285714287
+      "pop_newly_served": 31726.03125,
+      "share_new_in_income_deciles_1_3": 0.5303964705639002,
+      "co2_avoided_t_yr": 120.6022380539109
     },
     {
       "lambda": 0.5,
@@ -49,15 +49,15 @@
       "n_sites": 11,
       "pop_newly_served": 20274.9375,
       "share_new_in_income_deciles_1_3": 0.7206064137065774,
-      "co2_avoided_t_yr": 8.774912562453135
+      "co2_avoided_t_yr": 8.803991342018442
     },
     {
       "lambda": 0.75,
       "financeur": "citiz",
       "n_sites": 16,
-      "pop_newly_served": 31279.4375,
-      "share_new_in_income_deciles_1_3": 0.5272273518345718,
-      "co2_avoided_t_yr": 121.45714285714287
+      "pop_newly_served": 31726.03125,
+      "share_new_in_income_deciles_1_3": 0.5303964705639002,
+      "co2_avoided_t_yr": 120.6022380539109
     },
     {
       "lambda": 0.75,
@@ -65,15 +65,15 @@
       "n_sites": 11,
       "pop_newly_served": 20274.9375,
       "share_new_in_income_deciles_1_3": 0.7206064137065774,
-      "co2_avoided_t_yr": 8.774912562453135
+      "co2_avoided_t_yr": 8.803991342018442
     },
     {
       "lambda": 1.0,
       "financeur": "citiz",
       "n_sites": 16,
-      "pop_newly_served": 31279.4375,
-      "share_new_in_income_deciles_1_3": 0.5272273518345718,
-      "co2_avoided_t_yr": 121.45714285714287
+      "pop_newly_served": 31726.03125,
+      "share_new_in_income_deciles_1_3": 0.5303964705639002,
+      "co2_avoided_t_yr": 120.6022380539109
     },
     {
       "lambda": 1.0,
@@ -81,7 +81,7 @@
       "n_sites": 11,
       "pop_newly_served": 20274.9375,
       "share_new_in_income_deciles_1_3": 0.7206064137065774,
-      "co2_avoided_t_yr": 8.774912562453135
+      "co2_avoided_t_yr": 8.803991342018442
     }
   ]
 }

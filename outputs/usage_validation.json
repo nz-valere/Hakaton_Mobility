@@ -7,40 +7,40 @@
   },
   "stations_validees": 1512,
   "stations_sans_carreau_habite_proche": 11,
-  "spearman_modele_occupation": 0.151,
-  "p_value_modele": 3.7107997239702184e-09,
+  "spearman_modele_occupation": 0.172,
+  "p_value_modele": 1.5369441707402493e-11,
   "spearman_population_occupation": 0.181,
   "p_value_population": 1.4262418860995714e-12,
   "occupation_par_quintile_de_propension": [
     {
       "quintile": "Q1",
       "stations": 303,
-      "occupation_moyenne": 0.266,
-      "propension_mediane": 0.046
+      "occupation_moyenne": 0.279,
+      "propension_mediane": 0.053
     },
     {
       "quintile": "Q2",
       "stations": 302,
-      "occupation_moyenne": 0.329,
-      "propension_mediane": 0.181
+      "occupation_moyenne": 0.299,
+      "propension_mediane": 0.212
     },
     {
       "quintile": "Q3",
       "stations": 302,
-      "occupation_moyenne": 0.304,
-      "propension_mediane": 0.381
+      "occupation_moyenne": 0.298,
+      "propension_mediane": 0.453
     },
     {
       "quintile": "Q4",
       "stations": 302,
-      "occupation_moyenne": 0.338,
-      "propension_mediane": 0.632
+      "occupation_moyenne": 0.361,
+      "propension_mediane": 0.679
     },
     {
       "quintile": "Q5",
       "stations": 303,
-      "occupation_moyenne": 0.411,
-      "propension_mediane": 0.874
+      "occupation_moyenne": 0.413,
+      "propension_mediane": 0.868
     }
   ],
   "lecture": "Corrélation de rang entre la propension hors pli du modèle Citiz et la part du temps où les voitures de la station sont réservées. > 0 : le modèle, appris seulement sur la PRÉSENCE des stations, classe aussi correctement leur USAGE ; à comparer à la population seule.",

@@ -1,30 +1,30 @@
 financeur,rank,type,equipement,stage,lon,lat,commune,code_commune,pop_newly_served,pop_2040,pop_new_distinct,pop_from_zero_option,propensity,value_rel,usage_pred,usage_unit,cost_eur,cost_cum_eur,eur_per_new_resident,co2_avoided_t_yr,share_poor_households,share_carfree_households,demand_potential,vehicles_suggested,dist_existing_same_type_m
-citiz,1,citiz,Station Citiz (1 véhicule),global,7.26287,43.7071,Nice,06088,7109.0,7162.0,7109.0,0.0,0.8762,1.5,46.4,adhérents,60000.0,60000.0,8.0,7.59,0.287,0.366,624.8,14.0,20000.0
-citiz,2,citiz,Station Citiz (1 véhicule),global,7.28539,43.70228,Nice,06088,7760.0,7816.0,7760.0,0.0,0.9307,1.5,46.4,adhérents,60000.0,120000.0,8.0,7.59,0.19,0.366,681.9,15.0,20000.0
-citiz,3,citiz,Station Citiz (1 véhicule),global,7.26006,43.71424,Nice,06088,6491.0,6538.0,6491.0,0.0,0.7359,1.5,46.4,adhérents,60000.0,180000.0,9.0,7.59,0.191,0.366,570.4,13.0,20000.0
-citiz,4,citiz,Station Citiz (1 véhicule),global,7.25579,43.69969,Nice,06088,6233.0,6279.0,6233.0,0.0,0.8264,1.5,46.4,adhérents,60000.0,240000.0,10.0,7.59,0.234,0.366,547.8,12.0,20000.0
-citiz,5,citiz,Station Citiz (1 véhicule),global,7.29017,43.70602,Nice,06088,6191.0,6236.0,6191.0,0.0,0.9443,1.5,46.4,adhérents,60000.0,300000.0,10.0,7.59,0.223,0.366,544.0,12.0,20000.0
-citiz,6,citiz,Station Citiz (1 véhicule),global,7.20497,43.67485,Nice,06088,5542.0,5582.0,5542.0,0.0,0.4262,1.5,46.4,adhérents,60000.0,360000.0,11.0,7.59,0.419,0.366,487.0,11.0,20000.0
-citiz,7,citiz,Station Citiz (1 véhicule),global,7.25485,43.71952,Nice,06088,6083.0,6128.0,6083.0,0.0,0.6501,1.5,46.4,adhérents,60000.0,420000.0,10.0,7.59,0.186,0.366,534.6,12.0,20000.0
-citiz,8,citiz,Station Citiz (1 véhicule),global,7.29461,43.71696,Nice,06088,5681.0,5722.0,5681.0,0.0,0.6569,1.5,46.4,adhérents,60000.0,480000.0,11.0,7.59,0.286,0.366,499.2,11.0,20000.0
-citiz,9,citiz,Station Citiz (1 véhicule),global,7.26313,43.70169,Nice,06088,5526.0,5567.0,5526.0,0.0,0.8648,1.5,46.4,adhérents,60000.0,540000.0,11.0,7.59,0.242,0.366,485.6,11.0,20000.0
-citiz,10,citiz,Station Citiz (1 véhicule),global,7.28983,43.71323,Nice,06088,5815.0,5858.0,5815.0,0.0,0.831,1.5,46.4,adhérents,60000.0,600000.0,10.0,7.59,0.16,0.366,511.0,12.0,20000.0
-citiz,11,citiz,Station Citiz (1 véhicule),global,7.27038,43.70549,Nice,06088,5298.0,5337.0,5298.0,0.0,0.891,1.5,46.4,adhérents,60000.0,660000.0,11.0,7.59,0.236,0.366,465.6,11.0,20000.0
-citiz,12,citiz,Station Citiz (1 véhicule),global,7.25536,43.7087,Nice,06088,5268.0,5306.0,5268.0,0.0,0.8584,1.5,46.4,adhérents,60000.0,720000.0,11.0,7.59,0.228,0.366,462.9,10.0,20000.0
-citiz,13,citiz,Station Citiz (1 véhicule),global,7.24973,43.723,Nice,06088,5489.0,5529.0,5489.0,0.0,0.4225,1.5,46.4,adhérents,60000.0,780000.0,11.0,7.59,0.172,0.366,482.4,11.0,20000.0
-citiz,14,citiz,Station Citiz (1 véhicule),global,7.25349,43.69602,Nice,06088,4415.0,4447.0,4415.0,0.0,0.8016,1.5,46.4,adhérents,60000.0,840000.0,14.0,7.59,0.251,0.366,388.0,9.0,20000.0
-citiz,15,citiz,Station Citiz (1 véhicule),quota_peu_dense,7.32976,43.70705,Beaulieu-sur-Mer,06011,1700.0,1712.0,1700.0,0.0,0.3732,1.377,46.4,adhérents,60000.0,900000.0,35.0,7.59,0.183,0.256,137.1,3.0,20000.0
-citiz,16,citiz,Station Citiz (1 véhicule),quota_peu_dense,7.4106,43.72717,Cap-d'Ail,06032,1517.0,1528.0,1517.0,0.0,0.2778,1.025,46.4,adhérents,60000.0,960000.0,40.0,7.59,0.126,0.222,91.1,2.0,20000.0
-collectivite,1,bike,Station vélo libre-service (10 vélos),enveloppe_bike,7.28539,43.70228,Nice,06088,7760.0,7816.0,7760.0,0.0,0.7318,1.5,22.5,trajets/jour,60000.0,60000.0,8.0,0.67,0.19,0.366,,,20000.0
-collectivite,2,bike,Station vélo libre-service (10 vélos),enveloppe_bike,7.26287,43.7071,Nice,06088,7109.0,7162.0,7109.0,0.0,0.5381,1.307,19.6,trajets/jour,60000.0,120000.0,8.0,0.59,0.287,0.366,,,20000.0
-collectivite,3,bike,Station vélo libre-service (10 vélos),enveloppe_bike,7.26014,43.71244,Nice,06088,6382.0,6429.0,6382.0,0.0,0.6482,1.5,22.5,trajets/jour,60000.0,180000.0,9.0,0.67,0.194,0.366,,,20000.0
-collectivite,4,bike,Station vélo libre-service (10 vélos),enveloppe_bike,7.25579,43.69969,Nice,06088,6233.0,6279.0,6233.0,0.0,0.824,1.5,22.5,trajets/jour,60000.0,240000.0,10.0,0.67,0.234,0.366,,,20000.0
-collectivite,5,bike,Station vélo libre-service (10 vélos),enveloppe_bike,7.29017,43.70602,Nice,06088,6191.0,6236.0,6191.0,0.0,0.917,1.5,22.5,trajets/jour,60000.0,300000.0,10.0,0.67,0.223,0.366,,,20000.0
-collectivite,6,bike,Station vélo libre-service (10 vélos),enveloppe_bike,7.26313,43.70169,Nice,06088,5526.0,5567.0,5526.0,0.0,0.5869,1.426,21.4,trajets/jour,60000.0,360000.0,11.0,0.64,0.242,0.366,,,20000.0
-collectivite,7,bike,Station vélo libre-service (10 vélos),enveloppe_bike,7.27038,43.70549,Nice,06088,5298.0,5337.0,5298.0,0.0,0.6378,1.5,22.5,trajets/jour,60000.0,420000.0,11.0,0.67,0.236,0.366,,,20000.0
-collectivite,8,bike,Station vélo libre-service (10 vélos),reliquat,7.25494,43.71772,Nice,06088,5900.0,5944.0,5900.0,0.0,0.5291,1.286,19.3,trajets/jour,60000.0,480000.0,10.0,0.58,0.185,0.366,,,20000.0
-collectivite,9,bike,Station vélo libre-service (10 vélos),reliquat,7.25536,43.7087,Nice,06088,5268.0,5306.0,5268.0,0.0,0.5992,1.456,21.8,trajets/jour,60000.0,540000.0,11.0,0.65,0.228,0.366,,,20000.0
-collectivite,10,bike,Station vélo libre-service (10 vélos),reliquat,7.3012,43.73519,Nice,06088,4601.0,4635.0,4601.0,0.0,0.6036,1.466,22.0,trajets/jour,60000.0,600000.0,13.0,0.66,0.403,0.361,,,20000.0
-collectivite,11,bike,Station vélo libre-service (10 vélos),quota_peu_dense,7.32976,43.70705,Beaulieu-sur-Mer,06011,1700.0,1712.0,1700.0,0.0,0.4824,1.172,17.6,trajets/jour,60000.0,660000.0,35.0,0.52,0.183,0.256,,,20000.0
-collectivite,12,bike,Station vélo libre-service (10 vélos),quota_peu_dense,7.31005,43.70473,Villefranche-sur-Mer,06159,1366.0,1376.0,1366.0,0.0,0.2488,0.604,7.5,trajets/jour,60000.0,720000.0,44.0,0.23,0.219,0.187,,,20000.0
-collectivite,13,bus,Arrêt de bus (quai PMR + abri),enveloppe_bus,7.14122,43.66226,Cagnes-sur-Mer,06027,476.0,479.0,476.0,476.0,0.8559,1.5,107.1,montées/jour,267168.0,987168.0,561.0,-2.96,0.084,0.182,,,406.0
+citiz,1,citiz,Station Citiz (1 véhicule),global,4.88096,45.77834,Villeurbanne,69266,3946.0,4288.0,3946.0,0.0,0.6036,1.5,46.4,adhérents,60000.0,60000.0,15.0,7.59,0.238,0.38,346.7,8.0,486.0
+citiz,2,citiz,Station Citiz (1 véhicule),global,4.88471,45.76589,Villeurbanne,69266,3961.0,4305.0,3961.0,0.0,0.7281,1.5,46.4,adhérents,60000.0,120000.0,15.0,7.59,0.124,0.38,348.1,8.0,401.0
+citiz,3,citiz,Station Citiz (1 véhicule),global,4.85206,45.73001,Lyon 8e,69388,3559.0,3868.0,3559.0,0.0,0.4924,1.5,46.4,adhérents,60000.0,180000.0,17.0,7.59,0.211,0.355,312.8,7.0,474.0
+citiz,4,citiz,Station Citiz (1 véhicule),global,4.89786,45.76291,Villeurbanne,69266,3793.0,4123.0,3793.0,0.0,0.3275,1.1,46.4,adhérents,60000.0,240000.0,16.0,7.59,0.236,0.38,244.5,6.0,432.0
+citiz,5,citiz,Station Citiz (1 véhicule),global,4.85821,45.74655,Lyon 7e,69387,3504.0,3808.0,3504.0,0.0,0.4698,1.5,46.4,adhérents,60000.0,300000.0,17.0,7.59,0.207,0.431,307.9,7.0,468.0
+citiz,6,citiz,Station Citiz (1 véhicule),global,4.87274,45.75628,Lyon 3e,69383,3534.0,3840.0,3534.0,0.0,0.477,1.5,46.4,adhérents,60000.0,360000.0,17.0,7.59,0.159,0.403,310.5,7.0,421.0
+citiz,7,citiz,Station Citiz (1 véhicule),global,4.87753,45.76012,Villeurbanne,69266,3395.0,3690.0,3395.0,0.0,0.7196,1.5,46.4,adhérents,60000.0,420000.0,18.0,7.59,0.155,0.383,298.4,7.0,419.0
+citiz,8,citiz,Station Citiz (1 véhicule),global,4.87049,45.72548,Lyon 8e,69388,4652.0,5055.0,4652.0,0.0,0.1872,0.629,46.4,adhérents,60000.0,480000.0,13.0,7.59,0.33,0.338,171.4,4.0,522.0
+citiz,9,citiz,Station Citiz (1 véhicule),global,4.86351,45.745,Lyon 8e,69388,3390.0,3684.0,3390.0,0.0,0.3771,1.267,46.4,adhérents,60000.0,540000.0,18.0,7.59,0.124,0.358,251.6,6.0,395.0
+citiz,10,citiz,Station Citiz (1 véhicule),global,4.88555,45.7569,Villeurbanne,69266,2865.0,3114.0,2865.0,0.0,0.5725,1.5,46.4,adhérents,60000.0,600000.0,21.0,7.59,0.173,0.38,251.8,6.0,379.0
+citiz,11,citiz,Station Citiz (1 véhicule),global,4.89257,45.76446,Villeurbanne,69266,2426.0,2637.0,2426.0,0.0,0.5408,1.5,46.4,adhérents,60000.0,660000.0,25.0,7.59,0.214,0.38,213.2,5.0,449.0
+citiz,12,citiz,Station Citiz (1 véhicule),global,4.85104,45.74079,Lyon 7e,69387,2888.0,3139.0,2888.0,0.0,0.3761,1.263,46.4,adhérents,60000.0,720000.0,21.0,7.59,0.208,0.441,213.8,5.0,574.0
+citiz,13,citiz,Station Citiz (1 véhicule),global,4.87668,45.76911,Villeurbanne,69266,2741.0,2979.0,2741.0,0.0,0.6381,1.5,46.4,adhérents,60000.0,780000.0,22.0,7.59,0.166,0.38,240.8,6.0,348.0
+citiz,14,citiz,Station Citiz (1 véhicule),global,4.86675,45.73794,Lyon 8e,69388,2686.0,2919.0,2686.0,0.0,0.4903,1.5,46.4,adhérents,60000.0,840000.0,22.0,7.59,0.247,0.358,236.1,6.0,385.0
+citiz,15,citiz,Station Citiz (1 véhicule),quota_peu_dense,4.81569,45.65241,Vernaison,69260,1442.0,1567.0,1442.0,6.0,0.3468,1.165,46.4,adhérents,60000.0,900000.0,42.0,7.59,0.228,0.085,98.4,3.0,5284.0
+citiz,16,citiz,Station Citiz (1 véhicule),quota_peu_dense,4.82149,45.67255,Irigny,69100,1267.0,1377.0,1267.0,0.0,0.3547,1.191,46.4,adhérents,60000.0,960000.0,47.0,7.59,0.072,0.083,88.5,2.0,3398.0
+collectivite,1,bike,Station vélo libre-service (10 vélos),enveloppe_bike,4.89554,45.81515,Rillieux-la-Pape,69286,4253.0,4622.0,4253.0,0.0,0.373,0.886,13.3,trajets/jour,60000.0,60000.0,14.0,0.4,0.316,0.218,,,560.0
+collectivite,2,bike,Station vélo libre-service (10 vélos),enveloppe_bike,4.91731,45.7476,Bron,69029,3458.0,3758.0,3458.0,0.0,0.4328,1.028,15.4,trajets/jour,60000.0,120000.0,17.0,0.46,0.283,0.247,,,539.0
+collectivite,3,bike,Station vélo libre-service (10 vélos),enveloppe_bike,4.93769,45.69442,Saint-Priest,69290,3197.0,3475.0,3197.0,0.0,0.4893,1.162,17.4,trajets/jour,60000.0,180000.0,19.0,0.52,0.248,0.16,,,2284.0
+collectivite,4,bike,Station vélo libre-service (10 vélos),enveloppe_bike,5.00294,45.76792,Meyzieu,69282,2947.0,3203.0,2947.0,0.0,0.5467,1.299,19.5,trajets/jour,60000.0,240000.0,20.0,0.58,0.153,0.094,,,3705.0
+collectivite,5,bike,Station vélo libre-service (10 vélos),enveloppe_bike,4.77503,45.75512,Tassin-la-Demi-Lune,69244,3168.0,3443.0,3168.0,0.0,0.6041,1.435,21.5,trajets/jour,60000.0,300000.0,19.0,0.64,0.104,0.202,,,661.0
+collectivite,6,bike,Station vélo libre-service (10 vélos),enveloppe_bike,4.90306,45.81731,Rillieux-la-Pape,69286,3005.0,3266.0,3005.0,0.0,0.4633,1.101,16.5,trajets/jour,60000.0,360000.0,20.0,0.49,0.286,0.218,,,1118.0
+collectivite,7,bike,Station vélo libre-service (10 vélos),enveloppe_bike,4.91362,45.78713,Vaulx-en-Velin,69256,3472.0,3774.0,3472.0,0.0,0.3027,0.719,10.8,trajets/jour,60000.0,420000.0,17.0,0.32,0.466,0.278,,,430.0
+collectivite,8,bike,Station vélo libre-service (10 vélos),reliquat,4.91685,45.78007,Vaulx-en-Velin,69256,2696.0,2930.0,2696.0,0.0,0.4815,1.144,17.2,trajets/jour,60000.0,480000.0,22.0,0.51,0.304,0.278,,,356.0
+collectivite,9,bike,Station vélo libre-service (10 vélos),reliquat,4.8485,45.79482,Caluire-et-Cuire,69034,3335.0,3625.0,3335.0,0.0,0.3978,0.945,14.2,trajets/jour,60000.0,540000.0,18.0,0.42,0.126,0.205,,,524.0
+collectivite,10,bike,Station vélo libre-service (10 vélos),reliquat,4.77346,45.58353,Givors,69091,2348.0,2551.0,2348.0,0.0,0.5261,1.25,18.7,trajets/jour,60000.0,600000.0,26.0,0.56,0.289,0.2,,,12734.0
+collectivite,11,bike,Station vélo libre-service (10 vélos),quota_peu_dense,4.76374,45.60471,Givors,69091,2590.0,2814.0,2590.0,0.0,0.1106,0.263,3.9,trajets/jour,60000.0,660000.0,23.0,0.12,0.421,0.2,,,10613.0
+collectivite,12,bike,Station vélo libre-service (10 vélos),quota_peu_dense,4.85031,45.66674,Feyzin,69276,1201.0,1305.0,1201.0,0.0,0.6772,1.5,16.5,trajets/jour,60000.0,720000.0,50.0,0.49,0.188,0.141,,,3153.0
+collectivite,13,bus,Arrêt de bus (quai PMR + abri),enveloppe_bus,4.89513,45.76458,Villeurbanne,69266,2418.0,2628.0,2418.0,0.0,0.9637,1.5,544.1,montées/jour,275083.0,995083.0,114.0,24.51,0.25,0.38,,,420.0

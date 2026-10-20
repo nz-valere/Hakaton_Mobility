@@ -208,31 +208,34 @@ def map_france():
 
 
 def territories():
-    """Classement national : adhérents potentiels pour un même budget Citiz (+ Strasbourg témoin)."""
+    """Classement national : adhérents potentiels (modèle) et retenus après risque terrain (+ Strasbourg témoin)."""
     import pandas as pd
     t = pd.read_csv(C.OUT / "territories_citiz.csv")
     t = t[t["rank"].notna() | t["reference"]].copy()
-    t = t.sort_values("sim_members_potential", ascending=True)
+    t = t.sort_values("sim_members_adjusted", ascending=True)
     col = {"nouveau territoire": ORANGE, "extension": BLUE}
     fig, ax = plt.subplots(figsize=(9, 0.42 * len(t) + 1.4), dpi=150)
     fig.patch.set_facecolor(BG)
     _style(ax)
     colors = [GREY if r else col.get(s_, BLUE) for r, s_ in zip(t["reference"], t["statut"])]
     labels = [f"{n}{' (témoin)' if r else ''}" for n, r in zip(t["territoire"], t["reference"])]
-    bars = ax.barh(labels, t["sim_members_potential"], color=colors, height=0.6)
-    for b, v, p in zip(bars, t["sim_members_potential"], t["sim_pop_newly_served"]):
-        ax.text(v * 1.01, b.get_y() + b.get_height() / 2,
-                f"{v:,.0f} adhérents · {p:,.0f} hab.".replace(",", " "), va="center", color=INK, fontsize=8)
-    ax.set_xlim(0, t["sim_members_potential"].max() * 1.45)
+    ax.barh(labels, t["sim_members_potential"], color=colors, alpha=0.25, height=0.6)
+    bars = ax.barh(labels, t["sim_members_adjusted"], color=colors, height=0.6)
+    for b, v, raw, rk in zip(bars, t["sim_members_adjusted"], t["sim_members_potential"], t["risk"]):
+        note = f"  (modèle {raw:,.0f} · risque {100 * rk:+.0f} %)" if rk else ""
+        ax.text(max(v, raw) * 1.01, b.get_y() + b.get_height() / 2,
+                f"{v:,.0f} adhérents{note}".replace(",", " "), va="center", color=INK, fontsize=8)
+    ax.set_xlim(0, t["sim_members_potential"].max() * 1.75)
     ax.set_xticks([])
     ax.tick_params(axis="y", labelsize=9, colors=INK)
     from matplotlib.patches import Patch
     ax.legend(handles=[Patch(color=ORANGE, label="Citiz absent (nouveau territoire)"),
                        Patch(color=BLUE, label="Citiz présent (extension)"),
-                       Patch(color=GREY, label="Strasbourg, territoire témoin")],
+                       Patch(color=GREY, label="Strasbourg, territoire témoin"),
+                       Patch(color=GREY, alpha=0.25, label="potentiel du modèle avant risque terrain")],
               loc="lower right", frameon=False, fontsize=8)
     ax.set_title(f"Même budget Citiz ({_num(C.CITIZ_BUDGET / 1e6, 2)} M€ / {C.HORIZON_YEARS} ans) : "
-                 "adhérents potentiels des stations retenues", loc="left", color=INK, fontsize=11)
+                 "adhérents retenus après risque terrain", loc="left", color=INK, fontsize=11)
     fig.tight_layout()
     fig.savefig(C.FIG / "slides_territories.png", facecolor=BG)
     plt.close(fig)
@@ -276,7 +279,8 @@ def map_area(csv, summary, out_name, communes):
     plt.close(fig)
 
 
-ZONE_LABEL = {"ems": "Eurométropole de Strasbourg", "epci200030195": "Métropole Nice Côte d'Azur"}
+ZONE_LABEL = {"ems": "Eurométropole de Strasbourg", "epci200030195": "Métropole Nice Côte d'Azur",
+              "epci200046977": "Métropole de Lyon"}
 
 
 def frequency():

@@ -52,7 +52,21 @@ URLS = {
     "overpass": "https://overpass-api.de/api/interpreter",
     # Nice Côte d'Azur (territoire prioritaire) – GTFS du réseau urbain Lignes d'Azur (PAN)
     "gtfs_lignes_azur": "https://chouette.enroute.mobi/api/v1/datas/OpendataRLA/gtfs.zip",
+    # data.grandlyon.com – arrêts TCL (WFS public) : le GTFS TCL exige un compte (HTTP 401)
+    # et manque donc à l'agrégat national ; sans lui la Métropole de Lyon paraît sans bus/tram/métro.
+    "tcl_wfs": ("https://data.grandlyon.com/geoserver/sytral/ows?SERVICE=WFS&VERSION=2.0.0"
+                "&request=GetFeature&typename=sytral:tcl_sytral.tclarret"
+                "&outputFormat=application/json&SRSNAME=EPSG:4326"),
+    # Lyon (territoire prioritaire) – GTFS TCL : le jeu officiel exige un compte, miroir public MobilityData
+    "gtfs_tcl": "https://files.mobilitydatabase.org/tdg-81943/latest.zip",
 }
+# Jeux GTFS publiés sur le PAN mais absents de l'agrégat national « arrets_france.csv »
+# (TCL, Tango, Orizo, CITALIS, CarSud…) : téléchargés un à un par src/download.py.
+GTFS_EXTRA = RAW / "gtfs_extra"
+# Jeux GTFS écartés (titre) : longue distance, maritime, scolaire, transport à la demande.
+GTFS_EXCLUDED = (r"FlixBus|BlaBlaCar Bus|Corsica Ferries|Brittany Ferries|Corsica Linea|Transmanche|"
+                 r"^Réseau maritime|^Navettes? maritimes?|^Bacs |vols |covoiturage|^TAD |^Transport à la demande|^Réseau scolaire|^Transport scolaire|"
+                 r"Remontées mécaniques")
 # Le GTFS Fluo 67 est résolu dynamiquement via l'API transport.data.gouv.fr
 FLUO67_SLUG = "offre-de-transport-du-reseau-fluo-grand-est-bas-rhin-67"
 
@@ -302,6 +316,7 @@ CITIZ_BUDGET = 1_000_000      # ≈ 16 stations d'1 véhicule (60 k€ / 5 ans c
 FREQ_FEEDS = {
     "ems": ("gtfs_cts.zip", "gtfs_fluo67.zip"),            # CTS (bus, tram) + cars Fluo 67
     "epci200030195": ("gtfs_lignes_azur.zip",),             # Métropole Nice Côte d'Azur : Lignes d'Azur
+    "epci200046977": ("gtfs_tcl.zip",),                     # Métropole de Lyon : TCL (bus, tram, métro)
 }
 FREQ_REF_DATE = "20261117"     # mardi hors vacances scolaires ; à défaut, le mardi le plus chargé du GTFS
 FREQ_HOURS = (7, 20)           # fréquence moyenne entre 7 h et 20 h
@@ -324,4 +339,56 @@ TERRITORY_MIN_POP = 100_000   # masse critique d'un réseau local d'autopartage 
 # Île-de-France exclue : son autopartage (Getaround, Zity, Communauto, Free2Move) est presque
 # absent des flux GBFS publics -> couverture apparente ~1 %, potentiel surestimé.
 TERRITORY_EXCLUDED_DEPS = ("75", "77", "78", "91", "92", "93", "94", "95")
-TERRITORY_SHORTLIST = 10      # EPCI du criblage simulées avec l'optimiseur (budget CITIZ_BUDGET)
+TERRITORY_SHORTLIST = 20      # EPCI du criblage simulées avec l'optimiseur (budget CITIZ_BUDGET)
+# Risque terrain (veille presse, octobre 2026) : le modèle ne voit ni les échecs passés, ni
+# l'autopartage absent des flux GBFS. Adhérents retenus = adhérents du modèle × (1 − risque),
+# risque = somme des facteurs ci-dessous, borné à TERRITORY_RISK_CLIP. Pondérations = hypothèses :
+# un échec en station (le modèle de Citiz) pèse plus qu'un échec en free-floating, un concurrent
+# en station invisible des flux rend caduc le « nouveau territoire » du criblage.
+TERRITORY_RISK_WEIGHTS = {
+    "echec_station": 0.45,        # un réseau en station a fermé (même modèle que Citiz)
+    "echec_free_floating": 0.10,  # un service free-floating / constructeur a fermé, l'autopartage en boucle survit
+    "retrait_repete": 0.15,       # au moins deux opérateurs successifs ont quitté le territoire
+    "projet_avorte": 0.10,        # projet local étudié puis abandonné, ou service interrompu plusieurs années
+    "marche_non_teste": 0.15,     # aucun service d'autopartage public n'y a jamais fonctionné
+    "concurrent_station": 0.40,   # réseau en station hors GBFS couvrant le cœur (potentiel surestimé)
+    "concurrent_partiel": 0.15,   # flotte concurrente hors GBFS (gares, quelques dizaines de véhicules)
+    "concurrent_mineur": 0.05,    # autopartage entre particuliers / free-floating partenaire
+    "soutien_collectivite": -0.10,  # la collectivité a retenu ou planifie un réseau en boucle (Citiz)
+    "soutien_partiel": -0.05,     # étude, label ou ouverture de stations en cours
+}
+TERRITORY_RISK_CLIP = (-0.2, 0.9)
+# EPCI -> (facteurs, constat). Sources : SOURCES.md, « Risque terrain des territoires ».
+TERRITORY_RISK = {
+    "200030195": (("echec_station", "retrait_repete", "concurrent_mineur"),
+                  "Nice : Auto Bleue (68 stations, ~1,4 M€/an de DSP, recettes déficitaires) fermé fin 2018 ; "
+                  "Mobilize Share parti fin juin 2026 ; Getaround seul restant"),
+    "200046977": (("echec_free_floating", "soutien_collectivite"),
+                  "Lyon : Bluely fermé (2020) et Zity parti (2024), mais Citiz LPA en boucle survit et la "
+                  "Métropole planifie son développement d'ici 2030"),
+    "243400017": (("concurrent_station",),
+                  "Montpellier : Modulauto (+ Communauto) exploite ~100 stations hors GBFS, rentable sans "
+                  "subvention : ce n'est pas un territoire vierge"),
+    "248300543": (("marche_non_teste", "projet_avorte"),
+                  "Toulon : aucun service public d'autopartage ; l'association Var Autopartage n'a pas abouti"),
+    "200054807": (("concurrent_mineur",),
+                  "Aix-Marseille : Citiz Provence présent, Totem Mobi (Twizy free-floating) partenaire de Citiz"),
+    "243100518": (("soutien_collectivite",),
+                  "Toulouse : Citiz Occitanie retenu par la Métropole pour 2025-2030 (stations sur voirie)"),
+    "200023414": (("projet_avorte", "concurrent_partiel", "soutien_partiel"),
+                  "Rouen : projet Rouen Autopartage suspendu (2013) ; Normandy Mobility (~100 véhicules "
+                  "Rouen-Caen-Le Havre) ; étude métropolitaine 2024 et label autopartage"),
+    "243300316": (("echec_free_floating",),
+                  "Bordeaux : BlueCub (Bolloré, 5 000 abonnés) fermé en 2020 ; Citiz (ex-Autocool) survit"),
+    "246300701": (("marche_non_teste",),
+                  "Clermont : seul un prêt entre particuliers (2017-2020) ; étude de potentiel 2021-2022 sans suite"),
+    "200040715": (("echec_free_floating",),
+                  "Grenoble : expérimentation Cité Lib by Ha:mo (Toyota, 2014-2017) ; Citiz implanté"),
+    "244500468": (("projet_avorte",),
+                  "Orléans : six ans sans autopartage avant le retour de Citiz (octobre 2025)"),
+    "243700754": (("soutien_partiel",), "Tours : Citiz ouvre de nouvelles stations en 2026"),
+    "200065597": (("concurrent_partiel",), "Caen : Normandy Mobility présent autour de la gare"),
+    "200039915": (("marche_non_teste", "concurrent_mineur"),
+                  "Cannes : aucun autopartage public, seulement loueurs et Getaround ; voisin de l'échec niçois"),
+    "200084952": (("marche_non_teste",), "Le Havre : aucun service d'autopartage public identifié"),
+}

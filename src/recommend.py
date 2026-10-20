@@ -140,6 +140,19 @@ def _predict(F, kind, dep):
     return model.predict_value(F, kind), b.get("p_ref_insample", b["p_ref"]), "in_sample"
 
 
+PLM_CITY = {"751": ("Paris", 75100), "132": ("Marseille", 13200), "6938": ("Lyon", 69380)}
+
+
+def plm_label(code):
+    """« Lyon 8e », « Paris 1er »… pour un code d'arrondissement municipal, sinon None."""
+    code = str(code)
+    for prefix, (city, base) in PLM_CITY.items():
+        if code.startswith(prefix) and code.isdigit() and 1 <= int(code) - base <= 20:
+            n = int(code) - base
+            return f"{city} {n}{'er' if n == 1 else 'e'}"
+    return None
+
+
 def _subpoints(cells, F=None, offer=None):
     """
     Points de sous-échantillonnage (S² par carreau) et masques « déjà desservi » par type.
@@ -241,6 +254,11 @@ def prepare(area="ems", force=False):
         if "penetration" in b:
             extra["penetration"] = b["penetration"]
     names = model.load_communes()["com_name"]
+    for code in cells["com"].unique():          # arrondissements PLM absents de geo.api.gouv.fr
+        if code not in names.index:
+            lab = plm_label(code)
+            if lab:
+                names.loc[code] = lab
     ctx = {"name": name, "cells": cells, "F": F, "pred": pred, "p_ref": p_ref,
            "pred_source": "+".join(sorted(pred_kind)),
            "com_name": cells["com"].map(names).fillna(cells["com"]).values,

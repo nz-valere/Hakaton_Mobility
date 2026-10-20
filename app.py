@@ -429,8 +429,9 @@ with tab_fr:
         k2.metric("Habitants à 5 min des nouvelles stations", fmt(top["sim_pop_newly_served"]),
                   f"{int(top['sim_sites'])} stations · {C.CITIZ_BUDGET / 1e6:.1f} M€ sur {C.HORIZON_YEARS} ans",
                   delta_color="off")
-        k3.metric("Adhérents potentiels", fmt(top["sim_members_potential"]),
-                  f"≈ {int(top['sim_vehicles_suggested'])} véhicules justifiés", delta_color="off", help=USAGE_HELP)
+        k3.metric("Adhérents retenus (après risque terrain)", fmt(top["sim_members_adjusted"]),
+                  f"modèle : {fmt(top['sim_members_potential'])} · ≈ {int(top['sim_vehicles_suggested'])} véhicules",
+                  delta_color="off", help=USAGE_HELP)
         if len(ref):
             r0 = ref.iloc[0]
             k4.metric("Même budget à Strasbourg (témoin)", fmt(r0["sim_pop_newly_served"]) + " hab.",
@@ -440,32 +441,38 @@ with tab_fr:
             f"de plus de {C.TERRITORY_MIN_POP:,} habitants : habitants des quartiers denses sans autopartage à "
             "5 min, pondérés par la valeur du site prédite par le modèle (entraîné sur les stations Citiz et "
             "d'autopartage existantes, propensions hors pli départemental). 2) **Simulation** : sur les "
-            f"{C.TERRITORY_SHORTLIST} premières, l'optimiseur place les stations Citiz que permet le même budget ; "
-            "classement par adhérents potentiels. Île-de-France exclue : son autopartage est presque absent des "
-            "flux GBFS publics.".replace(",", " "))
+            f"{C.TERRITORY_SHORTLIST} premières, l'optimiseur place les stations Citiz que permet le même budget. "
+            "3) **Risque terrain** (veille presse) : adhérents × (1 − risque), le risque cumulant échecs passés "
+            "(Nice : Auto Bleue 2011-2018 puis Mobilize Share 2019-2026), autopartage absent des flux GBFS "
+            "(Montpellier : Modulauto) et soutien de la collectivité. Île-de-France exclue : son autopartage est "
+            "presque absent des flux GBFS publics.".replace(",", " "))
         sh = tr[tr["rank"].notna() | tr["reference"]].copy()
         sh["Territoire"] = sh["territoire"] + np.where(sh["reference"], " (témoin)", "")
         st.altair_chart(
             alt.Chart(sh).mark_bar(cornerRadiusTopRight=4, cornerRadiusBottomRight=4)
             .encode(y=alt.Y("Territoire:N", sort="-x", title=None),
-                    x=alt.X("sim_members_potential:Q", title="Adhérents potentiels (même budget Citiz)"),
+                    x=alt.X("sim_members_adjusted:Q", title="Adhérents retenus après risque terrain (même budget Citiz)"),
                     color=alt.Color("statut:N", title=None,
                                     scale=alt.Scale(domain=["nouveau territoire", "extension"],
                                                     range=["#eb6834", "#2a78d6"])),
                     tooltip=[alt.Tooltip("Territoire:N"), alt.Tooltip("statut:N"),
                              alt.Tooltip("population:Q", format=",.0f", title="Habitants"),
                              alt.Tooltip("sim_pop_newly_served:Q", format=",.0f", title="Nouveaux desservis"),
-                             alt.Tooltip("sim_members_potential:Q", format=",.0f", title="Adhérents potentiels"),
+                             alt.Tooltip("sim_members_potential:Q", format=",.0f", title="Adhérents (modèle)"),
+                             alt.Tooltip("risk:Q", format="+.0%", title="Risque terrain"),
+                             alt.Tooltip("sim_members_adjusted:Q", format=",.0f", title="Adhérents retenus"),
+                             alt.Tooltip("risk_note:N", title="Constat"),
                              alt.Tooltip("sim_top_communes:N", title="Communes")])
             .properties(height=40 + 30 * len(sh)), use_container_width=True)
         tbl = pd.DataFrame({
-            "Rang": sh["rank"], "Territoire": sh["Territoire"], "Statut Citiz": sh["statut"],
+            "Rang": sh["rank"], "Rang modèle seul": sh["rank_model"], "Territoire": sh["Territoire"], "Statut Citiz": sh["statut"],
             "Habitants": sh["population"],
             "Couverts par l'autopartage (%)": (100 * sh["share_carsharing_served"]).round(1),
             "Ménages sans voiture (%)": (100 * sh["share_carfree_households"]).round(0),
             "Potentiel (criblage)": sh["potential"], "Stations": sh["sim_sites"],
             "Nouveaux desservis": sh["sim_pop_newly_served"], "Adhérents potentiels": sh["sim_members_potential"],
-            "CO₂ évité (t/an)": sh["sim_co2_t_yr"]})
+            "Risque terrain (%)": (100 * sh["risk"]).round(0), "Adhérents retenus": sh["sim_members_adjusted"],
+            "Constat terrain": sh["risk_note"].fillna(""), "CO₂ évité (t/an)": sh["sim_co2_t_yr"]})
         st.dataframe(tbl, hide_index=True)
         with st.expander("Criblage complet (toutes les intercommunalités éligibles)"):
             st.dataframe(tr[tr["eligible"]][["screen_rank", "territoire", "statut", "population",
@@ -520,23 +527,34 @@ with tab3:
                 eqc = ad.equity_curve(area, b_citiz, b_public, V)
             if len(eqc):
                 eqc["Financeur"] = eqc["financeur"].map(FUNDER_SHORT)
-                eqc["actuel"] = np.isclose(eqc["λ"], lam)
-                base = alt.Chart(eqc).encode(
-                    x=alt.X("part_modestes:Q", title="% des nouveaux desservis dans les 3 premiers déciles de revenu",
-                            scale=alt.Scale(zero=False)),
-                    y=alt.Y("habitants:Q", title="Habitants nouvellement desservis", scale=alt.Scale(zero=False)),
-                    color=alt.Color("Financeur:N", scale=alt.Scale(domain=["Citiz", "collectivité"],
-                                                                     range=["#eb6834", "#2a78d6"])),
-                    tooltip=[alt.Tooltip("Financeur:N"), alt.Tooltip("λ:Q", format=".2f"),
-                             alt.Tooltip("habitants:Q", format=",.0f"), alt.Tooltip("part_modestes:Q", format=".1f"),
-                             alt.Tooltip("co2:Q", format=".0f", title="CO₂ évité (t/an)"), alt.Tooltip("sites:Q")])
-                chart = (base.mark_line(strokeWidth=2)
-                         + base.mark_circle().encode(size=alt.condition(alt.datum.actuel, alt.value(220), alt.value(60)))
-                         + base.mark_text(dy=-12, fontSize=11).encode(text=alt.Text("λ:Q", format=".2f")))
-                st.altair_chart(chart.properties(height=260, title="Le prix de l'équité (λ de 0 à 1, même budget)"),
-                                use_container_width=True)
-                st.caption("Chaque point est une optimisation complète avec la priorité d'équité λ indiquée (gros point "
-                           "= λ choisi). Vers la droite : plus de ménages modestes parmi les nouveaux desservis ; vers le "
+                st.markdown("**Le prix de l'équité** (λ de 0 à 1, même budget)")
+                # un graphique par financeur (échelles propres), données écrites dans la spec (alt.Data) :
+                # avec un DataFrame, Streamlit met à jour les données à part quand un curseur bouge et Vega
+                # échoue (« Unrecognized data set »). Le point du λ choisi est dans le titre, chaque λ dans l'infobulle.
+                cols_eq = ["λ", "habitants", "part_modestes", "co2", "sites"]
+                for col_, (fk, colr) in zip(st.columns(2), (("Citiz", "#eb6834"), ("collectivité", "#2a78d6"))):
+                    d = eqc[eqc["Financeur"] == fk]
+                    if not len(d):
+                        continue
+                    vals = alt.Data(values=d[cols_eq].astype(float).to_dict("records"))
+                    chart = alt.Chart(vals).mark_line(color=colr, strokeWidth=3, strokeCap="round").encode(
+                        x=alt.X("part_modestes:Q", title="% des nouveaux desservis en déciles 1-3",
+                                scale=alt.Scale(zero=False)),
+                        y=alt.Y("habitants:Q", title="Habitants nouvellement desservis", scale=alt.Scale(zero=False)),
+                        order="λ:Q",
+                        tooltip=[alt.Tooltip("λ:Q", format=".2f"), alt.Tooltip("habitants:Q", format=",.0f"),
+                                 alt.Tooltip("part_modestes:Q", format=".1f"),
+                                 alt.Tooltip("co2:Q", format=".0f", title="CO₂ évité (t/an)"), alt.Tooltip("sites:Q")])
+                    # point de la courbe le plus proche du λ choisi (la courbe n'a que 5 valeurs de λ)
+                    cur = d.iloc[(d["λ"] - lam).abs().argmin()]
+                    sign = "=" if np.isclose(cur["λ"], lam) else "≈"
+                    title = FUNDER_SHORT.get(d["financeur"].iloc[0], fk)
+                    fr = lambda x, f: format(x, f).replace(",", " ").replace(".", ",")  # 42,3 · 49 750
+                    title += (f" · λ {sign} {fr(cur['λ'], '.2f')} : {fr(cur['part_modestes'], '.1f')} % · "
+                              f"{fr(cur['habitants'], ',.0f')} hab.")
+                    col_.altair_chart(chart.properties(height=240, title=title), use_container_width=True)
+                st.caption("Chaque point est une optimisation complète pour une valeur de λ (survoler la courbe pour la "
+                           "voir ; le titre donne le point le plus proche du λ choisi). Vers la droite : plus de ménages modestes parmi les nouveaux desservis ; vers le "
                            "bas : moins d'habitants au total. La pente est le prix de l'équité, que le décideur choisit.")
         if full is not None and len(rec) == 0:
             st.warning("Aucun site retenu (budget trop faible ou territoire déjà entièrement desservi).")

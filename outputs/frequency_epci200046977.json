@@ -1,0 +1,25 @@
+{
+  "zone": "epci200046977",
+  "jour_reference": {
+    "gtfs_tcl.zip": {
+      "jour": "20261117",
+      "lignes_sens": 1287,
+      "arrets": 8383
+    }
+  },
+  "plage_horaire": [
+    7,
+    20
+  ],
+  "option_pleine_departs_h": 4.0,
+  "rayon_m": 282.0,
+  "population": 1297490.5,
+  "comparaison": {
+    "part_pop_arret_tc_5min": 0.9284881083907743,
+    "part_pop_au_moins_1_option_tc_pleine": 0.8751170047102464,
+    "part_pop_arret_mais_service_faible": 0.05515493177021335,
+    "arrets_moyens_5min": 3.363836575296698,
+    "options_tc_pleines_moyennes_5min": 4.585602042202592,
+    "lecture": "« service faible » = au moins un arrêt à 5 min, mais moins d'une ligne toutes les 15 min en cumulé (somme des min(1, départs/h ÷ 4))."
+  }
+}
