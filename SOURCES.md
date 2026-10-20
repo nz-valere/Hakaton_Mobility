@@ -3,6 +3,11 @@
 Toutes les données sont ouvertes et téléchargées automatiquement par `python -m src.download`
 (URL exactes dans `Config.py`, dictionnaire `URLS`). Fichiers bruts dans `data/raw/` (non versionnés).
 
+**Dates d'extraction** (horodatage des fichiers de `data/raw/`) : 19/10/2026 pour INSEE, agrégat d'arrêts, PAN,
+GBFS, CTS, Fluo 67, OSM et communes ; 19/10/2026 au soir pour les EPCI ; 20/10/2026 pour les GTFS hors agrégat,
+les arrêts TCL et les GTFS Lignes d'Azur et TCL. L'agrégat d'arrêts et les flux GBFS sont des sources **vivantes** :
+une nouvelle extraction redonne des chiffres légèrement différents (± 0,1 point sur la part sans option).
+
 | Donnée | Producteur | Format / maille | Licence | Usage dans le projet | Fichier |
 |---|---|---|---|---|---|
 | Revenus, pauvreté et niveau de vie – Filosofi 2021, carreaux 200 m | INSEE | CSV, carreaux 200 m (Métropole, Martinique, La Réunion) | Licence Ouverte 2.0 | Population résidente, ménages, revenus, âges, logement | `filosofi2021_200m_csv.zip` |
@@ -11,7 +16,7 @@ Toutes les données sont ouvertes et téléchargées automatiquement par `python
 | Arrêts de transport en France (agrégat national GTFS, non dédoublonné) | transport.data.gouv.fr / data.gouv.fr | CSV, points | Licence Ouverte 2.0 / ODbL selon jeux | Arrêts bus, tram, métro, train | `arrets_france.csv` |
 | Catalogue des jeux du Point d'Accès National | transport.data.gouv.fr (API) | JSON | Licence Ouverte 2.0 | Métadonnées des jeux, URL GTFS Fluo 67 et des jeux hors agrégat | `pan_datasets.json` |
 | GTFS des jeux publiés sur le PAN mais absents de l'agrégat national (Tango Nîmes, Orizo Avignon, CITALIS, CarSud, agrégat Nouvelle-Aquitaine, ZOU !…, hors scolaire / TAD / maritime) | AOM via transport.data.gouv.fr | GTFS (`stops.txt`) | Licence Ouverte / ODbL selon jeux | Arrêts bus, tram, train manquants | `gtfs_extra/*.zip`, `gtfs_extra/manifest.json` |
-| Arrêts du réseau TCL (bus, tram, métro, funiculaire) | SYTRAL Mobilités via data.grandlyon.com (WFS public) | GeoJSON, points | Licence Ouverte (Grand Lyon) | Le GTFS TCL exige un compte (HTTP 401) et manque à l'agrégat : sans ce flux la Métropole de Lyon paraissait sans transport en commun | `tcl_arrets.geojson` |
+| Arrêts du réseau TCL (bus, tram, métro, funiculaire) | SYTRAL Mobilités via data.grandlyon.com (WFS public) | GeoJSON, points | Licence Ouverte (Grand Lyon) | Le GTFS TCL officiel exige un compte (HTTP 401 ; la fréquence passe par le miroir Mobility Database ci-dessous) et manque à l'agrégat : sans ce flux la Métropole de Lyon paraissait sans transport en commun | `tcl_arrets.geojson` |
 | Catalogue mondial des flux GBFS (`systems.csv`) | MobilityData | CSV | CC-BY 4.0 / Apache 2.0 | Liste des systèmes de partage français | `gbfs_systems.csv` |
 | Flux GBFS des systèmes français (station_information, vehicle_types) | opérateurs (Citiz, nextbike, Bird, Vélhop…) | JSON GBFS v1–v3 | Licence propre à chaque flux (LOM, open data) | Stations vélo, trottinettes, autopartage | `gbfs_france.json` |
 | GBFS Citiz Grand Est | Citiz | GBFS v3.0 | open data LOM | Stations Citiz (étude de cas Strasbourg) | `gbfs_citiz_grandest_station_information.json` |
@@ -21,7 +26,8 @@ Toutes les données sont ouvertes et téléchargées automatiquement par `python
 | Communes (nom, code, centre, population, surface) | geo.api.gouv.fr (IGN Admin Express / INSEE) | JSON | Licence Ouverte 2.0 | Noms de communes, agrégations | `communes.json` |
 | Intercommunalités (EPCI) et rattachement des communes | geo.api.gouv.fr (IGN Admin Express / BANATIC) | JSON | Licence Ouverte 2.0 | Classement national des territoires pour Citiz (`src/territories.py`) | `epcis.json`, `communes_epci.json` |
 | Réseau piéton OpenStreetMap (Eurométropole de Strasbourg) | contributeurs OpenStreetMap via Overpass API | JSON | ODbL 1.0 | Calibration du coefficient de détour marche | `osm_walk_strasbourg.json` |
-| GTFS Lignes d'Azur (réseau urbain de la Métropole Nice Côte d'Azur) | Métropole Nice Côte d'Azur, via transport.data.gouv.fr | GTFS (valide du 19/10 au 31/12/2026) | Licence Ouverte / ODbL | Fréquence des lignes dans le territoire prioritaire (`src/frequency.py`) | `gtfs_lignes_azur.zip` |
+| GTFS Lignes d'Azur (réseau urbain de la Métropole Nice Côte d'Azur) | Métropole Nice Côte d'Azur, via transport.data.gouv.fr | GTFS (valide du 19/10 au 31/12/2026) | Licence Ouverte / ODbL | Fréquence des lignes à Nice, territoire de comparaison (`src/frequency.py`) | `gtfs_lignes_azur.zip` |
+| GTFS TCL (bus, tram, métro de Lyon) | SYTRAL Mobilités, miroir public Mobility Database (`tdg-81943`) | GTFS | Licence Ouverte / ODbL (jeu source) | Fréquence des lignes dans le territoire prioritaire (`src/frequency.py`) ; lignes scolaires « Junior Direct » exclues | `gtfs_tcl.zip` |
 | Usage des stations Citiz : relevés `vehicle_status` toutes les 5 min | Citiz (GBFS 3.0, backend.citiz.fr, 17 réseaux), collecte de l'équipe | CSV, totaux par station | open data LOM | Taux d'occupation, validation du modèle par l'usage (`src/collect_gbfs.py`, `src/usage.py`) | `data/gbfs/citiz_status_*.csv` |
 
 ## Hypothèses chiffrées (non issues de jeux de données)
@@ -32,9 +38,9 @@ Toutes les données sont ouvertes et téléchargées automatiquement par `python
 | Facteurs d'émission | voiture 218 gCO2e/km, bus 113 gCO2e/passager.km, VAE 11 gCO2e/km | ADEME – impactco2.fr (Base Empreinte) |
 | Effet de l'autopartage | 1 voiture partagée remplace 5 à 8 voitures personnelles | ADEME / 6t, Enquête nationale sur l'autopartage (2022) |
 | Taille du réseau Citiz | ~2 800 véhicules, ~280 villes, ~130 000 conducteurs | Énoncé du hackathon |
-| Coûts d'investissement / exploitation | voir `Config.COSTS` | Ordres de grandeur publics, **hypothèses paramétrables** |
+| Coûts d'investissement / exploitation | voir le tableau « Coûts » ci-dessous | **hypothèses paramétrables** (`Config.COSTS`) |
 | Seuil de secret statistique | 11 ménages | INSEE (règles de diffusion Filosofi) |
-| Option TC « pleine » | une ligne (dans un sens) toutes les 15 min ou mieux, 7 h-20 h, mardi 17/11/2026 | `Config.FULL_OPTION_DEP_H`, `Config.FREQ_REF_DATE`, seuil courant d'un « réseau fréquent » ; jour hors vacances de la Toussaint (17 oct.-2 nov. 2026, [Onisep](https://www.onisep.fr/vacances-scolaires-2026-2027)) |
+| Option TC « pleine » | une ligne (dans son meilleur sens ; les deux sens = une option) toutes les 15 min ou mieux, 7 h-20 h, mardi 17/11/2026 | `Config.FULL_OPTION_DEP_H`, `Config.FREQ_REF_DATE`, seuil courant d'un « réseau fréquent » ; jour hors vacances de la Toussaint (17 oct.-2 nov. 2026, [Onisep](https://www.onisep.fr/vacances-scolaires-2026-2027)) |
 | Station Citiz saturée | voitures réservées plus de 60 % du temps relevé | `Config.SATURATION_OCCUPANCY`, **hypothèse** |
 | Budgets par financeur | Citiz 1 M€, collectivité 1 M€ sur 5 ans | `Config.CITIZ_BUDGET`, `Config.PUBLIC_BUDGET`, **hypothèses paramétrables** |
 | Seuil de taille des territoires classés | 100 000 habitants par intercommunalité | `Config.TERRITORY_MIN_POP`, hypothèse de masse critique |
@@ -64,3 +70,25 @@ Les pondérations (`Config.TERRITORY_RISK_WEIGHTS`) sont des hypothèses. Cannes
 |---|---|
 | Fin du service Mobilize Share (Renault) dans la métropole niçoise fin juin 2026 ; les 86 bornes réservées reprises par la Métropole | [automobile-propre.com](https://www.automobile-propre.com/articles/nice-bornes-recharge-ex-mobilize-share-reseau-public/) |
 | Vélo Bleu (Nice) : stations publiées en 2014 sur data.gouv.fr, pas de flux GBFS | [data.gouv.fr – Cartographie des stations Vélobleu](https://www.data.gouv.fr/datasets/cartographie-des-stations-velobleu) |
+
+## Coûts (sur 5 ans, `Config.COSTS`, `Config.HORIZON_YEARS`)
+
+| Équipement | Investissement | Exploitation / an | Total 5 ans | Source |
+|---|---|---|---|---|
+| Station Citiz (1 véhicule) | 25 000 € | 7 000 € | 60 000 € | **hypothèse équipe** (citadine ~20 k€ amortie, télématique, marquage ; assurance, entretien, place). Coût brut : les recettes d'usage, qui autofinancent en partie une voiture Citiz, ne sont pas déduites. À valider avec Citiz. |
+| Station vélo libre-service (10 vélos) | 30 000 € | 6 000 € | 60 000 € | 1 200 €/vélo/an, bas de la fourchette Cerema 2005-2013 (1 100 à 3 200 € HT/vélo/an) |
+| Arrêt de bus (quai PMR + abri) | 35 000 € | 2 000 € | 45 000 € + détour | **hypothèse équipe** (ordre de grandeur d'un quai accessible) |
+| Détour de ligne pour l'arrêt | — | 2 × d × 30 passages/j × 365 × 5 €/km | — | **hypothèse équipe** : 30 passages/j et 5 €/km-bus (ordre de grandeur des coûts d'exploitation urbains), détour plafonné à 1 500 m |
+
+## Impact CO2 (hypothèses, `Config.py`)
+
+| Paramètre | Valeur | Source |
+|---|---|---|
+| Km voiture évités par adhérent Citiz actif | 1 500 km/an | hypothèse prudente (enquête ADEME / 6t 2022 : forte baisse des km des autopartageurs) |
+| Part d'adhérents actifs | 50 % | hypothèse équipe |
+| Adhérents par voiture (plafond d'usage) | 130 000 / 2 800 ≈ 46 | énoncé du hackathon. Conséquence : la demande dépasse presque toujours ce plafond, donc le CO2 Citiz vaut ≈ 7,6 t/an **par station** et ne départage pas les sites |
+| Trajets vélo par station et par jour | 15 × valeur relative × min(1, pop. desservie / bassin médian) | hypothèse équipe |
+| Distance d'un trajet vélo / report modal | 2,5 km / 15 % | hypothèses équipe |
+| Déplacements bus générés / report modal | 0,15 par habitant desservi et par jour, 4 km / 20 % | hypothèses équipe |
+| Émission d'un km-bus de détour | 1,1 kgCO2e | bus diesel standard (ADEME) |
+

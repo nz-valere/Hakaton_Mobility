@@ -263,6 +263,11 @@ with st.sidebar:
                f"d'au moins {C.PRIVACY_MIN_HOUSEHOLDS} ménages ; l'accessibilité, purement géographique, "
                f"est affichée au carreau.")
 
+if not ad.exists(C.INTERIM / "cells.parquet"):
+    missing("Les carreaux INSEE (data/interim/cells.parquet)",
+            "python -m src.download && python -m src.population && python -m src.offer && python -m src.accessibility")
+    st.stop()
+
 st.markdown(f"### {ad.zone_label(zone)}")
 tab1, tab2, tab_fr, tab3, tab4 = st.tabs(["Carte d'accessibilité", "Qui est concerné",
                                           "Où s'implanter (France)", "Où investir", "Méthode & limites"])
@@ -610,7 +615,7 @@ with tab3:
                 kz = ad.zone_kpis(zone, V) if key == "collectivite" else None
                 if kz and kz["by_mode"].get("bike", 1) == 0 and (part["type"] == "bike").any():
                     st.warning("Aucune station vélo publiée en GBFS sur ce territoire : si un service existe sans "
-                               "flux ouvert (à Nice, Vélo Bleu), ces stations vélo peuvent doublonner l'existant. "
+                               "flux ouvert (ex. Vélo Bleu à Nice), ces stations vélo peuvent doublonner l'existant. "
                                "À vérifier avec la collectivité avant toute décision.")
                 funder_block(key, part, summ, off, (w, s_, e_, n_), lam, area)
 
@@ -720,7 +725,8 @@ with tab4:
                         f"{100 * cp['part_pop_au_moins_1_option_tc_pleine']:.0f} % ; **service faible** pour "
                         f"{100 * cp['part_pop_arret_mais_service_faible']:.1f} %.")
     st.caption("Calculé par src/frequency.py à partir des GTFS des réseaux (CTS + Fluo 67 à Strasbourg, Lignes d'Azur "
-               "à Nice). La valeur d'un nouvel arrêt de bus est multipliée par la qualité de service de sa ligne, et le "
+               "à Nice, TCL à Lyon ; lignes scolaires et transport à la demande exclus, les deux sens d'une ligne = "
+               "une option). La valeur d'un nouvel arrêt de bus est multipliée par la qualité de service de sa ligne, et le "
                "besoin « faible accessibilité » utilise ces options pondérées.")
 
     st.markdown("#### Hypothèses de coûts et d'impact (Config.py)")
@@ -745,7 +751,7 @@ with tab4:
     st.markdown("#### Limites reconnues")
     st.markdown(
         "- **Offre ≠ service** : à l'échelle nationale, un arrêt compte même si la fréquence est faible (agrégat sans "
-        "horaires). Corrigé dans les zones d'étude (Strasbourg, Nice) par les GTFS des réseaux (src/frequency.py).\n"
+        "horaires). Corrigé dans les zones d'étude (Strasbourg, Nice, Lyon) par les GTFS des réseaux (src/frequency.py).\n"
         "- **Distance de marche** : rayon euclidien corrigé par un détour calibré sur Strasbourg, "
         "appliqué partout (plus fort en zone peu maillée).\n"
         "- **Modèle positive-unlabeled** : il apprend où les opérateurs se sont déjà implantés ; il reproduit "

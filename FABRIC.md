@@ -1,6 +1,6 @@
 # Mobili'Score dans Microsoft Fabric
 
-Objectif : exécuter les notebooks dans Fabric et construire les visuels Power BI à partir de tables Delta.
+Objectif : exécuter les notebooks dans Fabric et construire le rapport Power BI à partir de tables Delta.
 
 ## Ce qu'il faut créer et installer
 
@@ -9,15 +9,13 @@ Objectif : exécuter les notebooks dans Fabric et construire les visuels Power B
 | Un **workspace** avec une capacité Fabric (ou d'essai) | portail Fabric | héberge le Lakehouse, les notebooks et le rapport |
 | Un **Lakehouse** (ex. `mobiliscore_lh`) | workspace → *New item* → *Lakehouse* | stocke le projet (*Files*) et les tables Power BI (*Tables*) |
 | Le **projet** dans `Files/mobiliscore/` | Lakehouse → *Files* → *Upload* | les notebooks importent `Config.py` et `src/` |
-| Les **notebooks** `.ipynb` | workspace → *Import* → *Notebook* → *From this computer* | le code du pipeline |
-| **`pyproj`** et **`openpyxl`** | rien à faire : la première cellule de chaque notebook les installe | absents du runtime Fabric par défaut |
+| Les **notebooks** `.ipynb` | workspace → *Import* → *Notebook* → *From this computer* | le code du pipeline (même code que `src/`) |
+| Un **Environment** avec `pyproj` et `openpyxl` (recommandé) | workspace → *New item* → *Environment* → *Public libraries*, publier, puis le sélectionner dans chaque notebook | paquets absents du runtime ; installés une seule fois au lieu de chaque session |
 
-Le reste (pandas, numpy, scipy, scikit-learn, pyarrow, matplotlib, requests, joblib) est déjà dans le runtime Fabric.
-Le projet a été développé en Python 3.9 ; Fabric utilise une version plus récente, à vérifier au premier lancement.
-
-Alternative à l'installation par cellule : créer un **Environment** (workspace → *New item* → *Environment*),
-y ajouter `pyproj` et `openpyxl` dans *Public libraries*, le publier, puis le sélectionner dans chaque notebook.
-Les installations sont alors faites une seule fois, au lieu de chaque session.
+Sans Environment, la première cellule de chaque notebook fait `pip install pyproj openpyxl` (accès PyPI nécessaire :
+un workspace avec protection de l'accès sortant le bloque). Le reste (pandas, numpy, scipy, scikit-learn, pyarrow,
+matplotlib, requests, joblib) est dans le runtime Fabric. Le projet est développé en Python 3.9 ; le code est
+compatible 3.10/3.11.
 
 ## Étapes
 
@@ -29,67 +27,119 @@ Dans le Lakehouse, *Files* → créer un dossier `mobiliscore`, puis y uploader 
 Files/mobiliscore/
 ├── Config.py
 ├── src/            (tout le dossier)
-├── notebooks/      (facultatif : les notebooks s'importent à part, mais leur dossier doit exister)
-└── outputs/        (seulement pour la voie rapide, voir plus bas)
+└── outputs/        (seulement pour la voie rapide, voir plus bas ; sans outputs/cache/)
 ```
 
 Le chemin est fixé dans la première cellule de chaque notebook (`FABRIC_PROJECT = "/lakehouse/default/Files/mobiliscore"`).
-Si vous choisissez un autre dossier, modifiez cette ligne.
+Si vous choisissez un autre dossier, modifiez cette ligne (`python notebooks/make_notebooks.py` la régénère partout).
 
 ### 2. Importer les notebooks et attacher le Lakehouse
 
-1. Workspace → *Import* → *Notebook* → *From this computer* → sélectionner les fichiers de `notebooks/`.
-2. Dans chaque notebook : panneau *Explorer* à gauche → *Add data items* → choisir le Lakehouse et le définir **par défaut**.
-   Sans Lakehouse par défaut, le chemin `/lakehouse/default/` n'existe pas et la première cellule ne fait rien.
+1. Workspace → *Import* → *Notebook* → *From this computer* → sélectionner les 16 fichiers de `notebooks/`.
+2. Dans chaque notebook : panneau *Explorer* → *Add data items* → choisir le Lakehouse et le définir **par défaut**.
+   Sans Lakehouse par défaut, `/lakehouse/default/` n'existe pas et la première cellule ne fait rien.
 
 ### 3. Produire les tables : deux voies
 
-**Voie rapide (recommandée pour les visuels)** : uploader `outputs/` depuis une machine où le pipeline a déjà tourné
-(fichiers `.parquet`, `.csv` et `.json`, environ 115 Mo sans `outputs/cache/`), puis lancer **seulement `08_export_fabric`**.
+**Voie rapide (recommandée pour le rapport)** : uploader `outputs/` depuis une machine où le pipeline a tourné
+(sans `outputs/cache/`), puis lancer **seulement `08_export_fabric`**. Il ne recalcule rien : il relit les sorties
+et écrit les tables Delta. Ne relancez pas `06b`/`06c` sur des modèles `.joblib` produits ailleurs : un pickle
+scikit-learn / numpy 2 n'est pas garanti lisible par une autre version (relancer alors `05_model` dans Fabric).
 
-**Pipeline complet** : lancer les notebooks dans l'ordre :
+**Pipeline complet**, dans cet ordre (chaque étape lit les sorties des précédentes) :
 
-`00_geo` → `01_download` → `02_population` → `03_offer` → `03b_walk_calibration` → `04_accessibility` → `05_model` → `05b_territories` → `06a_optimize` → `06b_recommend` → `06c_scenarios` → `07_figures` → `08_export_fabric`
+`00_geo` → `01_download` → `02_population` → `03_offer` → `03b_walk_calibration` → `04_accessibility` →
+`04b_frequency` → `05_model` → `05c_usage` → `05b_territories` → `06a_optimize` → `06b_recommend` →
+`06c_scenarios` → `07_figures` → `08_export_fabric`
 
-`01_download` télécharge environ 700 Mo de données ouvertes (INSEE, data.gouv.fr, GBFS) : la session doit avoir accès à Internet.
-Pour enchaîner automatiquement : *New item* → *Data pipeline*, une activité *Notebook* par étape, reliées *On success*.
+- `01_download` télécharge environ 700 Mo de données ouvertes : la session doit avoir accès à Internet.
+- `04b_frequency` doit précéder `05b` et `06b`, qui pondèrent l'offre de bus par la fréquence des lignes.
+- `05c_collect_gbfs` est à part : un relevé par exécution, à **planifier toutes les 5 minutes** (de préférence
+  en *Python notebook*, sans Spark, pour ne pas démarrer une session Spark à chaque relevé). `05c_usage` lit ces relevés.
+- `06c_scenarios` est long (de l'ordre d'une heure sur 4 processus) ; son cache est signé (modèles, offre,
+  accessibilité, fréquence, grille) et recalculé seulement si l'une de ces entrées change.
+- Pour enchaîner automatiquement : *New item* → *Data pipeline*, une activité *Notebook* par étape, reliées *On success*.
 
-### 4. Créer le rapport Power BI
+### 4. Tables écrites par `08_export_fabric`
 
-1. Ouvrir le Lakehouse : les tables apparaissent sous *Tables* (actualiser si besoin).
-2. *New semantic model* → cocher les tables.
-3. Dans le modèle, créer les relations un-à-plusieurs `communes[com]` → `carreaux[com]` et `communes[com]` → `recommandations[com]`.
-4. *New report* → construire les visuels.
+`08_export_fabric` écrit des **tables Delta** (`saveAsTable` dans un notebook Spark, `deltalake` dans un notebook
+Python) : elles apparaissent sous *Tables* du Lakehouse. Une copie parquet reste dans `outputs/fabric/`.
 
-## Tables exportées par `08_export_fabric`
-
-| Table | Grain | Visuels suggérés |
+| Table | Grain | Visuels |
 |---|---|---|
-| `carreaux` | carreau 200 m (≥ 11 ménages, secret statistique INSEE) | carte (`lat`, `lon`, couleur = `score`), filtres `decile_revenu`, `sans_option` |
-| `communes` | commune | carte choroplèthe ou classement par `score_mean`, `share_pop_served` |
+| `carreaux` | carreau 200 m (≥ 11 ménages, secret statistique INSEE) | carte (`lat`, `lon`, couleur = `score`) ; filtrer par territoire (Azure Maps ≈ 30 000 points max) |
+| `communes` | commune (`epci` ajouté, noms des arrondissements PLM) | choroplèthe, classement par `score_mean`, `share_pop_served` |
 | `stations` | point d'offre existant | carte par `mode_libelle` |
-| `recommandations` | site proposé × zone | carte des sites, tableau trié par `rank`, `cost_cum_eur` ; filtre `zone_nom` et `financeur` |
+| `recommandations` | site proposé × zone (budget 1 M€ par financeur, λ = 0,5) | carte, tableau trié par `rank` |
 | `territoires_citiz` | intercommunalité | classement (`rank`), adhérents potentiels, risque |
-| `acces_par_mode` | périmètre × mode | barres : part de la population desservie par mode |
-| `acces_par_decile` | périmètre × décile de revenu | courbe en U : `part_sans_option` par `decile_revenu` |
-| `modele_metriques` | type × modèle × métrique | qualité des modèles (ROC-AUC, PR-AUC) |
-| `modele_importance` | type × variable | barres des variables les plus importantes |
-| `scenarios_sites` | site × territoire × financeur × budget × λ | carte et liste des sites du scénario choisi par les curseurs |
+| `acces_par_mode` | périmètre × mode | barres : part de la population desservie |
+| `acces_par_decile` | périmètre × décile de revenu | courbe revenu / accès (préférer « France (secret statistique) ») |
+| `modele_metriques`, `modele_importance` | modèle × métrique ; variable | qualité et variables des modèles |
+| `scenarios_sites` | site × territoire × financeur × budget × λ | carte et liste du scénario choisi par les curseurs |
 | `scenarios_resume` | territoire × financeur × budget × λ | KPI du scénario, courbe « prix de l'équité » |
+| `dim_zone`, `dim_financeur` | territoire ; financeur | segments |
+| `param_budget_citiz`, `param_budget_collectivite`, `param_lambda` | valeurs des curseurs | tables **déconnectées** des curseurs |
 
-### Curseurs de l'app dans Power BI
+Clés : `zone` (ex. `epci200046977`, `ems`, `dep54`) relie `dim_zone`, `scenarios_*` et `recommandations` ;
+`epci` (SIREN, 9 caractères ; Eurométropole = `246700488`) relie `dim_zone`, `communes` et `territoires_citiz` ;
+`com` (code INSEE, 5 caractères) relie `communes` et `carreaux`. Les curseurs filtrent des **entiers**
+(`budget_k_eur` de 100 à 5 000, `lambda_x10` de 0 à 10) : un λ décimal ne s'égalise pas de façon fiable en DAX.
 
-Power BI n'exécute pas l'optimiseur : `06c_scenarios` (`python -m src.scenarios`) précalcule toute la grille des
-curseurs de l'app sur les 10 premiers territoires du classement Citiz et l'Eurométropole de Strasbourg
-(témoin, territoire par défaut) : budget de 0,1 à 5 M€ par pas de 0,1 M€, λ de 0 à 1 par pas
-de 0,1, chaque financeur optimisé seul). Dans le rapport, trois paramètres *What-if* (*Modeling* → *New parameter*
-→ *Numeric range*) reproduisent les curseurs, et des mesures filtrent `scenarios_sites` / `scenarios_resume`
-sur le budget et le λ choisis ; un segment `zone_nom` choisit le territoire. Plus de territoires :
-`python -m src.scenarios --top 20` (chaque territoire est mis en cache dans `outputs/cache/`).
+La grille couvre les 10 premiers territoires du classement Citiz et l'Eurométropole de Strasbourg (témoin) ;
+le territoire prioritaire (rang 1) est `zone_par_defaut`. Plus de territoires : `python -m src.scenarios --top 20`.
+
+## 5. Rapport Power BI
+
+1. Lakehouse → *New semantic model* → cocher les tables (mode Direct Lake).
+2. Relations un-à-plusieurs, filtre simple :
+   - `dim_zone[zone]` → `scenarios_resume[zone]`, `scenarios_sites[zone]`, `recommandations[zone]`
+   - `dim_financeur[financeur]` → ces trois mêmes tables
+   - `dim_zone[epci]` → `communes[epci]` ; `communes[com]` → `carreaux[com]`
+   - `param_*` : aucune relation.
+3. Mesures (les variables sont obligatoires : une mesure ne sert pas de prédicat dans `CALCULATE`) :
+
+```dax
+Budget Citiz (k€) = SELECTEDVALUE ( param_budget_citiz[budget_k_eur], 1000 )
+Budget collectivité (k€) = SELECTEDVALUE ( param_budget_collectivite[budget_k_eur], 1000 )
+Lambda x10 = SELECTEDVALUE ( param_lambda[lambda_x10], 5 )
+
+Habitants nouvellement desservis =
+VAR bc = [Budget Citiz (k€)]  VAR bp = [Budget collectivité (k€)]  VAR l = [Lambda x10]
+RETURN
+    CALCULATE ( SUM ( scenarios_resume[pop_newly_served] ), scenarios_resume[financeur] = "citiz",
+                scenarios_resume[budget_k_eur] = bc, scenarios_resume[lambda_x10] = l,
+                KEEPFILTERS ( VALUES ( dim_financeur[financeur] ) ) )
+  + CALCULATE ( SUM ( scenarios_resume[pop_newly_served] ), scenarios_resume[financeur] = "collectivite",
+                scenarios_resume[budget_k_eur] = bp, scenarios_resume[lambda_x10] = l,
+                KEEPFILTERS ( VALUES ( dim_financeur[financeur] ) ) )
+```
+
+Même modèle pour `[Coût (€)]` (`cost_eur`), `[Sites]` (`n_sites`), `[CO2 évité (t/an)]` (`co2_avoided_t_yr`) et
+`[Sortis de 0 option]` (`pop_from_zero_option`). Puis :
+
+```dax
+€ par habitant = DIVIDE ( [Coût (€)], [Habitants nouvellement desservis] )
+
+-- filtre de visuel (= 1) des cartes et tableaux de sites
+Site du scénario =
+VAR f = SELECTEDVALUE ( scenarios_sites[financeur] )
+VAR b = IF ( f = "citiz", [Budget Citiz (k€)], [Budget collectivité (k€)] )
+RETURN IF ( SELECTEDVALUE ( scenarios_sites[budget_k_eur] ) = b
+            && SELECTEDVALUE ( scenarios_sites[lambda_x10] ) = [Lambda x10], 1, 0 )
+
+-- courbe « prix de l'équité » : axe X = scenarios_resume[lambda_x10], légende = financeur
+Habitants (tous λ, budget choisi) =
+VAR f = SELECTEDVALUE ( dim_financeur[financeur] )
+VAR b = IF ( f = "citiz", [Budget Citiz (k€)], [Budget collectivité (k€)] )
+RETURN CALCULATE ( SUM ( scenarios_resume[pop_newly_served] ), KEEPFILTERS ( scenarios_resume[budget_k_eur] = b ) )
+```
+
+4. Segments : `dim_zone[zone_nom]` (sélection unique, `zone_par_defaut` présélectionné), `dim_financeur[libelle]`,
+   et les trois paramètres en curseurs (*Slicer* → style *Single value*).
 
 À savoir :
 
 - `carreaux` ne garde que les carreaux d'au moins 11 ménages (82 % de la population). Pour les chiffres nationaux,
-  utiliser `acces_par_mode` et `acces_par_decile`, calculés sur tous les carreaux, plutôt que de sommer `carreaux`.
+  utiliser `acces_par_mode` et `acces_par_decile`, calculés sur tous les carreaux.
 - Les figures PNG de `07_figures` ne passent pas dans Power BI : ce sont des images, à refaire avec les visuels.
 - L'application Streamlit (`app.py`) ne tourne pas dans Fabric ; le rapport Power BI la remplace.
