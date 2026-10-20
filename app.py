@@ -380,8 +380,9 @@ with tab_fr:
         k2.metric("Habitants à 5 min des nouvelles stations", fmt(top["sim_pop_newly_served"]),
                   f"{int(top['sim_sites'])} stations · {C.CITIZ_BUDGET / 1e6:.1f} M€ sur {C.HORIZON_YEARS} ans",
                   delta_color="off")
-        k3.metric("Adhérents potentiels", fmt(top["sim_members_potential"]),
-                  f"≈ {int(top['sim_vehicles_suggested'])} véhicules justifiés", delta_color="off", help=USAGE_HELP)
+        k3.metric("Adhérents retenus (après risque terrain)", fmt(top["sim_members_adjusted"]),
+                  f"modèle : {fmt(top['sim_members_potential'])} · ≈ {int(top['sim_vehicles_suggested'])} véhicules",
+                  delta_color="off", help=USAGE_HELP)
         if len(ref):
             r0 = ref.iloc[0]
             k4.metric("Même budget à Strasbourg (témoin)", fmt(r0["sim_pop_newly_served"]) + " hab.",
@@ -391,32 +392,38 @@ with tab_fr:
             f"de plus de {C.TERRITORY_MIN_POP:,} habitants : habitants des quartiers denses sans autopartage à "
             "5 min, pondérés par la valeur du site prédite par le modèle (entraîné sur les stations Citiz et "
             "d'autopartage existantes, propensions hors pli départemental). 2) **Simulation** : sur les "
-            f"{C.TERRITORY_SHORTLIST} premières, l'optimiseur place les stations Citiz que permet le même budget ; "
-            "classement par adhérents potentiels. Île-de-France exclue : son autopartage est presque absent des "
-            "flux GBFS publics.".replace(",", " "))
+            f"{C.TERRITORY_SHORTLIST} premières, l'optimiseur place les stations Citiz que permet le même budget. "
+            "3) **Risque terrain** (veille presse) : adhérents × (1 − risque), le risque cumulant échecs passés "
+            "(Nice : Auto Bleue 2011-2018 puis Mobilize Share 2019-2026), autopartage absent des flux GBFS "
+            "(Montpellier : Modulauto) et soutien de la collectivité. Île-de-France exclue : son autopartage est "
+            "presque absent des flux GBFS publics.".replace(",", " "))
         sh = tr[tr["rank"].notna() | tr["reference"]].copy()
         sh["Territoire"] = sh["territoire"] + np.where(sh["reference"], " (témoin)", "")
         st.altair_chart(
             alt.Chart(sh).mark_bar(cornerRadiusTopRight=4, cornerRadiusBottomRight=4)
             .encode(y=alt.Y("Territoire:N", sort="-x", title=None),
-                    x=alt.X("sim_members_potential:Q", title="Adhérents potentiels (même budget Citiz)"),
+                    x=alt.X("sim_members_adjusted:Q", title="Adhérents retenus après risque terrain (même budget Citiz)"),
                     color=alt.Color("statut:N", title=None,
                                     scale=alt.Scale(domain=["nouveau territoire", "extension"],
                                                     range=["#eb6834", "#2a78d6"])),
                     tooltip=[alt.Tooltip("Territoire:N"), alt.Tooltip("statut:N"),
                              alt.Tooltip("population:Q", format=",.0f", title="Habitants"),
                              alt.Tooltip("sim_pop_newly_served:Q", format=",.0f", title="Nouveaux desservis"),
-                             alt.Tooltip("sim_members_potential:Q", format=",.0f", title="Adhérents potentiels"),
+                             alt.Tooltip("sim_members_potential:Q", format=",.0f", title="Adhérents (modèle)"),
+                             alt.Tooltip("risk:Q", format="+.0%", title="Risque terrain"),
+                             alt.Tooltip("sim_members_adjusted:Q", format=",.0f", title="Adhérents retenus"),
+                             alt.Tooltip("risk_note:N", title="Constat"),
                              alt.Tooltip("sim_top_communes:N", title="Communes")])
             .properties(height=40 + 30 * len(sh)), use_container_width=True)
         tbl = pd.DataFrame({
-            "Rang": sh["rank"], "Territoire": sh["Territoire"], "Statut Citiz": sh["statut"],
+            "Rang": sh["rank"], "Rang modèle seul": sh["rank_model"], "Territoire": sh["Territoire"], "Statut Citiz": sh["statut"],
             "Habitants": sh["population"],
             "Couverts par l'autopartage (%)": (100 * sh["share_carsharing_served"]).round(1),
             "Ménages sans voiture (%)": (100 * sh["share_carfree_households"]).round(0),
             "Potentiel (criblage)": sh["potential"], "Stations": sh["sim_sites"],
             "Nouveaux desservis": sh["sim_pop_newly_served"], "Adhérents potentiels": sh["sim_members_potential"],
-            "CO₂ évité (t/an)": sh["sim_co2_t_yr"]})
+            "Risque terrain (%)": (100 * sh["risk"]).round(0), "Adhérents retenus": sh["sim_members_adjusted"],
+            "Constat terrain": sh["risk_note"].fillna(""), "CO₂ évité (t/an)": sh["sim_co2_t_yr"]})
         st.dataframe(tbl, hide_index=True)
         with st.expander("Criblage complet (toutes les intercommunalités éligibles)"):
             st.dataframe(tr[tr["eligible"]][["screen_rank", "territoire", "statut", "population",

@@ -79,8 +79,7 @@ OUT_FILE = C.INTERIM / "offer.parquet"
 TERR = {-1: "Hors Filosofi", 0: "Métropole", 1: "Martinique", 2: "La Réunion"}
 
 # --- classification des jeux GTFS par leur titre
-EXCLUDED_DATASETS = re.compile(
-    r"FlixBus|BlaBlaCar Bus|Corsica Ferries|Brittany Ferries|vols |covoiturage|^TAD |^Réseau scolaire")
+EXCLUDED_DATASETS = re.compile(C.GTFS_EXCLUDED)
 RAIL_DATASETS = re.compile(
     r"^Réseau SNCF|^SNCF Transilien|^Trains régionaux|BreizhGo TER|Trenitalia|Eurostar|AVE Renfe")
 AGGREGATE = re.compile(r"^Agrégat")
@@ -101,6 +100,53 @@ def load_stops():
     print(f"  arrets_france : {len(df):,} lignes, {df['dataset_id'].nunique()} jeux")
     df = df[df["location_type"].fillna("0").isin(["0", ""])]
     print(f"  location_type 0 : {len(df):,} quais / arrêts")
+    return df
+
+
+STOP_COLS = ["dataset_custom_title", "dataset_organisation", "dataset_id", "stop_id",
+             "stop_name", "stop_lat", "stop_lon", "location_type"]
+
+
+def _gtfs_member(z, name):
+    """stops.txt peut être rangé dans un sous-dossier de l'archive."""
+    return next((n for n in z.namelist() if n.rsplit("/", 1)[-1] == name), None)
+
+
+def load_extra_stops():
+    """Jeux absents de l'agrégat national : GTFS du PAN (data/raw/gtfs_extra) + arrêts TCL (WFS)."""
+    parts = []
+    manifest = C.GTFS_EXTRA / "manifest.json"
+    for ds in json.loads(manifest.read_text()) if manifest.exists() else []:
+        f = C.GTFS_EXTRA / ds["file"]
+        try:
+            z = zipfile.ZipFile(f)
+            s = pd.read_csv(z.open(_gtfs_member(z, "stops.txt")), dtype=str, encoding="utf-8-sig")
+        except Exception as e:                              # archive vide ou non conforme
+            print(f"    [ignoré] {ds['title']} : {type(e).__name__}")
+            continue
+        s.columns = s.columns.str.strip()
+        if "location_type" not in s:
+            s["location_type"] = "0"
+        s["dataset_custom_title"], s["dataset_organisation"] = ds["title"], ds["organisation"]
+        s["dataset_id"] = ds["id"]
+        parts.append(s.reindex(columns=STOP_COLS))
+    n_gtfs = len(parts)
+    f = C.RAW / "tcl_arrets.geojson"
+    if f.exists():
+        feats = json.loads(f.read_text())["features"]
+        parts.append(pd.DataFrame({
+            "dataset_custom_title": "Réseau urbain TCL", "dataset_organisation": "SYTRAL Mobilités",
+            "dataset_id": "tcl-wfs",
+            "stop_id": [str(x["properties"]["id"]) for x in feats],
+            "stop_name": [x["properties"]["nom"] for x in feats],
+            "stop_lon": [str(x["geometry"]["coordinates"][0]) for x in feats],
+            "stop_lat": [str(x["geometry"]["coordinates"][1]) for x in feats],
+            "location_type": "0"}))
+    if not parts:
+        return pd.DataFrame(columns=STOP_COLS)
+    df = pd.concat(parts, ignore_index=True)
+    df = df[df["location_type"].fillna("0").isin(["0", ""])]
+    print(f"  jeux hors agrégat : {n_gtfs} GTFS + TCL (WFS) -> {len(df):,} quais / arrêts")
     return df
 
 
@@ -382,7 +428,7 @@ def check_strasbourg(df):
 def main():
     t0 = time.time()
     print("[offer] arrêts GTFS")
-    stops = classify_stops(load_stops())
+    stops = classify_stops(pd.concat([load_stops(), load_extra_stops()], ignore_index=True))
     pts_gtfs = stops_to_points(stops)
     print("[offer] stations GBFS")
     pts_gbfs = load_gbfs()

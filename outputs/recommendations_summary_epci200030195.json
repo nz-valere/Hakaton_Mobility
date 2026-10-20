@@ -1,0 +1,665 @@
+{
+  "area": "epci200030195",
+  "territoire": "Métropole Nice Côte d'Azur",
+  "funders": {
+    "citiz": {
+      "area": "epci200030195",
+      "offer_source": "offer.parquet@1792484171",
+      "prediction": "oof",
+      "budget_eur": 1000000,
+      "equity_lambda": 0.5,
+      "kinds": [
+        "citiz"
+      ],
+      "horizon": 2040,
+      "budget_split": {
+        "citiz": 0.4,
+        "bike": 0.3,
+        "bus": 0.3
+      },
+      "low_density_budget_share": 0.15,
+      "zone": {
+        "cells": 6027,
+        "population": 548610.0,
+        "communes": 51,
+        "pop_without_any_option": 38454.78125,
+        "already_served_share": {
+          "citiz": 0.0
+        }
+      },
+      "selected": {
+        "n_sites": 16,
+        "by_type": {
+          "citiz": 16
+        },
+        "cost_eur": 960000.0,
+        "pop_newly_served": 86037.5625,
+        "pop_newly_served_by_type": {
+          "citiz": 86037.5625
+        },
+        "pop_newly_served_distinct": 86037.5625,
+        "pop_from_zero_option": 0.0,
+        "pop_newly_served_horizon": 86669.03084862385,
+        "eur_per_new_resident": 11.157917217843078,
+        "eur_per_new_distinct_resident": 11.157917217843078,
+        "co2_avoided_t_yr": 121.45714285714287,
+        "co2_by_type_t_yr": {
+          "citiz": 121.45714285714287
+        },
+        "share_new_in_income_deciles_1_3": 0.4758826268468496,
+        "share_new_in_low_density": 0.037384107668089736,
+        "by_stage": {
+          "global": {
+            "n_sites": 14,
+            "cost_eur": 840000.0,
+            "pop_newly_served": 82821.125
+          },
+          "quota_peu_dense": {
+            "n_sites": 2,
+            "cost_eur": 120000.0,
+            "pop_newly_served": 3216.4375
+          }
+        },
+        "label": "Recommandée (modèle, λ, enveloppes, quota peu dense)"
+      },
+      "comparison": {
+        "lambda_0": {
+          "n_sites": 16,
+          "by_type": {
+            "citiz": 16
+          },
+          "cost_eur": 960000.0,
+          "pop_newly_served": 86274.4375,
+          "pop_newly_served_by_type": {
+            "citiz": 86274.4375
+          },
+          "pop_newly_served_distinct": 86274.4375,
+          "pop_from_zero_option": 0.0,
+          "pop_newly_served_horizon": 86907.64438073395,
+          "eur_per_new_resident": 11.127282052693765,
+          "eur_per_new_distinct_resident": 11.127282052693765,
+          "co2_avoided_t_yr": 121.45714285714287,
+          "co2_by_type_t_yr": {
+            "citiz": 121.45714285714287
+          },
+          "share_new_in_income_deciles_1_3": 0.4310528683539664,
+          "share_new_in_low_density": 0.03728146590350125,
+          "by_stage": {
+            "global": {
+              "n_sites": 14,
+              "cost_eur": 840000.0,
+              "pop_newly_served": 83058.0
+            },
+            "quota_peu_dense": {
+              "n_sites": 2,
+              "cost_eur": 120000.0,
+              "pop_newly_served": 3216.4375
+            }
+          },
+          "label": "Sans pondération d'équité (λ = 0) – maximise Σ pop·v, pas la population"
+        },
+        "no_model_value_1": {
+          "n_sites": 16,
+          "by_type": {
+            "citiz": 16
+          },
+          "cost_eur": 960000.0,
+          "pop_newly_served": 87269.28125,
+          "pop_newly_served_by_type": {
+            "citiz": 87269.28125
+          },
+          "pop_newly_served_distinct": 87269.28125,
+          "pop_from_zero_option": 0.25,
+          "pop_newly_served_horizon": 87909.78973623854,
+          "eur_per_new_resident": 11.0004343595989,
+          "eur_per_new_distinct_resident": 11.0004343595989,
+          "co2_avoided_t_yr": 116.47181912892918,
+          "co2_by_type_t_yr": {
+            "citiz": 116.47181912892918
+          },
+          "share_new_in_income_deciles_1_3": 0.482517652796642,
+          "share_new_in_low_density": 0.03832104438238398,
+          "by_stage": {
+            "global": {
+              "n_sites": 14,
+              "cost_eur": 840000.0,
+              "pop_newly_served": 83925.03125
+            },
+            "quota_peu_dense": {
+              "n_sites": 2,
+              "cost_eur": 120000.0,
+              "pop_newly_served": 3344.25
+            }
+          },
+          "label": "Offre existante prise en compte, sans modèle (v = 1) – baseline honnête"
+        },
+        "ignore_existing_offer": {
+          "n_sites": 16,
+          "by_type": {
+            "citiz": 16
+          },
+          "cost_eur": 960000.0,
+          "pop_newly_served": 86037.5625,
+          "pop_newly_served_by_type": {
+            "citiz": 86037.5625
+          },
+          "pop_newly_served_distinct": 86037.5625,
+          "pop_from_zero_option": 0.0,
+          "pop_newly_served_horizon": 86669.03084862385,
+          "eur_per_new_resident": 11.157917217843078,
+          "eur_per_new_distinct_resident": 11.157917217843078,
+          "co2_avoided_t_yr": 121.45714285714287,
+          "co2_by_type_t_yr": {
+            "citiz": 121.45714285714287
+          },
+          "share_new_in_income_deciles_1_3": 0.4758826268468496,
+          "share_new_in_low_density": 0.037384107668089736,
+          "by_stage": {
+            "global": {
+              "n_sites": 14,
+              "cost_eur": 840000.0,
+              "pop_newly_served": 82821.125
+            },
+            "quota_peu_dense": {
+              "n_sites": 2,
+              "cost_eur": 120000.0,
+              "pop_newly_served": 3216.4375
+            }
+          },
+          "label": "Modèle, mais offre existante ignorée"
+        },
+        "no_low_density_quota": {
+          "n_sites": 16,
+          "by_type": {
+            "citiz": 16
+          },
+          "cost_eur": 960000.0,
+          "pop_newly_served": 91270.0625,
+          "pop_newly_served_by_type": {
+            "citiz": 91270.0625
+          },
+          "pop_newly_served_distinct": 91270.0625,
+          "pop_from_zero_option": 95.84375,
+          "pop_newly_served_horizon": 91939.93451834861,
+          "eur_per_new_resident": 10.5182353742773,
+          "eur_per_new_distinct_resident": 10.5182353742773,
+          "co2_avoided_t_yr": 121.45714285714287,
+          "co2_by_type_t_yr": {
+            "citiz": 121.45714285714287
+          },
+          "share_new_in_income_deciles_1_3": 0.4889688636950369,
+          "share_new_in_low_density": 0.0,
+          "by_stage": {
+            "global": {
+              "n_sites": 16,
+              "cost_eur": 960000.0,
+              "pop_newly_served": 91270.0625
+            }
+          },
+          "label": "Sans quota peu dense"
+        },
+        "global_pool_no_split_no_quota": {
+          "n_sites": 16,
+          "by_type": {
+            "citiz": 16
+          },
+          "cost_eur": 960000.0,
+          "pop_newly_served": 91270.0625,
+          "pop_newly_served_by_type": {
+            "citiz": 91270.0625
+          },
+          "pop_newly_served_distinct": 91270.0625,
+          "pop_from_zero_option": 95.84375,
+          "pop_newly_served_horizon": 91939.93451834861,
+          "eur_per_new_resident": 10.5182353742773,
+          "eur_per_new_distinct_resident": 10.5182353742773,
+          "co2_avoided_t_yr": 121.45714285714287,
+          "co2_by_type_t_yr": {
+            "citiz": 121.45714285714287
+          },
+          "share_new_in_income_deciles_1_3": 0.4889688636950369,
+          "share_new_in_low_density": 0.0,
+          "by_stage": {
+            "global": {
+              "n_sites": 16,
+              "cost_eur": 960000.0,
+              "pop_newly_served": 91270.0625
+            }
+          },
+          "label": "Sans enveloppes ni quota"
+        },
+        "naive_population_only": {
+          "n_sites": 16,
+          "by_type": {
+            "citiz": 16
+          },
+          "cost_eur": 960000.0,
+          "pop_newly_served": 92912.0625,
+          "pop_newly_served_by_type": {
+            "citiz": 92912.0625
+          },
+          "pop_newly_served_distinct": 92912.0625,
+          "pop_from_zero_option": 0.0,
+          "pop_newly_served_horizon": 93593.9858944954,
+          "eur_per_new_resident": 10.332350549208828,
+          "eur_per_new_distinct_resident": 10.332350549208828,
+          "co2_avoided_t_yr": 116.47181912892918,
+          "co2_by_type_t_yr": {
+            "citiz": 116.47181912892918
+          },
+          "share_new_in_income_deciles_1_3": 0.4587980704873493,
+          "share_new_in_low_density": 0.0,
+          "by_stage": {
+            "global": {
+              "n_sites": 16,
+              "cost_eur": 960000.0,
+              "pop_newly_served": 92912.0625
+            }
+          },
+          "label": "Naïve : population seule (sans modèle, sans offre existante, λ = 0)",
+          "definition": "population seule (sans modèle, sans offre existante, λ=0)"
+        }
+      },
+      "notes": [
+        "lambda_0 n'est pas « l'efficacité pure » : il maximise Σ pop·v (valeur du modèle), pas la population desservie ; λ > 0 peut donc desservir plus d'habitants.",
+        "no_model_value_1 est la baseline honnête : même offre existante, enveloppes et quota, mais v = 1 (le modèle ne sert pas)."
+      ],
+      "hypotheses": {
+        "walk_radius_m": 282.00789622109414,
+        "coverage": "4×4 points par carreau, population uniforme",
+        "weight": "pop_horizon × (1 + 4.0·λ·besoin), besoin = {\"poverty_rate\": 0.4, \"carfree_share\": 0.2, \"low_access\": 0.4}",
+        "value": "clip(p / p_ref, (0.05, 1.5)) ** 0.5 ; filtre v_rel >= 0.0 ; p_ref = {\"citiz\": 0.2837, \"bike\": 0.4207, \"bus\": 0.5731}",
+        "costs": {
+          "citiz": {
+            "capex": 25000,
+            "opex_per_yr": 7000,
+            "horizon_years": 5
+          },
+          "bike": {
+            "capex": 30000,
+            "opex_per_yr": 6000,
+            "horizon_years": 5
+          },
+          "bus": {
+            "capex": 35000,
+            "opex_per_yr": 2000,
+            "horizon_years": 5
+          }
+        },
+        "bus_detour": {
+          "trips_per_day": 30,
+          "cost_per_km": 5.0,
+          "max_dist_m": 1500,
+          "formula": "2·d/1000 × passages/j × 365 × €/km"
+        },
+        "co2": {
+          "citiz": "min(130000/2800 adhérents/véhicule, pop_new × pénétration 0.0586 × min(v, 1.5)) × 0.5 actifs × 1500 km × 218 g/km",
+          "bike": "15 trajets/j × min(v, 1.5) × min(1, pop_new / 1642) × 365 × 2.5 km × 0.15 report × 218 g/km",
+          "bus": "pop_new × 0.15 montées/j × min(v, 1.5) × 365 × 4.0 km × 0.2 report × (218-0) g/km − détour km-véhicule × 1.1 kg/km",
+          "source": "impactco2.fr (ADEME Base Empreinte), enquête nationale autopartage ADEME/6t 2022"
+        },
+        "privacy": "parts non publiées si < 11 ménages dans la zone servie"
+      },
+      "runtime_s": {
+        "prepare": 2.45,
+        "total": 6.63
+      },
+      "label": "Citiz (opérateur d'autopartage)"
+    },
+    "collectivite": {
+      "area": "epci200030195",
+      "offer_source": "offer.parquet@1792484171",
+      "prediction": "oof",
+      "budget_eur": 1000000,
+      "equity_lambda": 0.5,
+      "kinds": [
+        "bike",
+        "bus"
+      ],
+      "horizon": 2040,
+      "budget_split": {
+        "citiz": 0.4,
+        "bike": 0.3,
+        "bus": 0.3
+      },
+      "low_density_budget_share": 0.15,
+      "zone": {
+        "cells": 6027,
+        "population": 548610.0,
+        "communes": 51,
+        "pop_without_any_option": 38454.78125,
+        "already_served_share": {
+          "bike": 0.0,
+          "bus": 0.9276913472229817
+        }
+      },
+      "selected": {
+        "n_sites": 11,
+        "by_type": {
+          "bike": 9,
+          "bus": 2
+        },
+        "cost_eur": 952134.0426635742,
+        "pop_newly_served": 48494.46875,
+        "pop_newly_served_by_type": {
+          "bike": 47672.375,
+          "bus": 822.09375
+        },
+        "pop_newly_served_distinct": 48494.46875,
+        "pop_from_zero_option": 822.09375,
+        "pop_newly_served_horizon": 48850.391456422025,
+        "eur_per_new_resident": 19.633868917546895,
+        "eur_per_new_distinct_resident": 19.633868917546895,
+        "co2_avoided_t_yr": 2.3426012727199064,
+        "co2_by_type_t_yr": {
+          "bike": 5.487548606602777,
+          "bus": -3.144947333882871
+        },
+        "share_new_in_income_deciles_1_3": 0.3460330205184483,
+        "share_new_in_low_density": 0.06268756166134927,
+        "by_stage": {
+          "enveloppe_bike": {
+            "n_sites": 7,
+            "cost_eur": 420000.0,
+            "pop_newly_served": 45101.65625
+          },
+          "quota_peu_dense": {
+            "n_sites": 2,
+            "cost_eur": 120000.0,
+            "pop_newly_served": 2570.71875
+          },
+          "enveloppe_bus": {
+            "n_sites": 2,
+            "cost_eur": 412134.0426635742,
+            "pop_newly_served": 822.09375
+          }
+        },
+        "label": "Recommandée (modèle, λ, enveloppes, quota peu dense)"
+      },
+      "comparison": {
+        "lambda_0": {
+          "n_sites": 11,
+          "by_type": {
+            "bike": 9,
+            "bus": 2
+          },
+          "cost_eur": 952686.6220092773,
+          "pop_newly_served": 48887.34375,
+          "pop_newly_served_by_type": {
+            "bike": 48029.1875,
+            "bus": 858.15625
+          },
+          "pop_newly_served_distinct": 48887.34375,
+          "pop_from_zero_option": 591.15625,
+          "pop_newly_served_horizon": 49246.14994266055,
+          "eur_per_new_resident": 19.487387714929334,
+          "eur_per_new_distinct_resident": 19.487387714929334,
+          "co2_avoided_t_yr": 2.675125432677519,
+          "co2_by_type_t_yr": {
+            "bike": 5.327876977082852,
+            "bus": -2.6527515444053327
+          },
+          "share_new_in_income_deciles_1_3": 0.34325218375154615,
+          "share_new_in_low_density": 0.06343474633963929,
+          "by_stage": {
+            "enveloppe_bike": {
+              "n_sites": 7,
+              "cost_eur": 420000.0,
+              "pop_newly_served": 45101.65625
+            },
+            "quota_peu_dense": {
+              "n_sites": 2,
+              "cost_eur": 120000.0,
+              "pop_newly_served": 2927.53125
+            },
+            "enveloppe_bus": {
+              "n_sites": 2,
+              "cost_eur": 412686.62200927734,
+              "pop_newly_served": 858.15625
+            }
+          },
+          "label": "Sans pondération d'équité (λ = 0) – maximise Σ pop·v, pas la population"
+        },
+        "no_model_value_1": {
+          "n_sites": 11,
+          "by_type": {
+            "bike": 9,
+            "bus": 2
+          },
+          "cost_eur": 952134.0426635742,
+          "pop_newly_served": 49575.0,
+          "pop_newly_served_by_type": {
+            "bike": 48752.90625,
+            "bus": 822.09375
+          },
+          "pop_newly_served_distinct": 49575.0,
+          "pop_from_zero_option": 822.34375,
+          "pop_newly_served_horizon": 49938.85321100918,
+          "eur_per_new_resident": 19.205931269058482,
+          "eur_per_new_distinct_resident": 19.205931269058482,
+          "co2_avoided_t_yr": 1.1696087304398537,
+          "co2_by_type_t_yr": {
+            "bike": 4.3145560643227245,
+            "bus": -3.144947333882871
+          },
+          "share_new_in_income_deciles_1_3": 0.4272428139183056,
+          "share_new_in_low_density": 0.07692448310640444,
+          "by_stage": {
+            "enveloppe_bike": {
+              "n_sites": 7,
+              "cost_eur": 420000.0,
+              "pop_newly_served": 45408.65625
+            },
+            "quota_peu_dense": {
+              "n_sites": 2,
+              "cost_eur": 120000.0,
+              "pop_newly_served": 3344.25
+            },
+            "enveloppe_bus": {
+              "n_sites": 2,
+              "cost_eur": 412134.0426635742,
+              "pop_newly_served": 822.09375
+            }
+          },
+          "label": "Offre existante prise en compte, sans modèle (v = 1) – baseline honnête"
+        },
+        "ignore_existing_offer": {
+          "n_sites": 16,
+          "by_type": {
+            "bike": 8,
+            "bus": 8
+          },
+          "cost_eur": 943719.6654295921,
+          "pop_newly_served": 46645.9375,
+          "pop_newly_served_by_type": {
+            "bike": 46645.9375,
+            "bus": 0.0
+          },
+          "pop_newly_served_distinct": 46645.9375,
+          "pop_from_zero_option": 0.0,
+          "pop_newly_served_horizon": 46988.293004587154,
+          "eur_per_new_resident": 20.231551041922827,
+          "eur_per_new_distinct_resident": 20.231551041922827,
+          "co2_avoided_t_yr": 0.5043267543526779,
+          "co2_by_type_t_yr": {
+            "bike": 5.067992278477777,
+            "bus": -4.563665524125099
+          },
+          "share_new_in_income_deciles_1_3": 0.3597459585842819,
+          "share_new_in_low_density": 0.033106446836876205,
+          "by_stage": {
+            "enveloppe_bike": {
+              "n_sites": 7,
+              "cost_eur": 420000.0,
+              "pop_newly_served": 45101.65625
+            },
+            "enveloppe_bus": {
+              "n_sites": 7,
+              "cost_eur": 412697.37689495087,
+              "pop_newly_served": 0.0
+            },
+            "quota_peu_dense": {
+              "n_sites": 2,
+              "cost_eur": 111022.28853464127,
+              "pop_newly_served": 1544.28125
+            }
+          },
+          "label": "Modèle, mais offre existante ignorée"
+        },
+        "no_low_density_quota": {
+          "n_sites": 10,
+          "by_type": {
+            "bike": 8,
+            "bus": 2
+          },
+          "cost_eur": 952036.8550872803,
+          "pop_newly_served": 51345.1875,
+          "pop_newly_served_by_type": {
+            "bike": 50399.90625,
+            "bus": 945.28125
+          },
+          "pop_newly_served_distinct": 51345.1875,
+          "pop_from_zero_option": 945.28125,
+          "pop_newly_served_horizon": 51722.032912844035,
+          "eur_per_new_resident": 18.541890709568065,
+          "eur_per_new_distinct_resident": 18.541890709568065,
+          "co2_avoided_t_yr": 1.1262848423087304,
+          "co2_by_type_t_yr": {
+            "bike": 5.1425895258681145,
+            "bus": -4.016304683559384
+          },
+          "share_new_in_income_deciles_1_3": 0.3659142835927905,
+          "share_new_in_low_density": 0.009139731936902557,
+          "by_stage": {
+            "enveloppe_bike": {
+              "n_sites": 8,
+              "cost_eur": 480000.0,
+              "pop_newly_served": 50399.90625
+            },
+            "enveloppe_bus": {
+              "n_sites": 2,
+              "cost_eur": 472036.8550872803,
+              "pop_newly_served": 945.28125
+            }
+          },
+          "label": "Sans quota peu dense"
+        },
+        "global_pool_no_split_no_quota": {
+          "n_sites": 16,
+          "by_type": {
+            "bike": 16
+          },
+          "cost_eur": 960000.0,
+          "pop_newly_served": 89819.4375,
+          "pop_newly_served_by_type": {
+            "bike": 89819.4375
+          },
+          "pop_newly_served_distinct": 89819.4375,
+          "pop_from_zero_option": 0.0,
+          "pop_newly_served_horizon": 90478.6627293578,
+          "eur_per_new_resident": 10.68810968672566,
+          "eur_per_new_distinct_resident": 10.68810968672566,
+          "co2_avoided_t_yr": 9.949623838398702,
+          "co2_by_type_t_yr": {
+            "bike": 9.949623838398702
+          },
+          "share_new_in_income_deciles_1_3": 0.41784663815112405,
+          "share_new_in_low_density": 0.0,
+          "by_stage": {
+            "global": {
+              "n_sites": 16,
+              "cost_eur": 960000.0,
+              "pop_newly_served": 89819.4375
+            }
+          },
+          "label": "Sans enveloppes ni quota"
+        },
+        "naive_population_only": {
+          "n_sites": 16,
+          "by_type": {
+            "bike": 8,
+            "bus": 8
+          },
+          "cost_eur": 949714.8007678986,
+          "pop_newly_served": 51363.09375,
+          "pop_newly_served_by_type": {
+            "bike": 51363.09375,
+            "bus": 0.0
+          },
+          "pop_newly_served_distinct": 51363.09375,
+          "pop_from_zero_option": 0.0,
+          "pop_newly_served_horizon": 51740.070584862384,
+          "eur_per_new_resident": 18.490218003425827,
+          "eur_per_new_distinct_resident": 18.490218003425827,
+          "co2_avoided_t_yr": -0.3209245557130931,
+          "co2_by_type_t_yr": {
+            "bike": 4.506526986306751,
+            "bus": -4.827451542019844
+          },
+          "share_new_in_income_deciles_1_3": 0.4542853301160427,
+          "share_new_in_low_density": 0.0,
+          "by_stage": {
+            "enveloppe_bike": {
+              "n_sites": 8,
+              "cost_eur": 480000.0,
+              "pop_newly_served": 51363.09375
+            },
+            "enveloppe_bus": {
+              "n_sites": 8,
+              "cost_eur": 469714.80076789856,
+              "pop_newly_served": 0.0
+            }
+          },
+          "label": "Naïve : population seule (sans modèle, sans offre existante, λ = 0)",
+          "definition": "population seule (sans modèle, sans offre existante, λ=0)"
+        }
+      },
+      "notes": [
+        "lambda_0 n'est pas « l'efficacité pure » : il maximise Σ pop·v (valeur du modèle), pas la population desservie ; λ > 0 peut donc desservir plus d'habitants.",
+        "no_model_value_1 est la baseline honnête : même offre existante, enveloppes et quota, mais v = 1 (le modèle ne sert pas).",
+        "La stratégie naïve a une part de nouveaux desservis en déciles 1-3 (45.4%) supérieure à la recommandée (34.6%), mais sur beaucoup moins d'habitants (elle place des sites là où l'offre existe déjà)."
+      ],
+      "hypotheses": {
+        "walk_radius_m": 282.00789622109414,
+        "coverage": "4×4 points par carreau, population uniforme",
+        "weight": "pop_horizon × (1 + 4.0·λ·besoin), besoin = {\"poverty_rate\": 0.4, \"carfree_share\": 0.2, \"low_access\": 0.4}",
+        "value": "clip(p / p_ref, (0.05, 1.5)) ** 0.5 ; filtre v_rel >= 0.0 ; p_ref = {\"citiz\": 0.2837, \"bike\": 0.4207, \"bus\": 0.5731}",
+        "costs": {
+          "citiz": {
+            "capex": 25000,
+            "opex_per_yr": 7000,
+            "horizon_years": 5
+          },
+          "bike": {
+            "capex": 30000,
+            "opex_per_yr": 6000,
+            "horizon_years": 5
+          },
+          "bus": {
+            "capex": 35000,
+            "opex_per_yr": 2000,
+            "horizon_years": 5
+          }
+        },
+        "bus_detour": {
+          "trips_per_day": 30,
+          "cost_per_km": 5.0,
+          "max_dist_m": 1500,
+          "formula": "2·d/1000 × passages/j × 365 × €/km"
+        },
+        "co2": {
+          "citiz": "min(130000/2800 adhérents/véhicule, pop_new × pénétration 0.0586 × min(v, 1.5)) × 0.5 actifs × 1500 km × 218 g/km",
+          "bike": "15 trajets/j × min(v, 1.5) × min(1, pop_new / 1642) × 365 × 2.5 km × 0.15 report × 218 g/km",
+          "bus": "pop_new × 0.15 montées/j × min(v, 1.5) × 365 × 4.0 km × 0.2 report × (218-0) g/km − détour km-véhicule × 1.1 kg/km",
+          "source": "impactco2.fr (ADEME Base Empreinte), enquête nationale autopartage ADEME/6t 2022"
+        },
+        "privacy": "parts non publiées si < 11 ménages dans la zone servie"
+      },
+      "runtime_s": {
+        "prepare": 2.45,
+        "total": 5.75
+      },
+      "label": "Collectivité / AOM (vélo, bus)"
+    }
+  }
+}

@@ -8,68 +8,68 @@
   "n_cells": 2324577,
   "national": {
     "population": 63783568.5,
-    "share_no_option": 0.36027428443424264,
+    "share_no_option": 0.33505496011876473,
     "share_served_by_mode": {
-      "rail": 0.047302801817994865,
-      "transit": 0.6206558433619154,
+      "rail": 0.047439804187186546,
+      "transit": 0.6586010549096198,
       "bike": 0.11562259957280377,
       "scooter": 0.09914197572686764,
       "carsharing": 0.004598245392933762,
       "citiz": 0.03479016700045561
     },
-    "n_options_mean": 2.193046325089196,
-    "n_modes_mean": 0.922111632872971,
-    "score_mean": 32.306333522324024,
-    "score_2sfca_mean": 32.306156433141545
+    "n_options_mean": 2.3156868919931943,
+    "n_modes_mean": 0.9601938467898672,
+    "score_mean": 33.579387481354225,
+    "score_2sfca_mean": 33.57972619915427
   },
   "by_territory": {
     "Métropole": {
       "population": 62592659.0,
-      "share_no_option": 0.3602180888337081,
+      "share_no_option": 0.33893991466315565,
       "share_served_by_mode": {
-        "rail": 0.04820280122625882,
-        "transit": 0.6203528835546034,
+        "rail": 0.04834241024973871,
+        "transit": 0.6545990720732922,
         "bike": 0.11739180947721042,
         "scooter": 0.101028285122062,
         "carsharing": 0.0046472782055799865,
         "citiz": 0.03545209670674
       },
-      "n_options_mean": 2.1976512533202976,
-      "n_modes_mean": 0.9270751542924547,
-      "score_mean": 32.312690883446905,
-      "score_2sfca_mean": 32.14204196821227
+      "n_options_mean": 2.3066509285058494,
+      "n_modes_mean": 0.9614609518346233,
+      "score_mean": 33.350189291926384,
+      "score_2sfca_mean": 33.173699529205194
     },
     "Martinique": {
       "population": 306745.0,
-      "share_no_option": 0.2431074671143784,
+      "share_no_option": 0.2432329785326574,
       "share_served_by_mode": {
         "rail": 0.0,
-        "transit": 0.7568925328856216,
+        "transit": 0.7567670214673425,
         "bike": 0.0,
         "scooter": 0.0,
         "carsharing": 0.007846908670067971,
         "citiz": 0.0
       },
-      "n_options_mean": 2.4307128070547197,
-      "n_modes_mean": 0.7647394415556896,
-      "score_mean": 38.240977081941026,
-      "score_2sfca_mean": 59.00058941466039
+      "n_options_mean": 2.4285905230729106,
+      "n_modes_mean": 0.7646139301374105,
+      "score_mean": 37.78483743826305,
+      "score_2sfca_mean": 58.5740467163279
     },
     "La Réunion": {
       "population": 884164.5,
-      "share_no_option": 0.4049014634720123,
+      "share_no_option": 0.09188335428531681,
       "share_served_by_mode": {
         "rail": 0.0,
-        "transit": 0.5948384039395384,
+        "transit": 0.9078565131262338,
         "bike": 0.03048810487188753,
         "scooter": 0.0,
         "carsharing": 0.0,
         "citiz": 0.0
       },
-      "n_options_mean": 1.7845955136176583,
-      "n_modes_mean": 0.6253265088114259,
-      "score_mean": 29.797358805968795,
-      "score_2sfca_mean": 34.663157755146244
+      "n_options_mean": 2.916199983147932,
+      "n_modes_mean": 0.9383446179981214,
+      "score_mean": 48.34600994498196,
+      "score_2sfca_mean": 53.652242173260746
     }
   },
   "ems": {
@@ -85,25 +85,25 @@
     },
     "n_options_mean": 3.221851383835686,
     "n_modes_mean": 1.4552360410022063,
-    "score_mean": 49.199890087691934,
-    "score_2sfca_mean": 27.62777599840193
+    "score_mean": 48.70676074040989,
+    "score_2sfca_mean": 26.945397598852622
   },
   "by_income_decile": {
     "1": {
       "population": 6378353.0,
-      "share_no_option": 0.17882508227437396,
+      "share_no_option": 0.12997814639609942,
       "share_served_by_mode": {
-        "rail": 0.03171038040697967,
-        "transit": 0.8015538650808446,
+        "rail": 0.03182302704162031,
+        "transit": 0.8642781294795067,
         "bike": 0.12326167899456177,
         "scooter": 0.11221533207710517,
         "carsharing": 0.004639834139001087,
         "citiz": 0.024931592842227453
       },
-      "n_options_mean": 2.870034082466116,
-      "n_modes_mean": 1.0983126835407198,
-      "score_mean": 45.6723509086123,
-      "score_2sfca_mean": 31.96022558958402,
+      "n_options_mean": 3.0900662757298005,
+      "n_modes_mean": 1.1611495945740224,
+      "score_mean": 48.7277968325052,
+      "score_2sfca_mean": 33.92676223783789,
       "income_pc_range": [
         8366.56842105263,
         18016.222222222223
@@ -111,19 +111,19 @@
     },
     "2": {
       "population": 6377607.5,
-      "share_no_option": 0.28617996639021764,
+      "share_no_option": 0.25752737213759236,
       "share_served_by_mode": {
-        "rail": 0.040862423722375515,
-        "transit": 0.6963119790611134,
+        "rail": 0.04110844074364878,
+        "transit": 0.7355356220965307,
         "bike": 0.10913591029237846,
         "scooter": 0.08201531687235378,
         "carsharing": 0.004924338790055675,
         "citiz": 0.027808076931670693
       },
-      "n_options_mean": 2.3036766530395605,
-      "n_modes_mean": 0.9610580456699476,
-      "score_mean": 36.337547877476,
-      "score_2sfca_mean": 32.22567085227493,
+      "n_options_mean": 2.440913069673855,
+      "n_modes_mean": 1.0005277057266382,
+      "score_mean": 37.99760822455757,
+      "score_2sfca_mean": 33.62457375042287,
       "income_pc_range": [
         18016.233333333334,
         20294.465625
@@ -131,19 +131,19 @@
     },
     "3": {
       "population": 6379049.0,
-      "share_no_option": 0.37248083530946385,
+      "share_no_option": 0.34922117701243555,
       "share_served_by_mode": {
-        "rail": 0.03573518560525244,
-        "transit": 0.6130379308890714,
+        "rail": 0.035768576162371536,
+        "transit": 0.6449688660488421,
         "bike": 0.08369891813027303,
         "scooter": 0.07088196061826771,
         "carsharing": 0.005327126347516691,
         "citiz": 0.03088305168999329
       },
-      "n_options_mean": 1.9397602213119856,
-      "n_modes_mean": 0.8395641732803746,
-      "score_mean": 30.254943222728038,
-      "score_2sfca_mean": 31.234831959277937,
+      "n_options_mean": 2.04740455826566,
+      "n_modes_mean": 0.8715284989972644,
+      "score_mean": 31.474003165675644,
+      "score_2sfca_mean": 32.39879463929498,
       "income_pc_range": [
         20294.483565004088,
         21861.8
@@ -151,19 +151,19 @@
     },
     "4": {
       "population": 6378406.5,
-      "share_no_option": 0.42621217383997084,
+      "share_no_option": 0.4043408804377708,
       "share_served_by_mode": {
-        "rail": 0.03286643772233708,
-        "transit": 0.5589831096528577,
+        "rail": 0.0331072502199413,
+        "transit": 0.5897932344073712,
         "bike": 0.07320049294443683,
         "scooter": 0.06629234119838552,
         "carsharing": 0.004357436296981072,
         "citiz": 0.028381304954458453
       },
-      "n_options_mean": 1.719835589029956,
-      "n_modes_mean": 0.7640811227694566,
-      "score_mean": 26.79994019901365,
-      "score_2sfca_mean": 30.08941625859061,
+      "n_options_mean": 1.8140643748560084,
+      "n_modes_mean": 0.7951320600215743,
+      "score_mean": 27.84813343426763,
+      "score_2sfca_mean": 31.20376806809036,
       "income_pc_range": [
         21861.813436692508,
         23140.312307692308
@@ -171,19 +171,19 @@
     },
     "5": {
       "population": 6378376.0,
-      "share_no_option": 0.44487358537659116,
+      "share_no_option": 0.42536869886629447,
       "share_served_by_mode": {
-        "rail": 0.029301110502109002,
-        "transit": 0.5393941968927514,
+        "rail": 0.029369858409099746,
+        "transit": 0.56976595609917,
         "bike": 0.07650427005243968,
         "scooter": 0.06475645211257536,
         "carsharing": 0.004073685841035398,
         "citiz": 0.035193205919500516
       },
-      "n_options_mean": 1.672780344087586,
-      "n_modes_mean": 0.7492229213204114,
-      "score_mean": 25.69986164581706,
-      "score_2sfca_mean": 29.754937934044655,
+      "n_options_mean": 1.7633044053846936,
+      "n_modes_mean": 0.7796634284338207,
+      "score_mean": 26.621563771091576,
+      "score_2sfca_mean": 30.774153856718392,
       "income_pc_range": [
         23140.31428571429,
         24340.27543859649
@@ -191,19 +191,19 @@
     },
     "6": {
       "population": 6378326.0,
-      "share_no_option": 0.44903968533436517,
+      "share_no_option": 0.42873122195384805,
       "share_served_by_mode": {
-        "rail": 0.025720306550652945,
-        "transit": 0.5331555646418825,
+        "rail": 0.025757933978288346,
+        "transit": 0.5656631536236938,
         "bike": 0.07330990921442397,
         "scooter": 0.06661442202860124,
         "carsharing": 0.004320804549657701,
         "citiz": 0.03678120246597618
       },
-      "n_options_mean": 1.6341431121582686,
-      "n_modes_mean": 0.7399022094511946,
-      "score_mean": 25.222140428381987,
-      "score_2sfca_mean": 29.981541329182612,
+      "n_options_mean": 1.7352346838339714,
+      "n_modes_mean": 0.7724474258606412,
+      "score_mean": 26.13692748379433,
+      "score_2sfca_mean": 31.094708539513334,
       "income_pc_range": [
         24340.29,
         25583.862
@@ -211,19 +211,19 @@
     },
     "7": {
       "population": 6378542.5,
-      "share_no_option": 0.43552245673678586,
+      "share_no_option": 0.41473314632613956,
       "share_served_by_mode": {
-        "rail": 0.028050451964535785,
-        "transit": 0.5449397726831796,
+        "rail": 0.028217809946394494,
+        "transit": 0.5795224379237106,
         "bike": 0.0805509252309599,
         "scooter": 0.07349790332195795,
         "carsharing": 0.0030071133021375967,
         "citiz": 0.039236628116846445
       },
-      "n_options_mean": 1.6839118027354996,
-      "n_modes_mean": 0.7692827946196172,
-      "score_mean": 25.694421411317705,
-      "score_2sfca_mean": 31.22137121450551,
+      "n_options_mean": 1.7880261830974709,
+      "n_modes_mean": 0.804032817842007,
+      "score_mean": 26.63960880404889,
+      "score_2sfca_mean": 32.382135460412776,
       "income_pc_range": [
         25583.868292682928,
         27038.707093184978
@@ -231,19 +231,19 @@
     },
     "8": {
       "population": 6378184.5,
-      "share_no_option": 0.40079257663368,
+      "share_no_option": 0.3799811686225132,
       "share_served_by_mode": {
-        "rail": 0.029901298715959063,
-        "transit": 0.5780001346778225,
+        "rail": 0.029917604296332286,
+        "transit": 0.613140855364093,
         "bike": 0.09060705283768446,
         "scooter": 0.0825804741145384,
         "carsharing": 0.004753155071008059,
         "citiz": 0.041305484342762426
       },
-      "n_options_mean": 1.8307415691722309,
-      "n_modes_mean": 0.8271475997597749,
-      "score_mean": 27.807089631853692,
-      "score_2sfca_mean": 32.72447389770552,
+      "n_options_mean": 1.9376286465215924,
+      "n_modes_mean": 0.8623046260264187,
+      "score_mean": 28.69662958087838,
+      "score_2sfca_mean": 33.87309606754084,
       "income_pc_range": [
         27038.75,
         28999.266666666666
@@ -251,19 +251,19 @@
     },
     "9": {
       "population": 6378363.0,
-      "share_no_option": 0.3570996978378308,
+      "share_no_option": 0.3319870631383005,
       "share_served_by_mode": {
-        "rail": 0.045940627712784614,
-        "transit": 0.6171469074431793,
+        "rail": 0.04611700525667793,
+        "transit": 0.660631732624813,
         "bike": 0.1292210085879402,
         "scooter": 0.11326691503760447,
         "carsharing": 0.00549945181859358,
         "citiz": 0.05066817300928154
       },
-      "n_options_mean": 2.226255702285994,
-      "n_modes_mean": 0.9617430836093838,
-      "score_mean": 31.95178017541492,
-      "score_2sfca_mean": 34.65807545760566,
+      "n_options_mean": 2.3692106422917605,
+      "n_modes_mean": 1.0054042863349106,
+      "score_mean": 33.06653404407996,
+      "score_2sfca_mean": 36.03991355305428,
       "income_pc_range": [
         28999.274193548386,
         32477.338461538464
@@ -271,19 +271,19 @@
     },
     "10": {
       "population": 6378360.5,
-      "share_no_option": 0.2517052775552589,
+      "share_no_option": 0.22866855832309885,
       "share_served_by_mode": {
-        "rail": 0.17294036610191602,
-        "transit": 0.7240460930359769,
+        "rail": 0.17321112533542124,
+        "transit": 0.7627225679702487,
         "bike": 0.3167389958595159,
         "scooter": 0.25930009757209554,
         "carsharing": 0.005079518475006234,
         "citiz": 0.03271263830258575
       },
-      "n_options_mean": 4.049371543047778,
-      "n_modes_mean": 1.5108177093470962,
-      "score_mean": 47.6240548813445,
-      "score_2sfca_mean": 39.211176759294176,
+      "n_options_mean": 4.171067157461545,
+      "n_modes_mean": 1.5497649435148735,
+      "score_mean": 48.58591761629026,
+      "score_2sfca_mean": 40.47954080911544,
       "income_pc_range": [
         32477.339130434786,
         73663.82333333333
@@ -304,9 +304,9 @@
   "by_income_decile_privacy_ok": {
     "1": {
       "population": 6212487.5,
-      "share_no_option": 0.16177183455097496,
-      "n_options_mean": 2.9375394316688768,
-      "score_mean": 46.73236533192219,
+      "share_no_option": 0.1129604687333375,
+      "n_options_mean": 3.1605212082921694,
+      "score_mean": 49.81994223811315,
       "income_pc_range": [
         8366.56842105263,
         18016.191616766468
@@ -314,9 +314,9 @@
     },
     "2": {
       "population": 5763019.5,
-      "share_no_option": 0.22357003997643943,
-      "n_options_mean": 2.528928194672949,
-      "score_mean": 39.866596281688786,
+      "share_no_option": 0.1931637572977152,
+      "n_options_mean": 2.678175303762203,
+      "score_mean": 41.663565460779715,
       "income_pc_range": [
         18016.24705882353,
         20294.465625
@@ -324,9 +324,9 @@
     },
     "3": {
       "population": 5262099.0,
-      "share_no_option": 0.2662923103499193,
-      "n_options_mean": 2.3143461382995647,
-      "score_mean": 36.055845282462386,
+      "share_no_option": 0.23957844578750798,
+      "n_options_mean": 2.442315224399997,
+      "score_mean": 37.50207941925836,
       "income_pc_range": [
         20294.483565004088,
         21861.793717277487
@@ -334,9 +334,9 @@
     },
     "4": {
       "population": 4906392.5,
-      "share_no_option": 0.2952252596994635,
-      "n_options_mean": 2.1806220150548494,
-      "score_mean": 33.91388438552358,
+      "share_no_option": 0.26915957090673037,
+      "n_options_mean": 2.2992563273321487,
+      "score_mean": 35.22815643469209,
       "income_pc_range": [
         21861.813436692508,
         23140.312307692308
@@ -344,9 +344,9 @@
     },
     "5": {
       "population": 4737506.0,
-      "share_no_option": 0.30339834925802733,
-      "n_options_mean": 2.1847969163521905,
-      "score_mean": 33.47355956594039,
+      "share_no_option": 0.27991025235640865,
+      "n_options_mean": 2.3024585087596723,
+      "score_mean": 34.665677219195075,
       "income_pc_range": [
         23140.31428571429,
         24340.27543859649
@@ -354,9 +354,9 @@
     },
     "6": {
       "population": 4688582.5,
-      "share_no_option": 0.3092250163029018,
-      "n_options_mean": 2.1448219157922463,
-      "score_mean": 32.99839960905028,
+      "share_no_option": 0.28515260209242344,
+      "n_options_mean": 2.2770925967496574,
+      "score_mean": 34.18040462015971,
       "income_pc_range": [
         24340.29,
         25583.862
@@ -364,9 +364,9 @@
     },
     "7": {
       "population": 4762720.0,
-      "share_no_option": 0.3074769249504485,
-      "n_options_mean": 2.168859286290187,
-      "score_mean": 32.9558766629153,
+      "share_no_option": 0.2832798274935331,
+      "n_options_mean": 2.3031478860819026,
+      "score_mean": 34.16479137761615,
       "income_pc_range": [
         25583.868292682928,
         27038.707093184978
@@ -374,9 +374,9 @@
     },
     "8": {
       "population": 4968556.5,
-      "share_no_option": 0.292135250952666,
-      "n_options_mean": 2.2648160486853675,
-      "score_mean": 34.25168146321774,
+      "share_no_option": 0.2689076797254897,
+      "n_options_mean": 2.3971221822676263,
+      "score_mean": 35.33936213264356,
       "income_pc_range": [
         27038.764336661912,
         28999.22
@@ -384,9 +384,9 @@
     },
     "9": {
       "population": 5275789.0,
-      "share_no_option": 0.27584433342576814,
-      "n_options_mean": 2.6134830259511896,
-      "score_mean": 37.298127175859385,
+      "share_no_option": 0.24930081547992158,
+      "n_options_mean": 2.7805607843679874,
+      "score_mean": 38.574296190579275,
       "income_pc_range": [
         28999.274193548386,
         32477.292307692307
@@ -394,9 +394,9 @@
     },
     "10": {
       "population": 5757828.0,
-      "share_no_option": 0.2018505936613598,
-      "n_options_mean": 4.437331577115537,
-      "score_mean": 51.92528507711588,
+      "share_no_option": 0.1790147256917018,
+      "n_options_mean": 4.567084845188151,
+      "score_mean": 52.92244397192832,
       "income_pc_range": [
         32477.341666666667,
         73663.82333333333
@@ -408,7 +408,7 @@
       "population": 78128.5,
       "share_no_option": 0.08231951208585855,
       "n_options_mean": 2.9308958958638653,
-      "score_mean": 48.336388577791716,
+      "score_mean": 47.7840990803612,
       "income_pc_range": [
         11352.17543859649,
         17997.025862068964
@@ -418,7 +418,7 @@
       "population": 44556.5,
       "share_no_option": 0.06300988632410535,
       "n_options_mean": 3.136972158944262,
-      "score_mean": 50.48444099065233,
+      "score_mean": 49.96542176786776,
       "income_pc_range": [
         18038.002985074625,
         20288.083241542092
@@ -428,7 +428,7 @@
       "population": 33820.5,
       "share_no_option": 0.06311260921630373,
       "n_options_mean": 3.3326976242219954,
-      "score_mean": 51.84851377123342,
+      "score_mean": 51.329671057494714,
       "income_pc_range": [
         20341.624402515725,
         21853.25
@@ -438,7 +438,7 @@
       "population": 30290.0,
       "share_no_option": 0.038213931990756025,
       "n_options_mean": 3.518900627269726,
-      "score_mean": 54.459575767580056,
+      "score_mean": 53.92282750082536,
       "income_pc_range": [
         21865.028762541806,
         23139.51014492754
@@ -448,7 +448,7 @@
       "population": 33344.0,
       "share_no_option": 0.0956693857965451,
       "n_options_mean": 3.2348548464491365,
-      "score_mean": 50.87911933181382,
+      "score_mean": 50.35048914347409,
       "income_pc_range": [
         23140.979393939397,
         24324.482109227873
@@ -458,7 +458,7 @@
       "population": 35364.0,
       "share_no_option": 0.07548637032009954,
       "n_options_mean": 4.04404196357878,
-      "score_mean": 59.07615428118989,
+      "score_mean": 58.58302567582853,
       "income_pc_range": [
         24357.310944527737,
         25575.06347305389
@@ -468,7 +468,7 @@
       "population": 44162.5,
       "share_no_option": 0.09427681856778941,
       "n_options_mean": 2.9043985281630342,
-      "score_mean": 47.79423673931503,
+      "score_mean": 47.27465202377583,
       "income_pc_range": [
         25584.70447761194,
         27038.395053003533
@@ -478,7 +478,7 @@
       "population": 53385.0,
       "share_no_option": 0.15102556898005057,
       "n_options_mean": 3.1958508944460053,
-      "score_mean": 47.61452186943898,
+      "score_mean": 47.1565582092348,
       "income_pc_range": [
         27039.78476190476,
         28993.125714285714
@@ -488,7 +488,7 @@
       "population": 55442.0,
       "share_no_option": 0.2139082284188882,
       "n_options_mean": 3.2536705025071244,
-      "score_mean": 44.642078207856855,
+      "score_mean": 44.23568792612099,
       "income_pc_range": [
         29006.322068965517,
         32424.31875
@@ -498,7 +498,7 @@
       "population": 37044.0,
       "share_no_option": 0.23696145124716553,
       "n_options_mean": 3.1651954432566676,
-      "score_mean": 42.599230239714934,
+      "score_mean": 42.20415330417882,
       "income_pc_range": [
         32484.830769230768,
         47809.38148148148
@@ -510,7 +510,7 @@
       "population": 44731.0,
       "share_no_option": 0.06971675124633923,
       "n_options_mean": 2.4790860924191276,
-      "score_mean": 45.2062681361919,
+      "score_mean": 44.612835617357085,
       "income_pc_range": [
         11352.17543859649,
         15973.719585687382
@@ -520,7 +520,7 @@
       "population": 44014.0,
       "share_no_option": 0.0965715454173672,
       "n_options_mean": 3.3204321352296997,
-      "score_mean": 50.24086995047031,
+      "score_mean": 49.752750942881804,
       "income_pc_range": [
         16017.049864498646,
         18717.810687022902
@@ -530,7 +530,7 @@
       "population": 44939.0,
       "share_no_option": 0.04915552192972696,
       "n_options_mean": 3.2748726050868955,
-      "score_mean": 52.853369790159995,
+      "score_mean": 52.31057066245354,
       "income_pc_range": [
         18724.90066518847,
         20792.737532133677
@@ -540,7 +540,7 @@
       "population": 44607.0,
       "share_no_option": 0.05490169704306499,
       "n_options_mean": 3.5004371511197796,
-      "score_mean": 53.740367094850576,
+      "score_mean": 53.223128656937256,
       "income_pc_range": [
         20795.167263427113,
         22639.43670103093
@@ -550,7 +550,7 @@
       "population": 44537.0,
       "share_no_option": 0.09309113770572783,
       "n_options_mean": 3.194198082493208,
-      "score_mean": 50.10632182230505,
+      "score_mean": 49.57843759121629,
       "income_pc_range": [
         22643.7001996008,
         24432.6345844504
@@ -560,7 +560,7 @@
       "population": 44498.0,
       "share_no_option": 0.08272281900310126,
       "n_options_mean": 3.878320373949391,
-      "score_mean": 57.48543350262933,
+      "score_mean": 56.99577834958875,
       "income_pc_range": [
         24442.445264040234,
         26001.07133058985
@@ -570,7 +570,7 @@
       "population": 44578.5,
       "share_no_option": 0.0996444474354229,
       "n_options_mean": 3.0577632715322407,
-      "score_mean": 49.25552261740526,
+      "score_mean": 48.73972161467972,
       "income_pc_range": [
         26001.384615384617,
         27463.11626213592
@@ -580,7 +580,7 @@
       "population": 44559.0,
       "share_no_option": 0.15636571736349558,
       "n_options_mean": 3.342242869005139,
-      "score_mean": 47.07033988644269,
+      "score_mean": 46.626524046769454,
       "income_pc_range": [
         27465.956521739132,
         29145.893641618495
@@ -590,7 +590,7 @@
       "population": 44521.0,
       "share_no_option": 0.20521776240425865,
       "n_options_mean": 3.1652478605601853,
-      "score_mean": 44.699252712203226,
+      "score_mean": 44.285080860717414,
       "income_pc_range": [
         29146.171428571426,
         31813.333333333332
@@ -600,7 +600,7 @@
       "population": 44552.5,
       "share_no_option": 0.24362269232927444,
       "n_options_mean": 3.0101116660120084,
-      "score_mean": 41.340036249368715,
+      "score_mean": 40.94263677683632,
       "income_pc_range": [
         31813.340000000004,
         47809.38148148148
@@ -610,75 +610,75 @@
   "score_by_group_served": {
     "strasbourg_commune": {
       "population_served": 236217.5,
-      "score_options_mean": 62.99596407971467,
-      "score_2sfca_mean": 29.518984431720767,
+      "score_options_mean": 62.451435816567354,
+      "score_2sfca_mean": 28.73139208568374,
       "n_options_mean": 4.361220062019114
     },
     "ems": {
       "population_served": 394283.0,
-      "score_options_mean": 55.59552765399472,
-      "score_2sfca_mean": 31.21919138030298,
+      "score_options_mean": 55.03829498101618,
+      "score_2sfca_mean": 30.448108617414395,
       "n_options_mean": 3.6406692654768276
     },
     "dens_lt_1500": {
-      "population_served": 15861493.5,
-      "score_options_mean": 31.231723890628587,
-      "score_2sfca_mean": 63.519097365579114,
-      "n_options_mean": 1.7878675800611084
+      "population_served": 16717793.0,
+      "score_options_mean": 31.104525397580886,
+      "score_2sfca_mean": 63.2625769813037,
+      "n_options_mean": 1.8083373804185756
     },
     "dens_ge_1500": {
-      "population_served": 24942495.5,
-      "score_options_mean": 62.75360265054472,
-      "score_2sfca_mean": 42.22088330475994,
-      "n_options_mean": 4.471167309622247
+      "population_served": 25694774.5,
+      "score_options_mean": 63.11844241501323,
+      "score_2sfca_mean": 42.196287794430724,
+      "n_options_mean": 4.571799744730198
     },
     "paris": {
       "population_served": 1972676.0,
-      "score_options_mean": 94.31012921027073,
-      "score_2sfca_mean": 72.48174470617577,
+      "score_options_mean": 94.06341973289074,
+      "score_2sfca_mean": 71.86774738730537,
       "n_options_mean": 10.435346453244222
     }
   },
   "score_concordance": {
-    "weighted_spearman": 0.21222387991070998,
+    "weighted_spearman": 0.20578419020652228,
     "quintile_transition_rows_options_cols_2sfca": [
       [
-        0.303,
-        0.206,
+        0.302,
+        0.205,
         0.17,
         0.142,
-        0.179
+        0.181
       ],
       [
-        0.236,
-        0.201,
-        0.188,
+        0.237,
+        0.2,
+        0.189,
         0.173,
         0.201
       ],
       [
-        0.197,
+        0.201,
         0.222,
-        0.203,
-        0.192,
-        0.186
+        0.202,
+        0.19,
+        0.185
       ],
       [
-        0.14,
+        0.145,
         0.225,
-        0.234,
-        0.215,
-        0.186
+        0.23,
+        0.216,
+        0.185
       ],
       [
-        0.053,
-        0.142,
-        0.225,
-        0.319,
-        0.261
+        0.056,
+        0.147,
+        0.227,
+        0.313,
+        0.258
       ]
     ],
-    "share_same_quintile": 0.2436688604146031,
+    "share_same_quintile": 0.24198384122819255,
     "note": "moyennes nationales de score_options et score_2sfca égales par construction"
   },
   "carsharing_served_share": {
@@ -693,18 +693,18 @@
   },
   "offer": {
     "rail": {
-      "n_points": 3392,
-      "n_points_in_territories": 3392,
-      "pop_served_median": 285.25,
-      "pop_served_exclusive_median": 274.0,
-      "share_points_serving_nobody": 0.05601415094339623
+      "n_points": 3403,
+      "n_points_in_territories": 3403,
+      "pop_served_median": 285.5,
+      "pop_served_exclusive_median": 275.0,
+      "share_points_serving_nobody": 0.05583308845136644
     },
     "transit": {
-      "n_points": 174047,
-      "n_points_in_territories": 172407,
-      "pop_served_median": 294.5,
-      "pop_served_exclusive_median": 8.0,
-      "share_points_serving_nobody": 0.025114989530587505
+      "n_points": 186729,
+      "n_points_in_territories": 185043,
+      "pop_served_median": 293.0,
+      "pop_served_exclusive_median": 7.0,
+      "share_points_serving_nobody": 0.02509686937630713
     },
     "bike": {
       "n_points": 5711,
@@ -737,36 +737,36 @@
   },
   "radius_sensitivity": {
     "278.0": {
-      "share_no_option": 0.3648479858884032,
-      "n_options_mean": 2.1381907473552535,
+      "share_no_option": 0.3396747471098297,
+      "n_options_mean": 2.257749235212514,
       "pop_catchment_mean": 1124.758389983586,
       "share_served_citiz": 0.03409380426872793,
       "pop_served_median": {
         "bike": 1601.0,
         "carsharing": 449.0,
         "citiz": 1687.5,
-        "rail": 277.25,
+        "rail": 277.5,
         "scooter": 2485.75,
-        "transit": 287.0
+        "transit": 285.5
       }
     },
     "282.0": {
-      "share_no_option": 0.36027428443424264,
-      "n_options_mean": 2.193046325089196,
+      "share_no_option": 0.33505496011876473,
+      "n_options_mean": 2.3156868919931943,
       "pop_catchment_mean": 1161.0136202954964,
       "share_served_citiz": 0.03479016700045561,
       "pop_served_median": {
         "bike": 1651.75,
         "carsharing": 452.5,
         "citiz": 1750.0,
-        "rail": 285.25,
+        "rail": 285.5,
         "scooter": 2558.5,
-        "transit": 294.5
+        "transit": 293.0
       }
     },
     "286.0": {
-      "share_no_option": 0.3559554840522916,
-      "n_options_mean": 2.2492737843603092,
+      "share_no_option": 0.3307164289498791,
+      "n_options_mean": 2.3751019433790383,
       "pop_catchment_mean": 1191.5298331904964,
       "share_served_citiz": 0.03541033455975421,
       "pop_served_median": {
@@ -775,9 +775,9 @@
         "citiz": 1780.5,
         "rail": 296.5,
         "scooter": 2641.0,
-        "transit": 303.0
+        "transit": 301.0
       }
     }
   },
-  "seconds": 29.2
+  "seconds": 28.3
 }

@@ -5,6 +5,7 @@ Chaque fichier est mis en cache dans data/raw/ : relancer le script ne retéléc
 que ce qui manque. Usage :  python -m src.download [nom_source ...]
 """
 import json
+import re
 import subprocess
 import sys
 import time
@@ -28,7 +29,7 @@ def fetch(url, dest, timeout=600, force=False):
     tmp = dest.with_suffix(dest.suffix + ".part")
     for _ in range(5):
         tmp.unlink(missing_ok=True)       # certains serveurs (INSEE) refusent la reprise
-        rc = subprocess.call(["curl", "-sSL", "--retry", "5", "--max-time", str(timeout),
+        rc = subprocess.call(["curl", "-fsSL", "--retry", "5", "--max-time", str(timeout),
                               "-A", UA["User-Agent"], "-o", str(tmp), url])
         if rc == 0:
             break
@@ -53,6 +54,34 @@ def dl_static():
 
 def dl_stops():
     fetch(C.URLS["stops_fr"], C.RAW / "arrets_france.csv", timeout=1800)
+
+
+def dl_gtfs_extra():
+    """GTFS des jeux du PAN absents de l'agrégat national (+ arrêts TCL via le WFS Grand Lyon)."""
+    fetch(C.URLS["tcl_wfs"], C.RAW / "tcl_arrets.geojson")
+    have = set(pd.read_csv(C.RAW / "arrets_france.csv", usecols=["dataset_datagouv_id"],
+                           dtype=str)["dataset_datagouv_id"])
+    excluded = re.compile(C.GTFS_EXCLUDED)
+    todo = []
+    for ds in json.loads((C.RAW / "pan_datasets.json").read_text()):
+        if ds.get("type") != "public-transit" or ds["datagouv_id"] in have or excluded.search(ds["title"]):
+            continue
+        res = [r for r in ds.get("resources", []) if r.get("format") == "GTFS" and r.get("is_available")
+               and "community_resource_publisher" not in r]
+        if res:
+            org = (ds.get("legal_owners") or [{}])[0].get("name") or ds["publisher"].get("name")
+            todo.append({"id": ds["datagouv_id"], "title": ds["title"], "organisation": org,
+                         "url": res[0]["url"], "file": f"{ds['datagouv_id']}.zip"})
+    C.GTFS_EXTRA.mkdir(exist_ok=True)
+    ok = []
+    for d in todo:
+        try:
+            fetch(d["url"], C.GTFS_EXTRA / d["file"], timeout=300)
+            ok.append(d)
+        except RuntimeError as e:
+            print(f"  [échec] {d['title']} : {e}")
+    (C.GTFS_EXTRA / "manifest.json").write_text(json.dumps(ok, ensure_ascii=False, indent=1))
+    print(f"  GTFS hors agrégat : {len(ok)}/{len(todo)} jeux téléchargés")
 
 
 # --------------------------------------------------------------------------- GBFS
@@ -175,7 +204,7 @@ def dl_osm():
         time.sleep(30)
 
 
-STEPS = {"static": dl_static, "stops": dl_stops, "gbfs": dl_gbfs,
+STEPS = {"static": dl_static, "stops": dl_stops, "gtfs_extra": dl_gtfs_extra, "gbfs": dl_gbfs,
          "strasbourg": dl_strasbourg, "osm": dl_osm}
 
 if __name__ == "__main__":

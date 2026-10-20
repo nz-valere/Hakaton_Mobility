@@ -12,37 +12,39 @@ Tous les chiffres viennent des fichiers de `outputs/`.
 
 **Diagnostic national** (`outputs/access_summary.json`, 63,8 M d'habitants, 2 324 577 carreaux habités, Métropole + Martinique + La Réunion)
 
-- **36 %** des habitants n'ont **aucune** option de transport à 5 minutes de marche (Métropole 36,0 %, Martinique 24,3 %, La Réunion 40,5 %).
-- Bus, tram et métro : 62,1 % de la population a au moins un arrêt à 5 min. Vélo en libre-service : 11,6 %. Free-floating : 9,9 %. Train : 4,7 %. **Citiz : 3,5 %**. Autre autopartage : 0,5 %.
-- **Courbe en U selon le revenu** : 18 % sans option dans le 1er décile de revenu, 45 % dans le 6e, 25 % dans le 10e. Les ménages les plus exposés sont ceux des déciles intermédiaires, pas les plus modestes.
+- **33,5 %** des habitants n'ont **aucune** option de transport à 5 minutes de marche (Métropole 33,9 %, Martinique 24,3 %, La Réunion 9,2 %).
+- Bus, tram et métro : 65,9 % de la population a au moins un arrêt à 5 min. Vélo en libre-service : 11,6 %. Free-floating : 9,9 %. Train : 4,7 %. **Citiz : 3,5 %**. Autre autopartage : 0,5 %.
+- **Courbe en U selon le revenu** : 13 % sans option dans le 1er décile de revenu, 43 % dans le 6e, 23 % dans le 10e. Les ménages les plus exposés sont ceux des déciles intermédiaires, pas les plus modestes.
 - Rayon « 5 minutes » : **282 m** à vol d'oiseau, soit 400 m sur le réseau piéton avec un détour de 1,42. Ce rayon est calibré sur le graphe OSM de Strasbourg (237 399 nœuds, 400 origines). Comparé au vrai réseau, il donne une précision de 0,92 et un rappel de 0,99 sur la population desservie (`outputs/walk_calibration.json`).
 
 **Modèle de valeur d'un site** (`outputs/model_metrics.json`, validation croisée spatiale par département)
 
 | Type | Modèle retenu | ROC-AUC | PR-AUC | PR-AUC « population seule » |
 |---|---|---|---|---|
-| Citiz | gradient boosting | 0,90 | 0,46 | 0,26 |
+| Citiz | gradient boosting | 0,90 | 0,48 | 0,26 |
 | Vélo | régression logistique | 0,87 | 0,64 | 0,53 |
-| Bus | gradient boosting | 0,85 | 0,71 | 0,67 |
+| Bus | gradient boosting | 0,86 | 0,75 | 0,71 |
 
 **Où Citiz doit-il s'implanter ?** (`outputs/territories_summary.json`, `outputs/territories_citiz.csv`)
 
-- Criblage des 99 intercommunalités de plus de 100 000 habitants (Île-de-France exclue : son autopartage est presque absent des flux GBFS publics), puis simulation de l'optimiseur avec le même budget Citiz (1 M€ sur 5 ans) sur les 10 premières.
-- **Territoire prioritaire : Métropole Nice Côte d'Azur** (549 000 habitants, aucune station d'autopartage publiée ; Mobilize Share y a fermé fin juin 2026). 16 stations y desservent **85 573 habitants** et 7 324 adhérents potentiels. Suivent Lyon (3 925) et Montpellier (3 874).
-- **Strasbourg, territoire témoin** : Citiz y couvre déjà 45 % des habitants, et le même budget n'y dessert que 33 740 habitants (1 391 adhérents potentiels).
-- **Modèle** : gradient boosting appris sur les 80 départements où l'autopartage existe. Test sur Strasbourg, avec le Bas-Rhin tenu hors de l'apprentissage : PR-AUC 0,66 contre 0,59 pour la population seule.
+- Criblage des 99 intercommunalités de plus de 100 000 habitants (Île-de-France exclue : son autopartage est presque absent des flux GBFS publics), puis simulation de l'optimiseur avec le même budget Citiz (1 M€ sur 5 ans) sur les 20 premières, enfin correction par le **risque terrain** (veille presse : échecs passés, autopartage absent des flux GBFS, soutien de la collectivité ; `Config.TERRITORY_RISK`) : adhérents retenus = adhérents du modèle × (1 − risque).
+- **Territoire prioritaire : Métropole de Lyon** (extension : Citiz LPA y couvre 35 % des habitants, la Métropole planifie son développement d'ici 2030). 16 stations y desservent **49 477 habitants** et 3 847 adhérents. Suivent Toulouse (3 814, Citiz retenu par la Métropole pour 2025-2030), Aix-Marseille (3 397), Nantes (3 066) et Lille (2 955).
+- **Nice, 1ʳᵉ pour le modèle seul (7 512 adhérents), recule au 10ᵉ rang** : l'autopartage y a échoué deux fois (Auto Bleue, 68 stations sous DSP d'environ 1,4 M€/an, fermé fin 2018 ; Mobilize Share parti fin juin 2026), risque 65 %. Nice ne repasse en tête que si l'on fixe ce risque sous 49 %. **Montpellier** (2ᵉ pour le modèle) recule au 13ᵉ rang : Modulauto y exploite environ 100 stations absentes des flux GBFS, ce n'est pas un territoire vierge.
+- **Strasbourg, territoire témoin** : Citiz y couvre déjà 45 % des habitants, et le même budget n'y dessert que 37 893 habitants (1 404 adhérents potentiels).
+- **Modèle** : gradient boosting appris sur les 80 départements où l'autopartage existe. Test sur Strasbourg, avec le Bas-Rhin tenu hors de l'apprentissage : PR-AUC 0,67 contre 0,59 pour la population seule.
 
-**Recommandation pour la Métropole Nice Côte d'Azur** (`outputs/recommendations_summary.json`, `outputs/recommendations.csv` : λ = 0,5, horizon 2040)
+**Recommandation pour la Métropole de Lyon** (`outputs/recommendations_summary.json`, `outputs/recommendations.csv` : λ = 0,5, horizon 2040)
 
 | Financeur | Budget | Sites | Habitants nouvellement desservis | € / habitant | CO2 évité |
 |---|---|---|---|---|---|
-| **Citiz** | 1 M€ | 16 stations Citiz (14 à Nice, Beaulieu-sur-Mer, Saint-Martin-du-Var) | **85 573** | 11 € | 121 t/an |
-| Collectivité / AOM | 1 M€ | 9 stations vélo, 2 arrêts de bus | 48 494 | 20 € | 2 t/an |
+| **Citiz** | 1 M€ | 16 stations Citiz (7 à Villeurbanne, 7 à Lyon 3ᵉ/7ᵉ/8ᵉ, Genay, Vernaison) | **49 477** | 19 € | 121 t/an |
+| Collectivité / AOM | 1 M€ | 9 stations vélo, 2 arrêts de bus | 29 774 | 32 € | 26 t/an |
 
-- 48 % des nouveaux desservis par Citiz vivent dans les 3 premiers déciles de revenu de la métropole.
-- Vélo Bleu (Nice) ne publie pas de flux GBFS : les stations vélo recommandées sont à confronter au réseau réel.
+- 40 % des nouveaux desservis par Citiz vivent dans les 3 premiers déciles de revenu de la métropole.
+- Les stations Citiz sont à coordonner avec Citiz LPA, coopérative du réseau déjà implantée à Lyon.
+- Nice, pour comparaison : `recommendations_epci200030195.csv` et `recommendations_summary_epci200030195.json`.
 
-Mêmes sorties pour le témoin Strasbourg (`outputs/recommendations_ems.csv`, `recommendations_summary_ems.json`) et pour la Meurthe-et-Moselle (`--dep 54`, `recommendations_dep54.csv`). À Strasbourg, ignorer l'offre existante divise par 2,4 le nombre d'habitants gagnés par Citiz (13 800 contre 33 740).
+Mêmes sorties pour le témoin Strasbourg (`outputs/recommendations_ems.csv`, `recommendations_summary_ems.json`) et pour la Meurthe-et-Moselle (`--dep 54`, `recommendations_dep54.csv`). À Strasbourg, ignorer l'offre existante divise par 2,7 le nombre d'habitants gagnés par Citiz (13 800 contre 37 893).
 
 ## Installation
 
@@ -94,7 +96,7 @@ python -m pytest
 - `tests/test_optimize.py` : comparaison du glouton à la force brute sur 40 petites instances. Il atteint en moyenne 97,3 % de l'optimum, et 88,4 % au minimum.
 - `tests/test_recommend.py` : respect du budget, exclusion des carreaux déjà desservis, effet de λ, coût de détour des arrêts de bus.
 - `tests/test_model.py` : variables autorisées, sommes sur grille, prédiction hors pli, backtest par département.
-- `tests/test_territories.py` : rattachement des communes (et arrondissements de Paris, Lyon, Marseille) aux intercommunalités, criblage, séparation des financeurs.
+- `tests/test_territories.py` : rattachement des communes (et arrondissements de Paris, Lyon, Marseille) aux intercommunalités, criblage, risque terrain, séparation des financeurs.
 
 ## Temps d'exécution mesurés
 

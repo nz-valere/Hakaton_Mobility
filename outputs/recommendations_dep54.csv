@@ -1,28 +1,28 @@
 financeur,rank,type,equipement,stage,lon,lat,commune,code_commune,pop_newly_served,pop_2040,pop_new_distinct,pop_from_zero_option,propensity,value_rel,usage_pred,usage_unit,cost_eur,cost_cum_eur,eur_per_new_resident,co2_avoided_t_yr,share_poor_households,share_carfree_households,demand_potential,vehicles_suggested,dist_existing_same_type_m
-citiz,1,citiz,Station Citiz (1 véhicule),global,6.17249,48.6642,Vandœuvre-lès-Nancy,54547,2383.0,2301.0,2383.0,30.0,0.5717,1.5,46.4,adhérents,60000.0,60000.0,25.0,7.59,0.253,0.328,209.4,5.0,466.0
-citiz,2,citiz,Station Citiz (1 véhicule),global,6.20448,48.6725,Jarville-la-Malgrange,54274,2210.0,2134.0,2210.0,0.0,0.5808,1.5,46.4,adhérents,60000.0,120000.0,27.0,7.59,0.339,0.277,194.2,5.0,1812.0
-citiz,3,citiz,Station Citiz (1 véhicule),global,6.19579,48.6794,Nancy,54395,2150.0,2076.0,2150.0,0.0,0.5747,1.5,46.4,adhérents,60000.0,180000.0,28.0,7.59,0.263,0.369,188.9,5.0,1007.0
-citiz,4,citiz,Station Citiz (1 véhicule),global,6.1638,48.6711,Nancy,54395,2028.0,1959.0,2028.0,0.0,0.5188,1.5,46.4,adhérents,60000.0,240000.0,30.0,7.59,0.404,0.348,178.2,4.0,635.0
-citiz,5,citiz,Station Citiz (1 véhicule),global,6.18752,48.68092,Nancy,54395,2112.0,2040.0,2112.0,0.0,0.6768,1.5,46.4,adhérents,60000.0,300000.0,28.0,7.59,0.225,0.369,185.6,4.0,537.0
-citiz,6,citiz,Station Citiz (1 véhicule),global,6.17709,48.67516,Nancy,54395,2028.0,1959.0,2028.0,0.0,0.4393,1.496,46.4,adhérents,60000.0,360000.0,30.0,7.59,0.2,0.366,177.8,4.0,396.0
-citiz,7,citiz,Station Citiz (1 véhicule),global,6.17231,48.70201,Nancy,54395,1976.0,1909.0,1976.0,0.0,0.6453,1.5,46.4,adhérents,60000.0,420000.0,30.0,7.59,0.234,0.369,173.7,4.0,548.0
-citiz,8,citiz,Station Citiz (1 véhicule),global,6.1924,48.68829,Nancy,54395,1806.0,1744.0,1806.0,110.0,0.551,1.5,46.4,adhérents,60000.0,480000.0,33.0,7.59,0.287,0.369,158.7,4.0,556.0
-citiz,9,citiz,Station Citiz (1 véhicule),global,6.19171,48.69727,Nancy,54395,1813.0,1751.0,1813.0,0.0,0.7849,1.5,46.4,adhérents,60000.0,540000.0,33.0,7.59,0.247,0.369,159.3,4.0,631.0
-citiz,10,citiz,Station Citiz (1 véhicule),global,6.16297,48.68188,Nancy,54395,2063.0,1992.0,2063.0,0.0,0.4095,1.394,46.4,adhérents,60000.0,600000.0,29.0,7.59,0.156,0.347,168.5,4.0,528.0
-citiz,11,citiz,Station Citiz (1 véhicule),global,6.20771,48.70142,Saint-Max,54482,1894.0,1829.0,1894.0,255.0,0.4342,1.479,46.4,adhérents,60000.0,660000.0,32.0,7.59,0.142,0.216,164.1,4.0,1298.0
-citiz,12,citiz,Station Citiz (1 véhicule),global,6.17667,48.68055,Nancy,54395,1741.0,1681.0,1741.0,356.0,0.603,1.5,46.4,adhérents,60000.0,720000.0,34.0,7.59,0.173,0.369,153.0,4.0,379.0
-citiz,13,citiz,Station Citiz (1 véhicule),global,6.15985,48.68717,Nancy,54395,1940.0,1873.0,1940.0,0.0,0.689,1.5,46.4,adhérents,60000.0,780000.0,31.0,7.59,0.133,0.357,170.4,4.0,571.0
-citiz,14,citiz,Station Citiz (1 véhicule),global,6.05297,48.90317,Pont-à-Mousson,54431,1754.0,1694.0,1754.0,0.0,0.4691,1.5,46.4,adhérents,60000.0,840000.0,34.0,7.59,0.228,0.196,154.1,4.0,20000.0
-citiz,15,citiz,Station Citiz (1 véhicule),quota_peu_dense,5.92977,49.46968,Villerupt,54580,1252.0,1210.0,1252.0,0.0,0.4984,1.5,46.4,adhérents,60000.0,900000.0,48.0,7.59,0.274,0.186,110.1,3.0,20000.0
-citiz,16,citiz,Station Citiz (1 véhicule),quota_peu_dense,6.16808,48.61541,Ludres,54328,1266.0,1223.0,1266.0,141.0,0.3745,1.275,46.4,adhérents,60000.0,960000.0,47.0,7.59,0.078,0.08,94.6,3.0,5587.0
-collectivite,1,bike,Station vélo libre-service (10 vélos),enveloppe_bike,6.17709,48.67516,Nancy,54395,2608.0,2519.0,2608.0,0.0,0.6587,1.5,22.5,trajets/jour,60000.0,60000.0,23.0,0.67,0.195,0.366,,,477.0
-collectivite,2,bike,Station vélo libre-service (10 vélos),enveloppe_bike,6.1809,48.66088,Vandœuvre-lès-Nancy,54547,3057.0,2952.0,3057.0,0.0,0.3556,0.864,13.0,trajets/jour,60000.0,120000.0,20.0,0.39,0.5,0.328,,,573.0
-collectivite,3,bike,Station vélo libre-service (10 vélos),enveloppe_bike,6.20448,48.6725,Jarville-la-Malgrange,54274,2210.0,2134.0,2210.0,0.0,0.6251,1.5,22.5,trajets/jour,60000.0,180000.0,27.0,0.67,0.339,0.277,,,1597.0
-collectivite,4,bike,Station vélo libre-service (10 vélos),enveloppe_bike,6.19579,48.6794,Nancy,54395,2150.0,2076.0,2150.0,0.0,0.7225,1.5,22.5,trajets/jour,60000.0,240000.0,28.0,0.67,0.263,0.369,,,597.0
-collectivite,5,bike,Station vélo libre-service (10 vélos),quota_peu_dense,6.13147,48.7024,Maxéville,54357,2041.0,1971.0,2041.0,13.0,0.4973,1.208,18.1,trajets/jour,60000.0,300000.0,29.0,0.54,0.464,0.296,,,2598.0
-collectivite,6,bike,Station vélo libre-service (10 vélos),enveloppe_bike,6.16702,48.70003,Nancy,54395,1787.0,1726.0,1787.0,13.0,0.6294,1.5,22.5,trajets/jour,60000.0,360000.0,34.0,0.67,0.213,0.369,,,576.0
-collectivite,7,bike,Station vélo libre-service (10 vélos),enveloppe_bike,6.14941,48.68141,Laxou,54304,2006.0,1937.0,2006.0,0.0,0.527,1.28,19.2,trajets/jour,60000.0,420000.0,30.0,0.57,0.328,0.214,,,565.0
-collectivite,8,bike,Station vélo libre-service (10 vélos),enveloppe_bike,6.1729,48.65881,Vandœuvre-lès-Nancy,54547,1780.0,1719.0,1780.0,0.0,0.5833,1.417,21.3,trajets/jour,60000.0,480000.0,34.0,0.63,0.359,0.328,,,397.0
-collectivite,9,bike,Station vélo libre-service (10 vélos),quota_peu_dense,6.21423,48.68724,Tomblaine,54526,1363.0,1317.0,1363.0,0.0,0.3757,0.913,11.4,trajets/jour,60000.0,540000.0,44.0,0.34,0.275,0.167,,,1112.0
-collectivite,10,bus,Arrêt de bus (quai PMR + abri),enveloppe_bus,5.77002,49.52683,Longwy,54323,913.0,882.0,913.0,913.0,0.9043,1.5,205.4,montées/jour,228435.0,768435.0,250.0,5.0,0.462,0.246,,,335.0
-collectivite,11,bus,Arrêt de bus (quai PMR + abri),enveloppe_bus,6.15617,48.69965,Nancy,54395,361.0,349.0,361.0,361.0,0.8322,1.5,81.3,montées/jour,194016.0,962451.0,537.0,-1.38,0.358,0.369,,,272.0
+citiz,1,citiz,Station Citiz (1 véhicule),global,6.17276,48.6606,Vandœuvre-lès-Nancy,54547,2798.0,2703.0,2798.0,0.0,0.4305,1.5,46.4,adhérents,60000.0,60000.0,21.0,7.59,0.34,0.328,245.9,6.0,725.0
+citiz,2,citiz,Station Citiz (1 véhicule),global,6.20448,48.6725,Jarville-la-Malgrange,54274,2210.0,2134.0,2210.0,0.0,0.377,1.329,46.4,adhérents,60000.0,120000.0,27.0,7.59,0.339,0.277,172.0,4.0,1812.0
+citiz,3,citiz,Station Citiz (1 véhicule),global,6.1638,48.6711,Nancy,54395,2028.0,1959.0,2028.0,0.0,0.6589,1.5,46.4,adhérents,60000.0,180000.0,30.0,7.59,0.404,0.348,178.2,4.0,635.0
+citiz,4,citiz,Station Citiz (1 véhicule),global,6.18752,48.68092,Nancy,54395,2112.0,2040.0,2112.0,0.0,0.6886,1.5,46.4,adhérents,60000.0,240000.0,28.0,7.59,0.225,0.369,185.6,4.0,537.0
+citiz,5,citiz,Station Citiz (1 véhicule),global,6.17993,48.67346,Vandœuvre-lès-Nancy,54547,2088.0,2016.0,2088.0,0.0,0.4419,1.5,46.4,adhérents,60000.0,300000.0,29.0,7.59,0.191,0.35,183.5,4.0,461.0
+citiz,6,citiz,Station Citiz (1 véhicule),global,6.19579,48.6794,Nancy,54395,2150.0,2076.0,2150.0,0.0,0.3641,1.283,46.4,adhérents,60000.0,360000.0,28.0,7.59,0.263,0.369,161.6,4.0,1007.0
+citiz,7,citiz,Station Citiz (1 véhicule),global,6.17231,48.70201,Nancy,54395,1976.0,1909.0,1976.0,0.0,0.6561,1.5,46.4,adhérents,60000.0,420000.0,30.0,7.59,0.234,0.369,173.7,4.0,548.0
+citiz,8,citiz,Station Citiz (1 véhicule),global,6.17424,48.67686,Nancy,54395,1870.0,1806.0,1870.0,213.0,0.4745,1.5,46.4,adhérents,60000.0,480000.0,32.0,7.59,0.174,0.369,164.4,4.0,399.0
+citiz,9,citiz,Station Citiz (1 véhicule),global,6.1924,48.68829,Nancy,54395,1806.0,1744.0,1806.0,110.0,0.6227,1.5,46.4,adhérents,60000.0,540000.0,33.0,7.59,0.287,0.369,158.7,4.0,556.0
+citiz,10,citiz,Station Citiz (1 véhicule),global,6.16297,48.68188,Nancy,54395,2063.0,1992.0,2063.0,0.0,0.4684,1.5,46.4,adhérents,60000.0,600000.0,29.0,7.59,0.156,0.347,181.3,4.0,528.0
+citiz,11,citiz,Station Citiz (1 véhicule),global,6.19171,48.69727,Nancy,54395,1813.0,1751.0,1813.0,0.0,0.7128,1.5,46.4,adhérents,60000.0,660000.0,33.0,7.59,0.247,0.369,159.3,4.0,631.0
+citiz,12,citiz,Station Citiz (1 véhicule),global,6.205,48.70133,Saint-Max,54482,1930.0,1864.0,1930.0,150.0,0.4666,1.5,46.4,adhérents,60000.0,720000.0,31.0,7.59,0.15,0.221,169.6,4.0,1197.0
+citiz,13,citiz,Station Citiz (1 véhicule),global,6.17249,48.6642,Vandœuvre-lès-Nancy,54547,1870.0,1806.0,1870.0,30.0,0.7792,1.5,46.4,adhérents,60000.0,780000.0,32.0,7.59,0.22,0.328,164.3,4.0,466.0
+citiz,14,citiz,Station Citiz (1 véhicule),global,6.15985,48.68717,Nancy,54395,1940.0,1873.0,1940.0,0.0,0.7582,1.5,46.4,adhérents,60000.0,840000.0,31.0,7.59,0.133,0.357,170.4,4.0,571.0
+citiz,15,citiz,Station Citiz (1 véhicule),quota_peu_dense,5.92977,49.46968,Villerupt,54580,1252.0,1210.0,1252.0,0.0,0.6376,1.5,46.4,adhérents,60000.0,900000.0,48.0,7.59,0.274,0.186,110.1,3.0,20000.0
+citiz,16,citiz,Station Citiz (1 véhicule),quota_peu_dense,6.16808,48.61541,Ludres,54328,1266.0,1223.0,1266.0,141.0,0.3786,1.334,46.4,adhérents,60000.0,960000.0,47.0,7.59,0.078,0.08,98.9,3.0,5587.0
+collectivite,1,bike,Station vélo libre-service (10 vélos),enveloppe_bike,6.17709,48.67516,Nancy,54395,2608.0,2519.0,2608.0,0.0,0.6531,1.5,22.5,trajets/jour,60000.0,60000.0,23.0,0.67,0.195,0.366,,,477.0
+collectivite,2,bike,Station vélo libre-service (10 vélos),enveloppe_bike,6.1809,48.66088,Vandœuvre-lès-Nancy,54547,3057.0,2952.0,3057.0,0.0,0.3706,0.881,13.2,trajets/jour,60000.0,120000.0,20.0,0.39,0.5,0.328,,,573.0
+collectivite,3,bike,Station vélo libre-service (10 vélos),enveloppe_bike,6.20448,48.6725,Jarville-la-Malgrange,54274,2210.0,2134.0,2210.0,0.0,0.6338,1.5,22.5,trajets/jour,60000.0,180000.0,27.0,0.67,0.339,0.277,,,1597.0
+collectivite,4,bike,Station vélo libre-service (10 vélos),enveloppe_bike,6.19579,48.6794,Nancy,54395,2150.0,2076.0,2150.0,0.0,0.7176,1.5,22.5,trajets/jour,60000.0,240000.0,28.0,0.67,0.263,0.369,,,597.0
+collectivite,5,bike,Station vélo libre-service (10 vélos),quota_peu_dense,6.13147,48.7024,Maxéville,54357,2041.0,1971.0,2041.0,13.0,0.5272,1.253,18.8,trajets/jour,60000.0,300000.0,29.0,0.56,0.464,0.296,,,2598.0
+collectivite,6,bike,Station vélo libre-service (10 vélos),enveloppe_bike,6.16702,48.70003,Nancy,54395,1787.0,1726.0,1787.0,13.0,0.6351,1.5,22.5,trajets/jour,60000.0,360000.0,34.0,0.67,0.213,0.369,,,576.0
+collectivite,7,bike,Station vélo libre-service (10 vélos),enveloppe_bike,6.14941,48.68141,Laxou,54304,2006.0,1937.0,2006.0,0.0,0.5395,1.282,19.2,trajets/jour,60000.0,420000.0,30.0,0.57,0.328,0.214,,,565.0
+collectivite,8,bike,Station vélo libre-service (10 vélos),enveloppe_bike,6.1729,48.65881,Vandœuvre-lès-Nancy,54547,1780.0,1719.0,1780.0,0.0,0.6023,1.432,21.5,trajets/jour,60000.0,480000.0,34.0,0.64,0.359,0.328,,,397.0
+collectivite,9,bike,Station vélo libre-service (10 vélos),quota_peu_dense,6.21423,48.68724,Tomblaine,54526,1363.0,1317.0,1363.0,0.0,0.3784,0.899,11.2,trajets/jour,60000.0,540000.0,44.0,0.33,0.275,0.167,,,1112.0
+collectivite,10,bus,Arrêt de bus (quai PMR + abri),enveloppe_bus,5.77002,49.52683,Longwy,54323,913.0,882.0,913.0,913.0,0.9116,1.5,205.4,montées/jour,228435.0,768435.0,250.0,5.0,0.462,0.246,,,335.0
+collectivite,11,bus,Arrêt de bus (quai PMR + abri),enveloppe_bus,6.15617,48.69965,Nancy,54395,361.0,349.0,361.0,361.0,0.8675,1.5,81.3,montées/jour,194016.0,962451.0,537.0,-1.38,0.358,0.369,,,272.0

@@ -6,39 +6,39 @@ Ouvrir `slides/presentation.html` dans un navigateur : ← → pour naviguer, `#
 
 | Orateur | Partie | Slides | Questions probables du jury |
 |---|---|---|---|
-| **A** – produit / métier | problème, chiffres, apport pour Citiz, suite | 1, 2, 3, 12, 15 (suite) | « Qu'est-ce que Citiz en fait concrètement ? Pourquoi Nice ? » |
+| **A** – produit / métier | problème, chiffres, apport pour Citiz, suite | 1, 2, 3, 12, 15 (suite) | « Qu'est-ce que Citiz en fait concrètement ? Pourquoi Lyon et pas Nice ? » |
 | **B** – données / accessibilité | carte, sources, calibration marche, équité | 4, 5, 6 | « Pourquoi 282 m ? Pourquoi pas le 2SFCA ? DROM ? » |
 | **C** – modèle / optimisation | modèle, optimisation, choix du territoire, recommandation, comparaison | 7, 8, 9, 10, 11 | « Fuite spatiale ? Biais PU ? Garantie du glouton ? Modèle appris où ? » |
 | **D** – éthique / démo | éthique, limites, démo live | 13, 14, 15 (démo) | « Stigmatisation ? Vie privée ? CO2 ? » |
 
-Tous les chiffres sont dans `outputs/` : `access_summary.json`, `walk_calibration.json`, `model_metrics.json`, `territories_summary.json`, `territories_citiz.csv`, `recommendations_summary.json` et `recommendations.csv` (Nice), `recommendations_summary_ems.json` (Strasbourg, témoin).
+Tous les chiffres sont dans `outputs/` : `access_summary.json`, `walk_calibration.json`, `model_metrics.json`, `territories_summary.json`, `territories_citiz.csv`, `recommendations_summary.json` et `recommendations.csv` (Lyon), `recommendations_summary_ems.json` (Strasbourg, témoin).
 
 ---
 
 ### 1. Titre (A, 20 s)
-« Notre question est simple : qui a vraiment une option de transport à 5 minutes à pied de chez soi, et où faut-il en ajouter ? On y répond pour toute la France, on choisit le territoire où Citiz a le plus à gagner (Nice), puis on y fait une recommandation chiffrée. »
+« Notre question est simple : qui a vraiment une option de transport à 5 minutes à pied de chez soi, et où faut-il en ajouter ? On y répond pour toute la France, on choisit le territoire où Citiz a le plus à gagner (Lyon), puis on y fait une recommandation chiffrée. »
 
 ### 2. Le problème (A, 45 s)
 - Citiz a environ 2 800 voitures dans environ 280 villes et doit choisir où ouvrir. Une station mal placée immobilise une voiture.
 - Les données sont ouvertes depuis la loi LOM, mais aucune source ne suffit seule.
 - On répond aux trois objectifs : la carte, qui est concerné, où investir. Le troisième est le cœur du projet.
 
-### 3. 36 % (A, 45 s)
-- **36 % des habitants n'ont aucune option à 5 minutes.** On a analysé 63,8 millions d'habitants, en Métropole, en Martinique et à La Réunion.
-- Le bus couvre 62 % de la population, le vélo en libre-service 12 %. **Citiz seulement 3,5 %** : la marge de développement est énorme.
+### 3. 34 % (A, 45 s)
+- **Un habitant sur trois (33,5 %) n'a aucune option à 5 minutes.** On a analysé 63,8 millions d'habitants, en Métropole, en Martinique et à La Réunion.
+- Le bus couvre 66 % de la population, le vélo en libre-service 12 %. **Citiz seulement 3,5 %** : la marge de développement est énorme.
 - Transition : « Où sont ces gens ? »
 
 ### 4. La carte (B, 50 s)
-- On croise quatre sources : population INSEE au carreau de 200 m (2,3 millions de carreaux), 207 973 arrêts et stations dédoublonnés, réseau piéton OSM, projections 2040.
+- On croise quatre sources : population INSEE au carreau de 200 m (2,3 millions de carreaux), 220 666 arrêts et stations dédoublonnés, réseau piéton OSM, projections 2040.
 - Le score va de 0 à 100. Gris = aucune option. Sinon, c'est le rang national : un score de 80 signifie mieux doté que 80 % des habitants desservis.
 - **Si on demande « options par habitant »** : on compte les options accessibles depuis le domicile de chaque habitant. Le ratio offre/population (2SFCA) rendrait un hameau qui a un seul arrêt « plus chaud » que le centre de Strasbourg. On l'exporte quand même pour l'analyse de sensibilité.
 - **DROM** : la Guadeloupe, la Guyane et Mayotte ne sont pas couvertes par les carreaux INSEE. Le dire franchement.
 
 ### 5. Courbe en U (B, 50 s)
-- Message clé : **ce ne sont pas les plus modestes les plus exposés.** Le 1er décile n'a que 18 % de personnes sans option, contre 45 % pour le 6e et 25 % pour le 10e.
+- Message clé : **ce ne sont pas les plus modestes les plus exposés.** Le 1er décile n'a que 13 % de personnes sans option, contre 43 % pour le 6e et 23 % pour le 10e.
 - Les ménages modestes vivent davantage dans des quartiers denses. Les classes moyennes, elles, vivent davantage dans le pavillonnaire. C'est notre interprétation, pas un résultat testé.
 - Conséquence pour l'outil : le besoin combine pauvreté, absence de voiture et faible accès actuel. Le revenu seul ne suffit pas.
-- Objectif 2 : chaque arrêt affiche sa population desservie. La médiane est de 289 habitants pour un arrêt de bus et de 1 750 pour une station Citiz.
+- Objectif 2 : chaque arrêt affiche sa population desservie. La médiane est de 293 habitants pour un arrêt de bus et de 1 750 pour une station Citiz.
 
 ### 6. Calibration marche (B, 60 s)
 - 5 minutes à pied, c'est 400 m de trottoir, pas 400 m à vol d'oiseau. On a mesuré le détour réel sur le graphe piéton OSM de Strasbourg, à partir de 400 origines tirées selon la population.
@@ -52,7 +52,7 @@ Tous les chiffres sont dans `outputs/` : `access_summary.json`, `walk_calibratio
   2. **Positif-non étiqueté** : on n'apprend que dans les communes où le réseau existe, sinon une absence ne veut rien dire.
   3. **Validation croisée spatiale par département** : une validation aléatoire mesurerait surtout la proximité géographique.
 - Résultat Citiz : PR-AUC de 0,48 contre 0,26 pour la population seule. On choisit la PR-AUC car seulement 8 % des carreaux sont positifs.
-- **Quel modèle, appris où ?** Un gradient boosting (HistGradientBoosting de scikit-learn), retenu face à une régression logistique sur la PR-AUC. Il est appris sur les 80 départements où l'autopartage existe (107 672 carreaux), **pas sur Strasbourg seule** : 2 800 carreaux ne suffiraient pas, et le modèle doit être transposable à Nice. Strasbourg sert de **test** : avec le Bas-Rhin tenu hors de l'apprentissage, le modèle retrouve les carreaux réellement équipés avec une PR-AUC de 0,66 contre 0,59 pour la population seule. Il bat la population seule dans 55 départements sur 67. Pour Nice, chaque carreau est scoré par un modèle qui n'a pas vu les Alpes-Maritimes.
+- **Quel modèle, appris où ?** Un gradient boosting (HistGradientBoosting de scikit-learn), retenu face à une régression logistique sur la PR-AUC. Il est appris sur les 80 départements où l'autopartage existe (107 672 carreaux), **pas sur Strasbourg seule** : 2 800 carreaux ne suffiraient pas, et le modèle doit être transposable à d'autres territoires. Strasbourg sert de **test** : avec le Bas-Rhin tenu hors de l'apprentissage, le modèle retrouve les carreaux réellement équipés avec une PR-AUC de 0,67 contre 0,59 pour la population seule. Il bat la population seule dans 56 départements sur 67. Pour Lyon, chaque carreau est scoré par un modèle qui n'a pas vu le Rhône.
 - **Honnêteté** : le modèle ne sait pas dire combien de voitures mettre. Pour la capacité, il ne bat pas la baseline. On l'a mesuré, et on ne le prétend pas.
 
 ### 8. Optimisation (C, 60 s)
@@ -64,27 +64,30 @@ Tous les chiffres sont dans `outputs/` : `access_summary.json`, `walk_calibratio
 ### 9. Quel territoire ? (C, 75 s)
 - Le sujet demande où Citiz doit s'implanter. Avant de placer des stations, on choisit **le territoire**.
 - **Criblage** des 99 intercommunalités de plus de 100 000 habitants. Pour chacune, on calcule les habitants des quartiers denses sans aucun autopartage à 5 min, pondérés par la valeur du modèle.
-- **Simulation** : sur les 10 premières, on lance le vrai optimiseur avec 1 M€ Citiz, et on classe par adhérents potentiels.
-- **Nice arrive en tête** : 16 stations y desservent 85 573 habitants et 7 300 adhérents potentiels, contre 33 740 et 1 400 à Strasbourg. Suivent Lyon et Montpellier.
+- **Simulation** : sur les 20 premières, on lance le vrai optimiseur avec 1 M€ Citiz.
+- **Risque terrain** : le modèle ne voit pas l'histoire. On a relevé, ville par ville, les échecs passés, l'autopartage non publié en GBFS et le soutien de la collectivité. Adhérents retenus = adhérents du modèle × (1 − risque).
+- **Nice, 1ʳᵉ pour le modèle (7 500 adhérents), tombe au 10ᵉ rang** : Auto Bleue (68 stations, environ 1,4 M€/an de délégation, recettes déficitaires) a fermé fin 2018, puis Mobilize Share est parti en juin 2026. Deux échecs, dont un en stations, le modèle même de Citiz : risque 65 %. Nice ne repasserait en tête qu'avec un risque sous 49 %.
+- **Montpellier** (2ᵉ pour le modèle) recule au 13ᵉ rang : Modulauto y a environ 100 stations hors GBFS.
+- **Lyon arrive en tête** : 49 477 habitants et 3 847 adhérents. Bluely et Zity y ont échoué, mais en free-floating ; Citiz LPA en boucle tient et la Métropole veut le développer. Suivent Toulouse, où la Métropole a retenu Citiz pour 2025-2030, puis Aix-Marseille.
 - **Pourquoi pas Strasbourg ?** Citiz y couvre déjà 45 % des habitants : il reste des quartiers moins denses. On garde Strasbourg comme **territoire témoin**, là où le modèle est le mieux validé.
-- **Contexte terrain** : Mobilize Share (Renault), le principal autopartage en stations de la métropole niçoise, a fermé fin juin 2026. Le vide est récent.
 - **Île-de-France exclue** : son autopartage (Getaround, Zity, Communauto) n'est presque pas publié en GBFS, d'où une couverture apparente de 1 %.
 
-### 10. Recommandation Nice (C, 60 s)
-- **Pour Citiz**, avec 0,96 M€ sur 5 ans : **16 stations**, dont 14 à Nice, une à Beaulieu-sur-Mer et une à Saint-Martin-du-Var (quota peu dense).
-- **85 573 habitants** passent à 5 minutes d'une voiture partagée, pour **11 € par habitant** (28 € à Strasbourg).
-- Environ **121 t de CO2** évitées par an ; **48 %** des nouveaux desservis sont dans les 3 déciles les plus modestes.
-- **Pour la collectivité**, liste séparée : 9 stations vélo et 2 arrêts de bus, soit 48 494 nouveaux desservis pour 0,95 M€. Attention : Vélo Bleu existe mais ne publie pas de flux GBFS, ces stations vélo sont à confronter au réseau réel.
+### 10. Recommandation Lyon (C, 60 s)
+- **Pour Citiz**, avec 0,96 M€ sur 5 ans : **16 stations**, dont 7 à Villeurbanne, 7 dans les 3ᵉ, 7ᵉ et 8ᵉ arrondissements, et deux en zone peu dense (Genay, Vernaison).
+- **49 477 habitants** passent à 5 minutes d'une voiture partagée, pour **19 € par habitant** (25 € à Strasbourg).
+- Environ **120 t de CO2** évitées par an ; **40 %** des nouveaux desservis sont dans les 3 déciles les plus modestes.
+- **Pour la collectivité**, liste séparée : 9 stations vélo et 2 arrêts de bus, soit 29 774 nouveaux desservis pour 0,96 M€.
+- Les stations sont à coordonner avec Citiz LPA, coopérative du réseau déjà présente à Lyon.
 
 ### 11. Avec ou sans l'outil (C, 45 s)
-- On montre cette comparaison sur Strasbourg, car c'est là que l'offre existante pèse : à Nice, il n'y a rien à éviter.
-- À budget Citiz égal, la stratégie naïve « là où il y a du monde » ne dessert que 13 800 nouveaux habitants, contre 33 740 : **2,4 fois moins**, car elle place des stations à côté des existantes.
-- **Honnêteté sur le modèle** : sans lui, on toucherait 19 % d'habitants de plus (41 493), mais avec 28 % de CO2 évité en moins (94 t contre 120 t). Le modèle vise les sites où l'usage attendu est plus fort. C'est un arbitrage, pas un gain gratuit.
+- On montre cette comparaison sur Strasbourg, territoire témoin où l'offre existante pèse le plus et où le modèle est le mieux validé.
+- À budget Citiz égal, la stratégie naïve « là où il y a du monde » ne dessert que 13 800 nouveaux habitants, contre 37 893 : **2,7 fois moins**, car elle place des stations à côté des existantes.
+- **Honnêteté sur le modèle** : sans lui, on toucherait 10 % d'habitants de plus (41 493), mais avec 13 % de CO2 évité en moins (105 t contre 120 t). Le modèle vise les sites où l'usage attendu est plus fort. C'est un arbitrage, pas un gain gratuit.
 
 ### 12. Ce que ça apporte à Citiz (A, 50 s)
-- **Où s'implanter** : un classement national simulé à budget égal, avec Nice en tête, Lyon et Montpellier ensuite.
+- **Où s'implanter** : un classement national simulé à budget égal, corrigé du risque terrain : Lyon en tête, Toulouse et Aix-Marseille ensuite ; Nice écartée après deux échecs.
 - **Où ouvrir** : 16 stations nommées, avec coordonnées, et pour chacune les habitants gagnés, la valeur du modèle, le coût et le CO2.
-- **Combien de voitures** : la demande estimée justifierait jusqu'à environ 10 voitures par station. C'est une borne haute (pénétration nationale Citiz) : on recommande un pilote à 1-2 voitures par station, suivi des réservations.
+- **Combien de voitures** : la demande estimée justifierait jusqu'à environ 8 voitures par station. C'est une borne haute (pénétration nationale Citiz) : on recommande un pilote à 1-2 voitures par station, suivi des réservations.
 - **Partout** : `--area epci:<siren>` ou `--dep 54` relance l'analyse en quelques secondes.
 
 ### 13. Éthique (D, 60 s)
@@ -100,7 +103,7 @@ Tous les chiffres sont dans `outputs/` : `access_summary.json`, `walk_calibratio
   - les coûts sont hypothétiques ;
   - le modèle mesure une ressemblance avec les sites existants, pas une fréquentation ;
   - le modèle apprend des biais passés des opérateurs ;
-  - l'offre non publiée en GBFS est invisible (Getaround, Vélo Bleu à Nice) : le classement des territoires est à confirmer sur le terrain ;
+  - l'offre non publiée en GBFS est invisible (Getaround, Modulauto, Vélo Bleu à Nice) : corrigée par une veille presse dont les pondérations sont des hypothèses ;
   - le nombre de voitures par station est une borne haute.
 - Renvoyer vers EXPLICATIONS.md, section « Ce qu'il faut garder en tête ».
 
@@ -108,8 +111,8 @@ Tous les chiffres sont dans `outputs/` : `access_summary.json`, `walk_calibratio
 - Lancer `.venv/bin/python -m streamlit run app.py` **avant** la soutenance : le premier chargement est plus lent.
 - Parcours de la démo :
   1. carte nationale ;
-  2. onglet « Où s'implanter (France) » : le classement, Nice en tête, Strasbourg en témoin ;
-  3. territoire prioritaire (Nice), onglet « Qui est concerné » (stations et habitants servis) ;
+  2. onglet « Où s'implanter (France) » : le classement corrigé du risque, Lyon en tête, Nice 10ᵉ, Strasbourg en témoin ;
+  3. territoire prioritaire (Lyon), onglet « Qui est concerné » (stations et habitants servis) ;
   4. onglet « Où investir » : bouger le budget Citiz, le budget collectivité et λ, montrer que les deux listes changent ;
   5. si le temps le permet, basculer sur Strasbourg pour comparer.
 - Suite (A) :

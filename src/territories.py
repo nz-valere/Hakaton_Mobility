@@ -16,7 +16,11 @@ Deux étapes :
        Strasbourg, territoire témoin où Citiz est déjà implanté) : la même optimisation que
        src/recommend.py, stations Citiz seules, budget C.CITIZ_BUDGET. Classement final par
        adhérents potentiels des stations retenues (habitants nouvellement desservis × pénétration
-       nationale Citiz × valeur du site) : c'est ce qu'un même budget rapporte à Citiz ici.
+       nationale Citiz × valeur du site) : c'est ce qu'un même budget rapporte à Citiz ici ;
+    3. correction par le risque terrain (C.TERRITORY_RISK, veille presse) : le modèle ne voit ni
+       les opérateurs qui ont échoué (Nice : Auto Bleue 2011-2018, Mobilize Share 2019-2026) ni
+       l'autopartage hors GBFS (Montpellier : Modulauto). Classement final par adhérents retenus
+       = adhérents potentiels × (1 − risque) ; le rang du modèle seul reste dans `rank_model`.
 
 Statut : « nouveau territoire » si aucune station Citiz ne dessert d'habitant de l'EPCI,
 « extension » sinon.
@@ -137,6 +141,14 @@ def screen(cells, F, pred, p_ref):
     return out.sort_values("potential", ascending=False).reset_index(drop=True)
 
 
+# --------------------------------------------------------------------------- 3. risque terrain (appliqué par rank)
+def risk(code):
+    """(risque, facteurs, constat) d'une EPCI d'après C.TERRITORY_RISK ; 0 si aucun signal relevé."""
+    factors, note = C.TERRITORY_RISK.get(str(code), ((), ""))
+    r = float(np.clip(sum(C.TERRITORY_RISK_WEIGHTS[f] for f in factors), *C.TERRITORY_RISK_CLIP))
+    return round(r, 2), ", ".join(factors), note
+
+
 # --------------------------------------------------------------------------- 2. simulation budgétée
 def simulate(code, budget=None, equity_lambda=C.EQUITY_LAMBDA):
     """Optimisation Citiz seule sur l'EPCI (même moteur que src/recommend.py) -> indicateurs."""
@@ -172,10 +184,14 @@ def rank(scr, n_short=None, budget=None):
     sim = pd.DataFrame(rows)
     out = scr.merge(sim, on="epci", how="left")
     out["shortlist"] = out["shortlist"].astype("boolean").fillna(False).astype(bool)
+    rk = pd.DataFrame([risk(c) for c in out["epci"]], columns=["risk", "risk_factors", "risk_note"])
+    out = pd.concat([out, rk], axis=1)
+    out["sim_members_adjusted"] = (out["sim_members_potential"] * (1 - out["risk"])).round(0)
     ok = out["shortlist"] & out["sim_members_potential"].notna()
-    out["rank"] = np.nan
-    order = out[ok].sort_values(["sim_members_potential", "sim_pop_newly_served"], ascending=False).index
-    out.loc[order, "rank"] = np.arange(1, len(order) + 1)
+    for col, key in (("rank_model", "sim_members_potential"), ("rank", "sim_members_adjusted")):
+        out[col] = np.nan
+        order = out[ok].sort_values([key, "sim_pop_newly_served"], ascending=False).index
+        out.loc[order, col] = np.arange(1, len(order) + 1)
     out["screen_rank"] = np.nan
     el = out.index[out["eligible"]]
     out.loc[el, "screen_rank"] = np.arange(1, len(el) + 1)
@@ -196,7 +212,7 @@ def main():
     ref = out[out["reference"]].iloc[0] if out["reference"].any() else None
     cols = ["epci", "territoire", "dep", "population", "statut", "share_carsharing_served", "share_citiz_served",
             "potential", "sim_sites", "sim_pop_newly_served", "sim_members_potential", "sim_vehicles_suggested",
-            "sim_co2_t_yr", "sim_top_communes"]
+            "sim_co2_t_yr", "sim_top_communes", "risk", "risk_note", "sim_members_adjusted", "rank_model"]
 
     def rec(r):
         return {c: (r[c].item() if hasattr(r[c], "item") else r[c]) for c in cols}
@@ -204,9 +220,10 @@ def main():
     summary = {
         "method": "criblage national (Σ habitants × valeur du modèle, carreaux denses sans autopartage à 5 min) "
                   "puis simulation de l'optimiseur Citiz seul sur la liste courte ; classement par "
-                  "adhérents potentiels",
+                  "adhérents potentiels, corrigés du risque terrain (échecs passés, autopartage hors GBFS)",
         "citiz_budget_eur": C.CITIZ_BUDGET, "min_population": C.TERRITORY_MIN_POP,
         "excluded_deps": list(C.TERRITORY_EXCLUDED_DEPS), "shortlist": C.TERRITORY_SHORTLIST,
+        "risk_weights": C.TERRITORY_RISK_WEIGHTS,
         "n_epci_screened": int(len(scr)), "n_epci_eligible": int(scr["eligible"].sum()),
         "top": rec(top), "reference_strasbourg": rec(ref) if ref is not None else None,
         "ranking": [rec(r) for _, r in out[out["rank"].notna()].iterrows()],
@@ -214,8 +231,8 @@ def main():
     }
     F_SUMMARY.write_text(json.dumps(summary, indent=2, ensure_ascii=False, default=float))
     pd.set_option("display.width", 220)
-    show = ["rank", "territoire", "statut", "population", "share_carsharing_served", "potential", "sim_sites",
-            "sim_pop_newly_served", "sim_members_potential"]
+    show = ["rank", "rank_model", "territoire", "statut", "population", "share_carsharing_served", "sim_sites",
+            "sim_pop_newly_served", "sim_members_potential", "risk", "sim_members_adjusted"]
     print(out[out["rank"].notna() | out["reference"]][show].to_string(index=False))
     print(f"-> territoire prioritaire : {top['territoire']} ({top['statut']}) ; {F_RANK.name}, {F_SUMMARY.name}")
     return out, summary
