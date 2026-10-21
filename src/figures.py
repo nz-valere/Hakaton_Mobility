@@ -1,5 +1,5 @@
 """
-Figures dédiées à la présentation (slides/presentation.html).
+Figures dédiées à la présentation.
 
 Lit uniquement des sorties existantes (aucun recalcul) :
     outputs/access_summary.json            -> part sans option par décile de revenu, part desservie par mode

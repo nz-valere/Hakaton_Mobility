@@ -1,7 +1,5 @@
 # Notes orales – soutenance Mobili'Score (environ 13 min + démo)
 
-Ouvrir `slides/presentation.html` dans un navigateur : ← → pour naviguer, `#n` dans l'URL pour aller à la slide n, impression possible en PDF.
-
 **Répartition des rôles.** Les lettres sont à remplacer par les prénoms. Chacun doit savoir expliquer toute la démarche et répondre en profondeur sur sa partie.
 
 | Orateur | Partie | Slides | Questions probables du jury |
