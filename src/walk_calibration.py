@@ -84,7 +84,6 @@ def load_graph(path=C.RAW / "osm_walk_strasbourg.json"):
     g = sparse.coo_matrix((np.r_[w, w], (np.r_[ia, ib], np.r_[ib, ia])), shape=(n, n))
     g = _min_duplicates(g)
 
-    # plus grande composante connexe
     _, lab = connected_components(g, directed=False)
     keep = lab == np.bincount(lab).argmax()
     idx = np.flatnonzero(keep)

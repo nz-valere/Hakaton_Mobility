@@ -195,7 +195,6 @@ def compute(cells, offer, radius):
     excl = n_raw[ci, mode_code[oj]] == 1
     pop_excl = np.bincount(oj[excl], weights=ind[ci[excl]], minlength=no)
 
-    # 2SFCA
     R = np.divide(w_pt, pop_served, out=np.zeros(no), where=pop_served > 0)
     a2 = 1000 * np.bincount(ci, weights=R[oj], minlength=nc)
 

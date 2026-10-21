@@ -51,11 +51,11 @@ PRIV = C.PRIVACY_MIN_HOUSEHOLDS
 
 # Couleurs des modes (palette catégorielle validée, ordre fixe) – RGB
 MODE_COLOR = {
-    "transit": (42, 120, 214),     # bleu
-    "rail": (98, 80, 214),         # violet
-    "bike": (27, 175, 122),        # aqua
-    "scooter": (237, 161, 0),      # jaune
-    "carsharing": (232, 123, 164),  # magenta
+    "transit": (42, 120, 214),
+    "rail": (98, 80, 214),
+    "bike": (27, 175, 122),
+    "scooter": (237, 161, 0),
+    "carsharing": (232, 123, 164),
     "citiz": (235, 104, 52),       # orange (Citiz mis en avant)
 }
 KIND_COLOR = {"citiz": (235, 104, 52), "bike": (27, 175, 122), "bus": (42, 120, 214)}

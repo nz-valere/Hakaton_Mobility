@@ -56,7 +56,7 @@ def load_filosofi():
     # idcar : "CRS3035RES200mN2029400E4259000" -> CRS, Nord (y), Est (x) du coin sud-ouest
     ext = df["idcar_200m"].str.extract(r"CRS(\d+)RES200mN(\d+)E(\d+)").astype(np.int64)
     df["crs_id"] = ext[0].map(CRS_ID).astype(np.int8)
-    df["x"] = ext[2] + C.CELL / 2          # centre du carreau
+    df["x"] = ext[2] + C.CELL / 2
     df["y"] = ext[1] + C.CELL / 2
     df["key"] = cell_key(df["crs_id"], ext[2], ext[1])
     df["com"] = df["lcog_geo"].str[:5]     # un carreau à cheval -> 1re commune listée
