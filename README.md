@@ -4,7 +4,7 @@
 Mobili'Score croise l'offre ouverte (GTFS, GBFS) avec la population au carreau de 200 m (INSEE) pour cartographier l'accès à la mobilité en France, DROM couverts par Filosofi inclus.
 Un modèle prédictif et un optimiseur sous budget choisissent ensuite **le territoire** où Citiz a le plus à gagner, puis y proposent deux listes priorisées, une par financeur : les stations Citiz (budget Citiz) et les stations vélo et arrêts de bus (budget de la collectivité). Chaque site vient avec son coût, les habitants gagnés et le CO2 évité.
 
-Hackathon Mobility, Epitech x Citiz x Microsoft. Sources : [SOURCES.md](SOURCES.md). Contrats entre modules : [CONTRACTS.md](CONTRACTS.md). Microsoft Fabric et Power BI : [FABRIC.md](FABRIC.md).
+Hackathon Mobility, Epitech x Citiz x Microsoft. Sources : [SOURCES.md](SOURCES.md). Contrats entre modules : [CONTRACTS.md](CONTRACTS.md). Présentation : [slides/Mobili-Score_présentation.pptx](slides/Mobili-Score_pr%C3%A9sentation.pptx). Microsoft Fabric et Power BI : [FABRIC.md](FABRIC.md).
 
 ## Résultats clés
 
@@ -182,5 +182,5 @@ Les durées de `download`, `population` et `offer` n'ont pas été mesurées dan
 ├── tests/                 # pytest
 ├── data/raw, data/interim # données (non versionnées)
 ├── outputs/               # résultats (json, csv, parquet, modèles, figures/)
-└── slides/                # speaker_notes.md
+└── slides/                # Mobili-Score_présentation.pptx + speaker_notes.md
 ```
