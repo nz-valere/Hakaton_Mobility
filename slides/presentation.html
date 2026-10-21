@@ -100,14 +100,14 @@
   <div class="kicker">Le chiffre</div>
   <div class="row">
     <div class="col">
-      <div class="big">33&nbsp;%</div>
-      <p style="font-size:26px;margin-top:14px">des habitants n'ont <b>aucune</b> option de transport à 5 minutes de marche de chez eux.</p>
+      <div class="big">1&nbsp;sur&nbsp;3</div>
+      <p style="font-size:26px;margin-top:14px">des habitants (33,5 %) n'ont <b>aucune</b> option de transport à 5 minutes de marche de chez eux. Borne basse : sur le vrai réseau piéton, plutôt 38 %.</p>
       <p class="sub" style="font-size:18px">63,8 M d'habitants analysés. Métropole 34 %, Martinique 24 %, La Réunion 9 %.</p>
       <p style="font-size:20px">Seuls <b style="color:var(--orange)">3,5 %</b> des habitants ont une station Citiz à 5 min.</p>
     </div>
     <div class="col w2"><div class="figbox"><img class="fig" src="../outputs/figures/slides_modes.png" alt="Part de la population desservie à 5 min, par mode"></div></div>
   </div>
-  <div class="src">Source : outputs/access_summary.json (2 324 577 carreaux habités, 221 616 points d'offre)</div>
+  <div class="src">Source : outputs/access_summary.json (2 324 577 carreaux habités, 220 666 points d'offre)</div>
 </section>
 
 <!-- 4 -->
@@ -118,9 +118,9 @@
       <h2>Croiser 4 sources de nature et d'échelle différentes</h2>
       <ul style="margin-top:16px">
         <li><b>Population</b> : 2,3 M de carreaux de 200 m (INSEE Filosofi 2021), avec revenus, motorisation (RP 2021) et projections 2040 (Omphale).</li>
-        <li><b>Offre</b> : 221 616 points, après classement en 6 modes et suppression des doublons de l'agrégat national GTFS et des flux GBFS.</li>
+        <li><b>Offre</b> : 220 666 points, après classement en 6 modes et suppression des doublons de l'agrégat national GTFS et des flux GBFS.</li>
         <li><b>Réseau piéton</b> OpenStreetMap pour calibrer les « 5 minutes ».</li>
-        <li><b>Score 0-100</b> : 0 = aucune option, sinon rang national du nombre d'options à 5 min.</li>
+        <li><b>Score 0-100</b> : 0 = aucune option, sinon rang national du nombre d'options à 5 min <i>depuis le domicile de chaque habitant</i>. Le ratio offre / population (2SFCA) est aussi calculé, mais rendrait un hameau à un arrêt plus « chaud » que le centre de Strasbourg.</li>
       </ul>
       <p class="note">La Guadeloupe, la Guyane et Mayotte ne sont pas couvertes par les carreaux INSEE : on ne peut pas les cartographier à cette maille.</p>
     </div>
@@ -131,13 +131,13 @@
 <!-- 5 -->
 <section class="slide">
   <div class="kicker">Objectif 2 · Qui est concerné ?</div>
-  <h2>Les plus exposés ne sont pas les plus modestes : une courbe en U</h2>
+  <h2>Les plus exposés ne sont pas les plus modestes, mais les classes moyennes périurbaines</h2>
   <div class="row">
     <div class="col w2"><div class="figbox"><img class="fig" src="../outputs/figures/slides_deciles.png" alt="Part sans option par décile de revenu"></div></div>
     <div class="col">
-      <p><b>13 %</b> sans option dans le 1er décile de revenu, <b>43 %</b> dans le 6e, <b>23 %</b> dans le 10e.</p>
+      <p><b>11 %</b> sans option dans le 1er décile de revenu, <b>29 %</b> dans le 6e, <b>18 %</b> dans le 10e (carreaux d'au moins 11 ménages, revenu non imputé). Sur tous les carreaux, la bosse monte à 43 %, amplifiée par l'imputation INSEE des petits carreaux ruraux.</p>
       <p>Conséquence : le revenu seul ne suffit pas à définir le besoin. On combine <b>pauvreté</b>, <b>ménages sans voiture</b> et <b>faible accès actuel</b>.</p>
-      <p class="note">Chaque arrêt et station affiche aussi sa population desservie dans la démo. Médiane : 291 habitants pour un arrêt de bus, 1 750 pour une station Citiz.</p>
+      <p class="note">Chaque arrêt et station affiche aussi sa population desservie dans la démo. Médiane : 293 habitants pour un arrêt de bus, 1 750 pour une station Citiz.</p>
     </div>
   </div>
   <div class="src">Source : outputs/access_summary.json (déciles nationaux de revenu par habitant du carreau)</div>
@@ -165,17 +165,17 @@
 <!-- 7 · fréquence des lignes -->
 <section class="slide">
   <div class="kicker">Méthode · Un arrêt n'est pas un service</div>
-  <h2>À Lyon, 71 500 habitants ont un arrêt, mais un service faible</h2>
+  <h2>À Lyon, 189 000 habitants ont un arrêt, mais un service faible</h2>
   <div class="row">
     <div class="col w2"><div class="figbox"><img class="fig" src="../outputs/figures/slides_frequency.png" alt="Comptage d'arrêts contre fréquence des lignes à Strasbourg, Nice et Lyon"></div></div>
     <div class="col">
       <p style="font-size:18px">L'agrégat national n'a pas d'horaires. Dans nos zones d'étude, on lit les <b>GTFS des réseaux</b> (TCL, Lignes d'Azur, CTS et Fluo 67) un mardi hors vacances, de 7 h à 20 h.</p>
-      <div class="formula" style="font-size:15px">options TC = Σ<sub>lignes-sens à 5 min</sub> min(1, départs/h ÷ 4)</div>
+      <div class="formula" style="font-size:15px">options TC = Σ<sub>lignes à 5 min</sub> min(1, départs/h ÷ 4)</div>
       <ul style="margin-top:10px">
-        <li style="font-size:17px">Une ligne compte <b>une fois</b>, même si elle passe à 3 arrêts autour de chez soi.</li>
+        <li style="font-size:17px">Une ligne compte <b>une fois</b>, même si elle passe à 3 arrêts autour de chez soi ou dans les deux sens. Lignes scolaires et à la demande exclues.</li>
         <li style="font-size:17px">Une ligne toutes les 15 min ou mieux = 1 option pleine.</li>
       </ul>
-      <p style="font-size:17px">Lyon : 93 % ont un arrêt, 88 % une option pleine, <b>5,5 % en service faible</b>. Nice : 13,5 %.</p>
+      <p style="font-size:17px">Lyon : 93 % ont un arrêt, 78 % une option pleine, <b>14,6 % en service faible</b>. Nice : 20,7 %. Strasbourg : 14,6 %.</p>
     </div>
   </div>
   <div class="src">Source : outputs/frequency_epci200046977.json, frequency_epci200030195.json, frequency_ems.json (src/frequency.py)</div>
@@ -188,14 +188,14 @@
   <div class="row">
     <div class="col">
       <ul style="margin-top:4px">
-        <li style="font-size:17px">Un modèle par équipement estime si un carreau <b>ressemble aux sites existants</b>, à partir de 29 variables : ménages, densité, revenus, offre des <i>autres</i> modes.</li>
+        <li style="font-size:17px">Un modèle par équipement estime si un carreau <b>ressemble aux sites existants</b>, à partir de 26 à 29 variables selon l'équipement : ménages, densité, revenus, offre des <i>autres</i> modes.</li>
         <li style="font-size:17px">Apprentissage <b>positif-non étiqueté</b>, avec une validation croisée <b>spatiale par département</b>.</li>
       </ul>
       <table style="margin-top:6px">
         <tr><th>Type</th><th>Modèle</th><th>PR-AUC</th><th>Pop. seule</th></tr>
-        <tr class="hl"><td>Citiz</td><td>boosting</td><td class="n">0,49</td><td class="n">0,26</td></tr>
+        <tr class="hl"><td>Citiz</td><td>boosting</td><td class="n">0,48</td><td class="n">0,26</td></tr>
         <tr><td>Vélo</td><td>logistique</td><td class="n">0,64</td><td class="n">0,53</td></tr>
-        <tr><td>Bus</td><td>boosting</td><td class="n">0,74</td><td class="n">0,71</td></tr>
+        <tr><td>Bus</td><td>boosting</td><td class="n">0,75</td><td class="n">0,71</td></tr>
       </table>
       <p class="note">Appris sur 80 départements où l'autopartage existe. <b>Test sur Strasbourg</b>, Bas-Rhin tenu hors de l'apprentissage : PR-AUC 0,67 contre 0,59 pour la population seule. Limite : il ne prédit pas le nombre de voitures par station, d'où la confrontation à l'usage réel (slide 9).</p>
     </div>
@@ -207,7 +207,7 @@
 <!-- 9 · usage réel -->
 <section class="slide">
   <div class="kicker">Validation · L'usage réel des stations Citiz</div>
-  <h2>Le modèle sait où Citiz réussit, pas encore combien une station roulera</h2>
+  <h2>Le modèle repère les secteurs où Citiz tourne, pas encore l'usage d'une station</h2>
   <div class="row">
     <div class="col w2"><div class="figbox"><img class="fig" src="../outputs/figures/slides_usage.png" alt="Occupation réelle des stations Citiz par quintile de propension du modèle"></div></div>
     <div class="col">
@@ -216,8 +216,8 @@
         <div class="kpi"><div class="v">41 %</div><div class="l">d'occupation dans le 5e quintile du modèle, contre 28 % dans le 1er</div></div>
         <div class="kpi"><div class="v">303</div><div class="l">stations saturées (réservées plus de 60 % du temps)</div></div>
       </div>
-      <p style="font-size:16px;margin-top:12px"><b>Limite assumée</b> : station par station, le modèle classe l'usage à peine moins bien que la population seule (Spearman 0,17 contre 0,18).</p>
-      <p class="note" style="font-size:14px">65 relevés en un jour, en partie pendant les vacances de la Toussaint ; sens de <code>is_reserved</code> à confirmer avec Citiz. Validation, pas apprentissage.</p>
+      <p style="font-size:16px;margin-top:12px"><b>Limite assumée</b> : station par station, le modèle ne fait pas mieux que la population seule (Spearman 0,17 contre 0,18, écart non significatif).</p>
+      <p class="note" style="font-size:14px">65 relevés sur 235 possibles en un jour, en partie pendant les vacances de la Toussaint ; sens de <code>is_reserved</code> à confirmer avec Citiz. Validation, pas apprentissage.</p>
     </div>
   </div>
   <div class="src">Source : outputs/usage_validation.json, citiz_usage.csv (src/collect_gbfs.py, src/usage.py)</div>
@@ -242,7 +242,7 @@
     </div>
     <div class="col">
       <div class="card" style="margin-bottom:14px"><h3>Glouton paresseux + garde-fou</h3><p>Garantie théorique : au moins (1 − 1/e)/2 de l'optimum. <b>Testé contre la force brute</b> : 97,3 % de l'optimum en moyenne, 88,4 % au pire.</p></div>
-      <div class="card"><h3>Un budget par financeur</h3><p>Citiz ne gère que l'autopartage : <b>1 M€ Citiz</b> pour ses stations, <b>1 M€ collectivité</b> pour le vélo et le bus, deux listes séparées. Choix normatif réglable : 15 % de chaque budget réservés aux zones peu denses.</p></div>
+      <div class="card"><h3>Un budget par financeur</h3><p>Citiz ne gère que l'autopartage : <b>1 M€ Citiz</b> pour ses stations, <b>1 M€ collectivité</b> pour le vélo et le bus, deux listes séparées. Choix normatif réglable : 15 % de chaque budget réservés aux zones peu denses. Une enveloppe est un plafond : un site 5 fois moins rentable que le meilleur n'est pas acheté.</p></div>
     </div>
   </div>
 </section>
@@ -256,7 +256,7 @@
     <div class="col">
       <p style="font-size:17px"><b>1. Criblage</b> des 99 intercommunalités de plus de 100 000 habitants : habitants des quartiers denses sans autopartage à 5 min, pondérés par le modèle.</p>
       <p style="font-size:17px"><b>2. Simulation</b> : sur les 20 premières, l'optimiseur place les stations que permet 1 M€.</p>
-      <p style="font-size:17px"><b>3. Risque terrain</b> : échecs passés, autopartage hors GBFS, soutien local. <b>Nice</b> (1ʳᵉ pour le modèle) a vu échouer Auto Bleue (2011-2018) puis Mobilize Share (2026) : 8ᵉ. <b>Montpellier</b> a déjà Modulauto : 13ᵉ.</p>
+      <p style="font-size:17px"><b>3. Risque terrain</b> : échecs passés, autopartage hors GBFS, soutien local. <b>Nice</b> (1ʳᵉ pour le modèle) a vu échouer Auto Bleue (2011-2018) puis Mobilize Share (2026) : 11ᵉ. <b>Montpellier</b> a déjà Modulauto. Lyon devance Toulouse de 0,9 % seulement : deux choix défendables.</p>
       <p class="note">Île-de-France exclue : son autopartage est presque absent des flux GBFS publics.</p>
     </div>
   </div>
@@ -270,13 +270,13 @@
     <div class="col">
       <h2 style="margin-bottom:16px">Pour Citiz : 16 stations, 0,96 M€ sur 5 ans</h2>
       <div class="kpis">
-        <div class="kpi"><div class="v">50 051</div><div class="l">habitants nouvellement à 5 min d'une voiture partagée</div></div>
-        <div class="kpi"><div class="v">19 €</div><div class="l">par nouvel habitant desservi (28 € à Strasbourg)</div></div>
-        <div class="kpi"><div class="v">≈ 120 t</div><div class="l">de CO2 évitées par an (hypothèses ADEME)</div></div>
-        <div class="kpi"><div class="v">41 %</div><div class="l">des nouveaux desservis dans les 3 premiers déciles de revenu</div></div>
+        <div class="kpi"><div class="v">49 477</div><div class="l">habitants nouvellement à 5 min d'une voiture partagée</div></div>
+        <div class="kpi"><div class="v">19 €</div><div class="l">par nouvel habitant desservi (24 € à Strasbourg)</div></div>
+        <div class="kpi"><div class="v">≈ 120 t</div><div class="l">de CO2 évitées par an (≈ 7,6 t par station, hypothèses ADEME)</div></div>
+        <div class="kpi"><div class="v">40 %</div><div class="l">des nouveaux desservis dans les 3 premiers déciles de revenu</div></div>
       </div>
-      <p style="margin-top:14px;font-size:17px"><span class="tag">7 à Villeurbanne</span><span class="tag">7 à Lyon</span><span class="tag">Irigny</span><span class="tag">Vernaison</span></p>
-      <p class="note" style="font-size:16px">Pour la collectivité, liste séparée : 12 stations vélo et 1 arrêt de bus, <b>38 089</b> nouveaux desservis pour 1,0 M€. Sans la fréquence des lignes TCL, on aurait gardé 2 arrêts sur des lignes peu fréquentes : 29 774 habitants (−22 %). Stations Citiz à coordonner avec Citiz LPA, déjà implanté.</p>
+      <p style="margin-top:14px;font-size:17px"><span class="tag">7 à Villeurbanne</span><span class="tag">7 à Lyon</span><span class="tag">Vernaison</span><span class="tag">Genay</span></p>
+      <p class="note" style="font-size:16px">Citiz densifie : ses nouveaux desservis ont déjà un bus, la voiture partagée remplace la 2ᵉ voiture. La collectivité équipe la périphérie : 16 stations vélo (Vaulx-en-Velin, Saint-Priest, Givors…), <b>46 869</b> nouveaux desservis pour 0,96 M€, dont 85 % de ménages modestes. Aucun arrêt de bus : à nos coûts, il dépasse 200 k€ pour quelques centaines d'habitants. Stations Citiz à coordonner avec Citiz LPA.</p>
     </div>
     <div class="col"><div class="figbox"><img class="fig" src="../outputs/figures/slides_map_top.png" alt="Carte des sites recommandés dans la Métropole de Lyon"></div></div>
   </div>
@@ -288,17 +288,17 @@
   <div class="kicker">Équité · Un choix chiffré, laissé au décideur</div>
   <h2>À Lyon, l'équité ne coûte presque rien</h2>
   <div class="figbox" style="margin-top:4px"><img class="fig" src="../outputs/figures/slides_equity.png" alt="Prix de l'équité à Lyon pour Citiz et pour la collectivité"></div>
-  <p style="font-size:17px;margin:8px 0 0">Chaque point est une optimisation complète avec la même enveloppe. <b>Collectivité</b> : de λ = 0 à λ = 1, la part des ménages modestes parmi les nouveaux desservis passe de 81 % à 88 %, sans perdre d'habitants. <b>Citiz</b> : de 41,1 % à 42,3 %, pour 2,6 % d'habitants en moins.</p>
+  <p style="font-size:17px;margin:8px 0 0">Chaque point est une optimisation complète avec la même enveloppe. <b>Collectivité</b> : de λ = 0 à λ = 1, la part des ménages modestes parmi les nouveaux desservis passe de 74 % à 85 %, et le nombre d'habitants augmente (44 616 → 46 869). <b>Citiz</b> : de 38 % à 40 % au mieux, pour 2 % d'habitants en moins.</p>
   <p class="note" style="font-size:14px">Dans la démo, chaque mouvement de curseur relance l'optimisation en ≈ 1 s (territoire préparé une fois, seul le glouton est relancé).</p>
-  <div class="src">Source : outputs/equity_curve.json (src/recommend.py, λ = 0 ; 0,25 ; 0,5 ; 0,75 ; 1)</div>
+  <div class="src">Source : outputs/equity_curve.json (src/recommend.py, λ de 0 à 1 par pas de 0,1)</div>
 </section>
 
 <!-- 14 -->
 <section class="slide">
   <div class="kicker">Impact · Avec ou sans l'outil (Strasbourg, témoin)</div>
-  <h2>Là où l'offre existe déjà, l'ignorer divise l'efficacité par 2,5</h2>
+  <h2>Là où l'offre existe déjà, l'ignorer divise par 2,8 les habitants gagnés par euro</h2>
   <div class="figbox" style="margin-top:6px"><img class="fig" src="../outputs/figures/slides_strategies.png" alt="Comparaison des stratégies pour Citiz à Strasbourg"></div>
-  <p class="note" style="font-size:15px">Même budget Citiz à Strasbourg. La stratégie naïve place les stations là où il y a le plus d'habitants, sans regarder l'existant : 13 800 nouveaux desservis contre 34 813. Le modèle, lui, est un arbitrage : 16 % d'habitants en moins que sans modèle (41 551), mais +37 % de CO2 évité (119 t contre 87 t), car il vise les sites où l'usage attendu est plus fort.</p>
+  <p class="note" style="font-size:15px">Même budget Citiz à Strasbourg. La stratégie naïve place les stations là où il y a le plus d'habitants, sans regarder l'existant : 13 800 nouveaux desservis contre 39 260 (à Lyon : 15 493 contre 49 477). Le modèle, lui, est un arbitrage : 6 % d'habitants en moins que sans modèle (41 551), mais +17 % de CO2 évité (119 t contre 102 t) ; à Lyon −19 % d'habitants pour +67 % de CO2, car il vise les sites où l'usage attendu est plus fort.</p>
 </section>
 
 <!-- 15 -->
@@ -306,9 +306,9 @@
   <div class="kicker">Ce que ça apporte à Citiz</div>
   <h2>Un territoire, une liste de stations, un plan de montée en charge</h2>
   <div class="grid4" style="margin-top:14px">
-    <div class="card"><h3>Où s'implanter</h3><p>Un classement national des territoires, simulé à budget égal. Corrigé du risque terrain : Lyon en tête, devant Toulouse et Aix-Marseille ; Nice écartée après deux échecs. Strasbourg sert de témoin.</p></div>
-    <div class="card"><h3>Où ouvrir</h3><p>16 stations nommées et localisées, à 5 min de 50 051 habitants. Chaque site est justifié par les habitants gagnés, la valeur du modèle, le coût et le CO2.</p></div>
-    <div class="card"><h3>Combien de voitures</h3><p>La demande estimée justifierait jusqu'à ≈ 6 véhicules par station (borne haute, pénétration nationale Citiz). Elle est à confirmer par un pilote : 1-2 voitures, puis suivre l'occupation. Aujourd'hui, <b>303 stations Citiz sont saturées</b> : une 2e voiture y passe avant une nouvelle station.</p></div>
+    <div class="card"><h3>Où s'implanter</h3><p>Un classement national des territoires, simulé à budget égal. Corrigé du risque terrain : Lyon en tête, au coude-à-coude avec Toulouse, devant Aix-Marseille ; Nice écartée après deux échecs. Strasbourg sert de témoin.</p></div>
+    <div class="card"><h3>Où ouvrir</h3><p>16 stations nommées et localisées, à 5 min de 49 477 habitants. Chaque site est justifié par les habitants gagnés, la valeur du modèle, le coût et le CO2.</p></div>
+    <div class="card"><h3>Combien de voitures</h3><p>La demande estimée justifierait ≈ 6 véhicules par station en moyenne, jusqu'à 8 (borne haute, pénétration nationale Citiz). Elle est à confirmer par un pilote : 1-2 voitures, puis suivre l'occupation. Aujourd'hui, <b>303 stations Citiz sont saturées</b> : une 2e voiture y passe avant une nouvelle station.</p></div>
     <div class="card"><h3>Partout en France</h3><p><code>--area epci:&lt;siren&gt;</code> ou <code>--dep 54</code> relance l'analyse en quelques secondes, sur n'importe quel territoire.</p></div>
   </div>
   <div class="src">Sources : outputs/territories_citiz.csv, recommendations.csv, recommendations_summary_ems.json, usage_validation.json</div>
@@ -320,9 +320,9 @@
   <h2>Quatre risques, quatre réponses</h2>
   <div class="grid4" style="margin-top:14px">
     <div class="card"><h3>Empreinte carbone</h3><p>CO2 calculé site par site avec des hypothèses prudentes (ADEME) : 50 % d'adhérents actifs, 1 500 km évités par an. Le détour des bus est retranché : un arrêt peut avoir un bilan négatif, et on l'affiche.</p></div>
-    <div class="card"><h3>Équité dense / peu dense</h3><p>Les zones déjà desservies ne comptent pas, 15 % du budget est réservé au peu dense et le besoin social est pondéré par λ. On publie toujours la comparaison avec l'efficacité pure.</p></div>
+    <div class="card"><h3>Équité dense / peu dense</h3><p>Un carreau déjà desservi par un équipement ne compte pas pour ce type, 15 % du budget est réservé au peu dense et le besoin social est pondéré par λ. On publie toujours la comparaison avec l'efficacité pure.</p></div>
     <div class="card"><h3>Stigmatisation</h3><p>On parle d'« offre à développer », jamais de quartier « mal desservi ». Le classement des territoires mesure un <b>potentiel pour Citiz</b>, pas un retard, et il n'y a aucun palmarès de communes.</p></div>
-    <div class="card"><h3>Vie privée</h3><p>Aucune statistique sociale sous 11 ménages (seuil INSEE). Seuls 22,7 % des carreaux l'atteignent seuls : les autres sont lissés au km² ou masqués. La collecte GBFS ne garde que des totaux par station, jamais de position de voiture.</p></div>
+    <div class="card"><h3>Vie privée</h3><p>Aucune statistique sociale sous 11 ménages (seuil INSEE). Seuls 23 % des carreaux l'atteignent seuls : les autres sont agrégés à la maille d'affichage ou masqués. La collecte GBFS ne garde que des totaux par station, jamais de position de voiture.</p></div>
   </div>
 </section>
 
@@ -333,10 +333,10 @@
   <div class="row" style="margin-top:10px">
     <div class="col" style="justify-content:flex-start">
       <ul>
-        <li style="font-size:18px"><b>Cercle ≠ réseau</b> hors de Strasbourg : le détour est calibré sur un seul territoire.</li>
+        <li style="font-size:18px"><b>Cercle ≠ réseau</b> : calibré sur Strasbourg seulement, il surestime la part desservie (89 % contre 84 %) : « 1 sur 3 » est une borne basse.</li>
         <li style="font-size:18px"><b>Fréquence lue à Lyon, Nice et Strasbourg seulement</b> (GTFS) : ailleurs, un car scolaire compte autant qu'un tram.</li>
-        <li style="font-size:18px"><b>Coûts hypothétiques</b>, à valider avec Citiz et l'Eurométropole.</li>
-        <li style="font-size:18px"><b>Le modèle mesure une ressemblance</b> : face à l'usage réel, il sépare les stations peu et très utilisées, mais classe l'usage à peine moins bien que la population seule. Les réservations Citiz permettraient de le recalibrer.</li>
+        <li style="font-size:18px"><b>Coûts hypothétiques</b> (SOURCES.md), à valider avec Citiz LPA et la Métropole de Lyon. Le CO2 Citiz suit le nombre de stations.</li>
+        <li style="font-size:18px"><b>Le modèle mesure une ressemblance</b> : face à l'usage réel, il sépare les stations peu et très utilisées, mais ne classe pas l'usage mieux que la population seule. Les réservations Citiz permettraient de le recalibrer.</li>
       </ul>
     </div>
     <div class="col" style="justify-content:flex-start">
@@ -370,7 +370,7 @@
       <ul>
         <li style="font-size:18px">Remplacer notre courte collecte GBFS par les <b>réservations Citiz</b> pour recalibrer le modèle sur l'usage.</li>
         <li style="font-size:18px">Étendre la <b>fréquence</b> GTFS à toute la France et calibrer le détour dans d'autres villes.</li>
-        <li style="font-size:18px">Porter le pipeline sur <b>Microsoft Fabric</b> : lakehouse Parquet/Delta, notebooks, MLflow et Power BI. Python local pendant le hackathon, pour la reproductibilité.</li>
+        <li style="font-size:18px"><b>Microsoft Fabric : déjà porté.</b> 16 notebooks générés depuis <code>src/</code> (même code), tables Delta dans le Lakehouse, rapport Power BI avec les curseurs budget et λ (grille de 12 100 scénarios précalculée). Suite : MLflow et collecte GBFS planifiée dans Fabric.</li>
       </ul>
     </div>
   </div>

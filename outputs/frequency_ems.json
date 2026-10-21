@@ -3,12 +3,12 @@
   "jour_reference": {
     "gtfs_cts.zip": {
       "jour": "20261117",
-      "lignes_sens": 85,
+      "lignes_sens": 43,
       "arrets": 1298
     },
     "gtfs_fluo67.zip": {
       "jour": "20261117",
-      "lignes_sens": 84,
+      "lignes_sens": 42,
       "arrets": 940
     }
   },
@@ -21,10 +21,10 @@
   "population": 457792.0,
   "comparaison": {
     "part_pop_arret_tc_5min": 0.850682187543688,
-    "part_pop_au_moins_1_option_tc_pleine": 0.8178484988815882,
-    "part_pop_arret_mais_service_faible": 0.042352203620858384,
+    "part_pop_au_moins_1_option_tc_pleine": 0.7135937281560184,
+    "part_pop_arret_mais_service_faible": 0.14638744233188872,
     "arrets_moyens_5min": 2.1607585977911365,
-    "options_tc_pleines_moyennes_5min": 3.403611940155556,
+    "options_tc_pleines_moyennes_5min": 1.7917365394025098,
     "lecture": "« service faible » = au moins un arrêt à 5 min, mais moins d'une ligne toutes les 15 min en cumulé (somme des min(1, départs/h ÷ 4))."
   }
 }

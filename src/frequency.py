@@ -213,7 +213,7 @@ def run(area):
         lf, day = line_frequencies(f)
         parts.append(lf)
         days[f.name] = {"jour": day, "lignes_sens": int(lf["line"].nunique()), "arrets": int(lf["stop_id"].nunique())}
-        print(f"  {f.name} : jour {day}, {lf['line'].nunique()} lignes-sens, {lf['stop_id'].nunique()} arrêts")
+        print(f"  {f.name} : jour {day}, {lf['line'].nunique()} lignes, {lf['stop_id'].nunique()} arrêts")
     lines = pd.concat(parts, ignore_index=True)
     fq = cell_frequency(cells, lines)
     out = pd.concat([cells[["key"]], fq], axis=1)

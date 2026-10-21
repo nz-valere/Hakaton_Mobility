@@ -3,8 +3,8 @@
   "jour_reference": {
     "gtfs_lignes_azur.zip": {
       "jour": "20261117",
-      "lignes_sens": 188,
-      "arrets": 2825
+      "lignes_sens": 93,
+      "arrets": 2812
     }
   },
   "plage_horaire": [
@@ -16,10 +16,10 @@
   "population": 548610.0,
   "comparaison": {
     "part_pop_arret_tc_5min": 0.9310666958312827,
-    "part_pop_au_moins_1_option_tc_pleine": 0.7960071817866973,
-    "part_pop_arret_mais_service_faible": 0.13511237491113906,
+    "part_pop_au_moins_1_option_tc_pleine": 0.7245675434279361,
+    "part_pop_arret_mais_service_faible": 0.20654289932739103,
     "arrets_moyens_5min": 4.79387178505678,
-    "options_tc_pleines_moyennes_5min": 4.320029571238081,
+    "options_tc_pleines_moyennes_5min": 2.4026221338403486,
     "lecture": "« service faible » = au moins un arrêt à 5 min, mais moins d'une ligne toutes les 15 min en cumulé (somme des min(1, départs/h ÷ 4))."
   }
 }
